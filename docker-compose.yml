@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    container_name: dbiller_db_local
+    environment:
+      POSTGRES_USER: dbiller_user
+      POSTGRES_PASSWORD: dbiller_password
+      POSTGRES_DB: dbiller_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
