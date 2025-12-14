@@ -27,6 +27,8 @@ lib/generated_plugin_registrant.dart
 **/android/gradlew.bat
 **/android/key.properties
 **/android/local.properties
+**/*.apk
+**/*.aab
 **/android/**/GeneratedPluginRegistrant.java
 
 # iOS/XCode related
