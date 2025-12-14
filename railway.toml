@@ -1,4 +1,4 @@
 [build]
-root = "backend"
+# root = "backend" 
 builder = "NIXPACKS"
 watchPatterns = ["backend/**"]
