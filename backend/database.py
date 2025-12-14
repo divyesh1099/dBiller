@@ -13,7 +13,13 @@ if not SQLALCHEMY_DATABASE_URL:
 
 # Fix for SQLAlchemy 1.4+ which deprecated 'postgres://' in favor of 'postgresql://'
 if SQLALCHEMY_DATABASE_URL:
+    # Handle accidental copy-paste of 'psql ' command prefix
+    if SQLALCHEMY_DATABASE_URL.strip().startswith("psql "):
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("psql ", "", 1)
+    
+    # Strip quotes and whitespace
     SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.strip().strip("'").strip('"')
+
     if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
         SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
