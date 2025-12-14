@@ -12,10 +12,13 @@ if not SQLALCHEMY_DATABASE_URL:
     SQLALCHEMY_DATABASE_URL = "sqlite:///./dbiller.db"
 
 # Fix for SQLAlchemy 1.4+ which deprecated 'postgres://' in favor of 'postgresql://'
-if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
-    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+if SQLALCHEMY_DATABASE_URL:
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.strip().strip("'").strip('"')
+    if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-print(f"Connecting to DB: {SQLALCHEMY_DATABASE_URL.split('@')[-1] if '@' in SQLALCHEMY_DATABASE_URL else 'sqlite'}")
+print(f"Connecting to DB Scheme: {SQLALCHEMY_DATABASE_URL.split(':')[0] if ':' in SQLALCHEMY_DATABASE_URL else 'Unknown'}")
+print(f"Connecting to DB Host: {SQLALCHEMY_DATABASE_URL.split('@')[-1] if '@' in SQLALCHEMY_DATABASE_URL else 'sqlite'}")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 if "sqlite" in SQLALCHEMY_DATABASE_URL:
