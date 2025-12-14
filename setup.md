@@ -72,3 +72,15 @@ Onboarding is restricted. You must generate a License Key to register a new user
     *   **Inventory**: Add a product (requires R2 config for images).
     *   **Billing**: Create a bill.
     *   **Device Limit**: Try logging in from a 3rd different device (Incognito, different browser) -> Should be blocked.
+
+## 7. New features (OCR search, CSV import, categories)
+- **Categories/Groups**: Product forms now include an optional `Category / Group` field. CSV import also accepts a `category` column.
+- **Bulk CSV upload**: From the Inventory screen use “Bulk CSV”. Expected headers: `name,price,stock,category,image_url` (case-insensitive). The server will skip bad rows and report counts.
+- **Image-to-search (OCR)**: Upload an image in POS “Scan Items”; the backend extracts text and matches products by name/category.
+
+### OCR runtime setup
+- Local: install the Tesseract binary (`brew install tesseract`, `choco install tesseract`, or `sudo apt-get install tesseract-ocr`) then `pip install -r requirements.txt`.
+- Railway: add a service variable `NIXPACKS_PKGS=tesseract` so Nixpacks installs the binary during build, then redeploy.
+
+### Existing databases
+- If you already have a `products` table, add the new column once (`ALTER TABLE products ADD COLUMN category VARCHAR;`) or recreate your dev DB so category data can be stored.

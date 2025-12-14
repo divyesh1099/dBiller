@@ -9,12 +9,13 @@ R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL")
 R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID")
 R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY")
 R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME", "dbiller-images")
+PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:8001")
 
 def get_s3_client():
     if not R2_ENDPOINT_URL or not R2_ACCESS_KEY_ID or not R2_SECRET_ACCESS_KEY:
-        print("R2 Credentials not set. Image upload will fail.")
+        print("R2 Credentials not set. Falling back to local storage.")
         return None
-
+        
     return boto3.client(
         's3',
         endpoint_url=R2_ENDPOINT_URL,
@@ -24,15 +25,26 @@ def get_s3_client():
 
 async def upload_file_to_r2(file: UploadFile, folder: str = "products") -> str:
     s3 = get_s3_client()
-    if not s3:
-        return None
-
     # Enable reading file content
     file_content = await file.read()
     
     # Generate unique filename
     file_extension = file.filename.split(".")[-1]
     filename = f"{folder}/{uuid.uuid4()}.{file_extension}"
+
+    def _save_locally() -> str:
+        os.makedirs("uploads", exist_ok=True)
+        local_path = os.path.join("uploads", filename)
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        with open(local_path, "wb") as f:
+            f.write(file_content)
+        print(f"[upload_debug] saved local file at {local_path} ({len(file_content)} bytes)")
+        # Return relative URL so frontend can resolve it against its own API base
+        return f"/uploads/{filename}"
+
+    # Local fallback
+    if not s3:
+        return _save_locally()
 
     try:
         s3.put_object(
@@ -68,5 +80,5 @@ async def upload_file_to_r2(file: UploadFile, folder: str = "products") -> str:
         return filename 
         
     except Exception as e:
-        print(f"Upload Error: {e}")
-        return None
+        print(f"Upload Error: {e}. Falling back to local storage.")
+        return _save_locally()

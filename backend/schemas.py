@@ -23,12 +23,22 @@ class ProductBase(BaseModel):
     price: float
     stock: int = 0
     image_url: Optional[str] = None
+    category: Optional[str] = None
 
 class ProductCreate(ProductBase):
     pass
 
 class Product(ProductBase):
     id: int
+
+    class Config:
+        orm_mode = True
+
+
+class Store(BaseModel):
+    id: int
+    name: str
+    logo_url: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -74,3 +84,4 @@ class UserRegister(BaseModel):
     business_name: Optional[str] = None
     device_id: str
     license_key: str
+    store_name: Optional[str] = None

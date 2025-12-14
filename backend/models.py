@@ -3,6 +3,15 @@ from sqlalchemy.orm import relationship
 import datetime
 from database import Base
 
+class Store(Base):
+    __tablename__ = "stores"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    logo_url = Column(String, nullable=True)
+    owner_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
 class User(Base):
     __tablename__ = "users"
 
@@ -13,6 +22,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     devices = relationship("UserDevice", back_populates="user")
+    stores = relationship("Store", primaryjoin="User.id==Store.owner_user_id")
 
 class UserDevice(Base):
     __tablename__ = "user_devices"
@@ -41,6 +51,7 @@ class Product(Base):
     price = Column(Float)
     image_url = Column(String, nullable=True)
     stock = Column(Integer, default=0)
+    category = Column(String, nullable=True)
 
 class Bill(Base):
     __tablename__ = "bills"

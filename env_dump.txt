@@ -1,0 +1,9 @@
+# If using Docker (Recommended)
+# If using Neon
+# DATABASE_URL=postgresql://user:pass@ep-xyz.neon.tech/neondb?sslmode=require
+DATABASE_URL=psql 'postgresql://neondb_owner:npg_LrYba4qsdzf1@ep-long-morning-ad3juc64-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+SECRET_KEY=e506d5d8a7c9bf23b6d19f72883cf95843cce3be91f8a57077105b9d7e78faaa
+R2_ENDPOINT_URL=https://pub-ac0dc6d1914c4236a7693ef0a86477e4.r2.dev
+R2_ACCESS_KEY_ID=4f7d639eebeee5e72387752e0ea4410a
+R2_SECRET_ACCESS_KEY=57dda047152f105dd1a704304909bc2ccdbfadcab988fb8709b216ace54c1580
+R2_BUCKET_NAME=dbiller-images
