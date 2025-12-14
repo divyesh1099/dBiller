@@ -6,12 +6,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Default to sqlite if not set (for safety/dev), but production will throw if not set properly eventually
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./dbiller.db")
+# Default to sqlite if not set (for safety/dev)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+if not SQLALCHEMY_DATABASE_URL:
+    SQLALCHEMY_DATABASE_URL = "sqlite:///./dbiller.db"
 
-# Postgres requires a different connect string format if using certain drivers, 
-# typically 'postgresql://user:password@host/dbname'
-# Neon provides 'postgres://', which SQLAlchemy handles fine usually.
+# Fix for SQLAlchemy 1.4+ which deprecated 'postgres://' in favor of 'postgresql://'
+if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+print(f"Connecting to DB: {SQLALCHEMY_DATABASE_URL.split('@')[-1] if '@' in SQLALCHEMY_DATABASE_URL else 'sqlite'}")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 if "sqlite" in SQLALCHEMY_DATABASE_URL:
