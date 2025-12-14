@@ -14,7 +14,7 @@ def get_s3_client():
     if not R2_ENDPOINT_URL or not R2_ACCESS_KEY_ID or not R2_SECRET_ACCESS_KEY:
         print("R2 Credentials not set. Image upload will fail.")
         return None
-        
+
     return boto3.client(
         's3',
         endpoint_url=R2_ENDPOINT_URL,
