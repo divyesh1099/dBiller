@@ -1,0 +1,68 @@
+name: Build dBiller
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Decode Android keystore (if provided)
+        if: ${{ secrets.ANDROID_KEYSTORE_B64 != '' }}
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          echo "$ANDROID_KEYSTORE_B64" | base64 -d > android/app/release.keystore
+          cat > android/key.properties <<'EOF'
+storePassword=${ANDROID_STORE_PASSWORD}
+keyPassword=${ANDROID_KEY_PASSWORD}
+keyAlias=${ANDROID_KEY_ALIAS}
+storeFile=release.keystore
+EOF
+
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+
+      - name: Build Android APKs (per ABI)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Build Web
+        run: flutter build web --release --web-renderer canvaskit
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: frontend/build/app/outputs/bundle/release/app-release.aab
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: frontend/build/app/outputs/apk/release/*.apk
+
+      - name: Upload Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: frontend/build/web

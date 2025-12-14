@@ -7,7 +7,7 @@ void main() {
   // Replace with actual production URL
   AppConfig.init(
     environment: Environment.prod,
-    apiBaseUrl: 'https://dbiller-api.up.railway.app', 
+    apiBaseUrl: 'https://dbiller-production.up.railway.app', 
   );
   runApp(const ProviderScope(child: DBillerApp()));
 }
