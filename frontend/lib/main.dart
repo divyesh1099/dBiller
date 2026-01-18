@@ -5,20 +5,31 @@ import 'core/theme.dart';
 import 'core/config.dart';
 
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 void main() {
-  String baseUrl = 'http://localhost:8001';
-  try {
-    if (Platform.isAndroid) {
-      baseUrl = 'http://10.0.2.2:8001';
+  String baseUrl;
+  Environment env;
+
+  if (kReleaseMode) {
+    // Production Mode
+    baseUrl = AppConfig.productionApiUrl;
+    env = Environment.prod;
+  } else {
+    // Development Mode
+    baseUrl = 'http://localhost:8001';
+    env = Environment.dev;
+    try {
+      if (Platform.isAndroid) {
+        baseUrl = 'http://10.0.2.2:8001';
+      }
+    } catch (e) {
+      // Platform checking not supported on Web or other error
     }
-  } catch (e) {
-    // Platform checking not supported on Web, or other error. Default to localhost is fine for Web.
   }
 
-  // Default to dev if ran directly
   AppConfig.init(
-    environment: Environment.dev,
+    environment: env,
     apiBaseUrl: baseUrl, 
   );
   runApp(const ProviderScope(child: DBillerApp()));

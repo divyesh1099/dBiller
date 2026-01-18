@@ -22,8 +22,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
-# Expose port 8001 for the FastAPI app
+# Expose port 8001
 EXPOSE 8001
 
-# Run the command to start uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+# Run with Gunicorn for production
+# Workers: 4 (adjust based on CPU cores)
+# Bind: 0.0.0.0:8001
+# Worker Class: uvicorn.workers.UvicornWorker (for FastAPI/ASGI)
+CMD ["gunicorn", "main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8001"]
