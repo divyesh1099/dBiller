@@ -77,6 +77,10 @@ class _TopBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+          ),
           const Icon(Icons.dashboard_customize, color: AppColors.primary),
           const SizedBox(width: 8),
           const Expanded(

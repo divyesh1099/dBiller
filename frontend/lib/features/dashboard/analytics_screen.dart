@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/app_colors.dart';
 
 class AnalyticsScreen extends StatelessWidget {
@@ -7,7 +8,13 @@ class AnalyticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sales & Inventory Analytics')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+        ),
+        title: const Text('Sales & Inventory Analytics'),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

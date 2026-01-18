@@ -16,7 +16,10 @@ class RolesManagementScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _TopBar(onBack: () => context.pop(), onAdd: () => _showCreateRole(context, ref)),
+            _TopBar(
+              onBack: () => context.canPop() ? context.pop() : context.go('/home'),
+              onAdd: () => _showCreateRole(context, ref),
+            ),
             Expanded(
               child: rolesAsync.when(
                 data: (roles) {

@@ -44,79 +44,115 @@ except Exception as e:
 models.Base.metadata.create_all(bind=engine)
 
 
+from sqlalchemy import inspect
+
 def ensure_optional_columns():
-    """Add columns that may be missing on older databases without requiring a full migration tool."""
-    with engine.begin() as conn:
-        def add_column(table: str, column_def: str):
-            try:
-                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column_def}"))
-            except Exception:
-                pass  # Column already exists or table missing; safe to ignore for idempotency
+    """Add columns that may be missing on older databases safely."""
+    inspector = inspect(engine)
+    
+    # Map of table -> list of (column_name, column_type_def)
+    required_columns = {
+        "products": [("category", "VARCHAR")],
+        "stores": [("dummy_check", "INTEGER")],
+        "users": [
+            ("email", "VARCHAR"),
+            ("phone", "VARCHAR"),
+            ("profile_photo", "VARCHAR"),
+            ("organization_id", "INTEGER"),
+            ("full_name", "VARCHAR"),
+            ("user_code", "VARCHAR"),
+        ],
+        "organizations": [
+            ("logo_url", "VARCHAR"),
+            ("status", "VARCHAR"),
+            ("subscription_id", "INTEGER"),
+            ("trial_ends_at", "DATETIME"),
+            ("current_period_end", "DATETIME"),
+            ("node_limit", "INTEGER"),
+        ],
+        "subscriptions": [
+            ("currency", "VARCHAR"),
+            ("monthly_price", "FLOAT"),
+            ("annual_price", "FLOAT"),
+            ("features", "TEXT"),
+            ("limits", "TEXT"),
+            ("description", "TEXT"),
+            ("badge_text", "VARCHAR"),
+            ("is_featured", "BOOLEAN"),
+            ("is_active", "BOOLEAN"),
+            ("created_at", "DATETIME"),
+        ],
+        "suppliers": [
+            ("contact_name", "VARCHAR"),
+            ("status", "VARCHAR"),
+            ("logo_url", "VARCHAR"),
+            ("category", "VARCHAR"),
+            ("supplier_code", "VARCHAR"),
+        ],
+        "items": [
+            ("category", "VARCHAR"),
+            ("tags", "TEXT"),
+            ("barcode", "VARCHAR"),
+            ("reorder_point", "INTEGER"),
+            ("min_stock", "INTEGER"),
+            ("max_stock", "INTEGER"),
+            ("warehouse_aisle", "VARCHAR"),
+            ("bin_location", "VARCHAR"),
+            ("ai_verified", "BOOLEAN"),
+            ("ai_confidence", "FLOAT"),
+        ],
+        "orders": [
+            ("order_number", "VARCHAR"),
+            ("supplier_id", "INTEGER"),
+            ("customer_name", "VARCHAR"),
+            ("customer_email", "VARCHAR"),
+            ("customer_phone", "VARCHAR"),
+            ("billing_address", "TEXT"),
+            ("notes", "TEXT"),
+            ("confirmed_at", "DATETIME"),
+            ("shipped_at", "DATETIME"),
+            ("delivered_at", "DATETIME"),
+            ("cancelled_at", "DATETIME"),
+            ("expected_delivery_at", "DATETIME"),
+        ],
+        "order_items": [
+            ("sku", "VARCHAR"),
+            ("image_url", "VARCHAR"),
+            ("ai_verified", "BOOLEAN"),
+            ("ai_confidence", "FLOAT"),
+        ],
+        "invoices": [
+            ("source_url", "VARCHAR"),
+            ("source_type", "VARCHAR"),
+            ("ai_extracted", "BOOLEAN"),
+            ("paid_at", "DATETIME"),
+        ],
+        "invoice_items": [
+            ("sku", "VARCHAR"),
+            ("image_url", "VARCHAR"),
+        ],
+    }
 
-        add_column("products", "category VARCHAR")
-        add_column("stores", "dummy_check INTEGER")
-        add_column("users", "email VARCHAR")
-        add_column("users", "phone VARCHAR")
-        add_column("users", "profile_photo VARCHAR")
-        add_column("users", "organization_id INTEGER")
-        add_column("users", "full_name VARCHAR")
-        add_column("users", "user_code VARCHAR")
-        add_column("organizations", "logo_url VARCHAR")
-        add_column("organizations", "status VARCHAR")
-        add_column("organizations", "subscription_id INTEGER")
-        add_column("organizations", "trial_ends_at DATETIME")
-        add_column("organizations", "current_period_end DATETIME")
-        add_column("organizations", "node_limit INTEGER")
-        add_column("subscriptions", "currency VARCHAR")
-        add_column("subscriptions", "monthly_price FLOAT")
-        add_column("subscriptions", "annual_price FLOAT")
-        add_column("subscriptions", "features TEXT")
-        add_column("subscriptions", "limits TEXT")
-        add_column("subscriptions", "description TEXT")
-        add_column("subscriptions", "badge_text VARCHAR")
-        add_column("subscriptions", "is_featured BOOLEAN")
-        add_column("subscriptions", "is_active BOOLEAN")
-        add_column("subscriptions", "created_at DATETIME")
-        add_column("suppliers", "contact_name VARCHAR")
-        add_column("suppliers", "status VARCHAR")
-        add_column("suppliers", "logo_url VARCHAR")
-        add_column("suppliers", "category VARCHAR")
-        add_column("suppliers", "supplier_code VARCHAR")
-        add_column("items", "category VARCHAR")
-        add_column("items", "tags TEXT")
-        add_column("items", "barcode VARCHAR")
-        add_column("items", "reorder_point INTEGER")
-        add_column("items", "min_stock INTEGER")
-        add_column("items", "max_stock INTEGER")
-        add_column("items", "warehouse_aisle VARCHAR")
-        add_column("items", "bin_location VARCHAR")
-        add_column("items", "ai_verified BOOLEAN")
-        add_column("items", "ai_confidence FLOAT")
-        add_column("orders", "order_number VARCHAR")
-        add_column("orders", "supplier_id INTEGER")
-        add_column("orders", "customer_name VARCHAR")
-        add_column("orders", "customer_email VARCHAR")
-        add_column("orders", "customer_phone VARCHAR")
-        add_column("orders", "billing_address TEXT")
-        add_column("orders", "notes TEXT")
-        add_column("orders", "confirmed_at DATETIME")
-        add_column("orders", "shipped_at DATETIME")
-        add_column("orders", "delivered_at DATETIME")
-        add_column("orders", "cancelled_at DATETIME")
-        add_column("orders", "expected_delivery_at DATETIME")
-        add_column("order_items", "sku VARCHAR")
-        add_column("order_items", "image_url VARCHAR")
-        add_column("order_items", "ai_verified BOOLEAN")
-        add_column("order_items", "ai_confidence FLOAT")
-        add_column("invoices", "source_url VARCHAR")
-        add_column("invoices", "source_type VARCHAR")
-        add_column("invoices", "ai_extracted BOOLEAN")
-        add_column("invoices", "paid_at DATETIME")
-        add_column("invoice_items", "sku VARCHAR")
-        add_column("invoice_items", "image_url VARCHAR")
-
+    try:
+        existing_tables = inspector.get_table_names()
+        with engine.begin() as conn:
+            for table, columns in required_columns.items():
+                if table in existing_tables:
+                    existing_cols = [c["name"] for c in inspector.get_columns(table)]
+                    for col_name, col_def in columns:
+                        if col_name not in existing_cols:
+                            try:
+                                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col_name} {col_def}"))
+                            except Exception as e:
+                                print(f"Migration Error on {table}.{col_name}: {e}")
+                                # In Postgres, checking existence first should prevent this, but if it fails,
+                                # we must ensure we don't break the transaction for others if using a single block.
+                                # However, inspector check is the primary safety.
+    except Exception as e:
+        print(f"Schema migration failed: {e}")
 
 ensure_optional_columns()
+
 
 app = FastAPI(title="dBiller API")
 if not os.path.exists("uploads"):

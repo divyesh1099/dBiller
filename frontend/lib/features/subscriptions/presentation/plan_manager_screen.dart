@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/app_colors.dart';
 import '../../../core/formatters.dart';
 import '../data/subscription.dart';
@@ -13,7 +14,13 @@ class PlanManagerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final plansAsync = ref.watch(subscriptionPlansProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Plan Manager')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+        ),
+        title: const Text('Plan Manager'),
+      ),
       body: SafeArea(
         child: Column(
           children: [

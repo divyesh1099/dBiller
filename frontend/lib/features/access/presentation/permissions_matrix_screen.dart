@@ -36,7 +36,7 @@ class _PermissionsMatrixScreenState extends ConsumerState<PermissionsMatrixScree
             }
             return Column(
               children: [
-                _TopBar(onBack: () => context.pop()),
+                _TopBar(onBack: () => context.canPop() ? context.pop() : context.go('/roles')),
                 Expanded(
                   child: ListView(
                     padding: const EdgeInsets.only(bottom: 100),

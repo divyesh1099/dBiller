@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/app_colors.dart';
 
 class SuperadminDashboardScreen extends StatelessWidget {
@@ -7,7 +8,13 @@ class SuperadminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Superadmin Dashboard')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+        ),
+        title: const Text('Superadmin Dashboard'),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

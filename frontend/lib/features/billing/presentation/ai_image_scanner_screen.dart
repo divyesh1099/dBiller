@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/app_colors.dart';
 import 'pos_controller.dart';
 
@@ -48,7 +49,13 @@ class AiImageScannerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Image Scanner')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+        ),
+        title: const Text('AI Image Scanner'),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

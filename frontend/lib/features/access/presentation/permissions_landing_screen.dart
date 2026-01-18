@@ -11,7 +11,13 @@ class PermissionsLandingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rolesAsync = ref.watch(rolesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Permissions Matrix')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+        ),
+        title: const Text('Permissions Matrix'),
+      ),
       body: rolesAsync.when(
         data: (roles) {
           if (roles.isEmpty) {

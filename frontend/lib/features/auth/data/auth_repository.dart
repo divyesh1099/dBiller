@@ -20,7 +20,11 @@ class AuthRepository {
       );
       return response.data['access_token'];
     } on DioException catch (e) {
-      throw e.response?.data['detail'] ?? 'Login failed';
+      final data = e.response?.data;
+      if (data is Map<String, dynamic> && data.containsKey('detail')) {
+        throw data['detail'];
+      }
+      throw data.toString();
     }
   }
 
@@ -37,7 +41,11 @@ class AuthRepository {
       });
       await _client.post('/register', data: form);
     } on DioException catch (e) {
-      throw e.response?.data['detail'] ?? 'Registration failed';
+      final data = e.response?.data;
+      if (data is Map<String, dynamic> && data.containsKey('detail')) {
+        throw data['detail'];
+      }
+      throw data.toString();
     }
   }
 }

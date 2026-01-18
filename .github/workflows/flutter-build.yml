@@ -2,7 +2,7 @@ name: Build dBiller
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -33,12 +33,12 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           echo "$ANDROID_KEYSTORE_B64" | base64 -d > android/app/release.keystore
-          cat > android/key.properties <<'EOF'
-storePassword=${ANDROID_STORE_PASSWORD}
-keyPassword=${ANDROID_KEY_PASSWORD}
-keyAlias=${ANDROID_KEY_ALIAS}
-storeFile=release.keystore
-EOF
+          cat > android/key.properties <<EOF
+          storePassword=${ANDROID_STORE_PASSWORD}
+          keyPassword=${ANDROID_KEY_PASSWORD}
+          keyAlias=${ANDROID_KEY_ALIAS}
+          storeFile=release.keystore
+          EOF
 
       - name: Build Android App Bundle
         run: flutter build appbundle --release
