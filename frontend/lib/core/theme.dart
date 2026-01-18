@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'app_colors.dart';
 
 class AppTheme {
   static final lightTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: GoogleFonts.roboto().fontFamily,
+    fontFamily: GoogleFonts.inter().fontFamily,
     colorScheme: const ColorScheme.light(
-      primary: Color(0xFF111111), // single neutral accent
-      secondary: Color(0xFF2A2A2A),
+      primary: AppColors.primary,
+      secondary: AppColors.textMuted,
       surface: Colors.white,
-      background: Colors.white,
+      background: AppColors.backgroundLight,
       onPrimary: Colors.white,
-      onSecondary: Colors.white,
-      onSurface: Color(0xFF111111),
-      onBackground: Color(0xFF111111),
+      onSecondary: AppColors.textDark,
+      onSurface: AppColors.textDark,
+      onBackground: AppColors.textDark,
     ),
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: AppColors.backgroundLight,
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.white,
-      foregroundColor: Colors.grey.shade900,
+      backgroundColor: AppColors.backgroundLight,
+      foregroundColor: AppColors.textDark,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
@@ -26,7 +27,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         elevation: 0,
-        backgroundColor: const Color(0xFF111111),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         shape: const StadiumBorder(),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -37,47 +38,47 @@ class AppTheme {
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.grey.shade300),
+        borderSide: const BorderSide(color: AppColors.borderLight),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       filled: true,
-      fillColor: const Color(0xFFF5F6F7),
+      fillColor: Colors.white,
       contentPadding: const EdgeInsets.all(16),
     ),
     cardTheme: const CardThemeData(
       elevation: 0,
       color: Colors.white,
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: Color(0xFFE0E0E0)),
+        side: BorderSide(color: AppColors.borderLight),
         borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
     ),
     textTheme: const TextTheme(
-      bodyLarge: TextStyle(color: Color(0xFF111111)),
-      bodyMedium: TextStyle(color: Color(0xFF111111)),
-      bodySmall: TextStyle(color: Color(0xFF111111)),
-      titleLarge: TextStyle(color: Color(0xFF111111)),
-      titleMedium: TextStyle(color: Color(0xFF111111)),
-      titleSmall: TextStyle(color: Color(0xFF111111)),
+      bodyLarge: TextStyle(color: AppColors.textDark),
+      bodyMedium: TextStyle(color: AppColors.textDark),
+      bodySmall: TextStyle(color: AppColors.textDark),
+      titleLarge: TextStyle(color: AppColors.textDark),
+      titleMedium: TextStyle(color: AppColors.textDark),
+      titleSmall: TextStyle(color: AppColors.textDark),
     ),
   );
 
   static final darkTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: GoogleFonts.roboto().fontFamily,
+    fontFamily: GoogleFonts.inter().fontFamily,
     colorScheme: const ColorScheme.dark(
-      primary: Colors.white,
-      secondary: Colors.white70,
-      surface: Color(0xFF0F1113),
-      background: Color(0xFF0F1113),
-      onPrimary: Color(0xFF111111),
-      onSecondary: Color(0xFF0F1113),
+      primary: AppColors.primary,
+      secondary: AppColors.textMuted,
+      surface: AppColors.surfaceDark,
+      background: AppColors.backgroundDark,
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
       onSurface: Colors.white,
       onBackground: Colors.white,
     ),
-    scaffoldBackgroundColor: const Color(0xFF0F1113),
+    scaffoldBackgroundColor: AppColors.backgroundDark,
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF0F1113),
+      backgroundColor: AppColors.backgroundDark,
       foregroundColor: Colors.white,
       elevation: 0,
       scrolledUnderElevation: 0,

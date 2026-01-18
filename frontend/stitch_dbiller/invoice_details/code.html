@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Invoice Details</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#137fec",
+                "background-light": "#f6f7f8",
+                "background-dark": "#101922", // Deep charcoal/almost black
+                "surface-dark": "#1c252e", // Slightly lighter for cards
+                },
+                fontFamily: {
+                "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', "Noto Sans", sans-serif;
+        }
+        /* Custom scrollbar hiding for cleaner mobile look if needed */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased selection:bg-primary/30">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden pb-24">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-50 flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between border-b border-gray-200 dark:border-gray-800/50 backdrop-blur-md bg-opacity-90 dark:bg-opacity-90">
+<div class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center cursor-pointer hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Invoice #1023</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex size-12 cursor-pointer items-center justify-center rounded-full text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">edit</span>
+</button>
+</div>
+</div>
+<!-- Headline & Status -->
+<div class="flex flex-col items-center justify-center pt-8 pb-6">
+<div class="flex items-center gap-2 mb-2">
+<div class="flex h-7 items-center justify-center gap-x-2 rounded-full bg-orange-500/10 dark:bg-orange-500/20 px-3 border border-orange-500/20">
+<div class="size-2 rounded-full bg-orange-500 animate-pulse"></div>
+<p class="text-orange-600 dark:text-orange-400 text-xs font-bold uppercase tracking-wide">Pending</p>
+</div>
+</div>
+<h1 class="text-slate-900 dark:text-white tracking-tight text-[40px] font-bold leading-tight text-center">$1,350.00</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Due Oct 24, 2023</p>
+</div>
+<!-- Original Scan (Source Preview) -->
+<div class="px-4 mb-6">
+<div class="flex items-center gap-4 bg-white dark:bg-surface-dark p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm cursor-pointer hover:border-primary/50 transition-colors group">
+<div class="bg-center bg-no-repeat bg-cover rounded-lg h-14 w-12 shrink-0 relative overflow-hidden bg-gray-200 dark:bg-gray-700" data-alt="Blurred preview of a scanned paper receipt invoice" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAFILchcBnPDD9cdwxQLxyhUKHVnc3D0_lIdQD17Z3_hSDilC001R_9fUFkr6M4X-bWeHykhsJ9UcVkje4naDPaUFFI1TGiLJVAohGCCT1C5wH1yfF19ftzHlJNYN545HLgtOdI-jo39tdrIvR1dEFqk0OzZ5Gw5YX7RQbEaRDf2vvWrslRUIs_jZl_VievXOl0dN8iBbicjLNeeuO9s76ChxVysHV3ed49J5iUqu4Mc60wP-Hhgdu-EgK3Tr6VnsYBNp-h0SBpTnhf");'>
+<!-- AI indicator overlay -->
+<div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-white drop-shadow-md" style="font-size: 16px;">document_scanner</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-slate-900 dark:text-white text-sm font-semibold leading-normal truncate group-hover:text-primary transition-colors">Original Scan</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs truncate">Extracted via AI Recognition</p>
+</div>
+<div class="shrink-0 text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined" style="font-size: 20px;">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Client Info (Bill To) -->
+<div class="px-4 mb-2">
+<h3 class="text-slate-900 dark:text-white text-base font-bold leading-tight px-1 pb-3">Bill To</h3>
+<div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+<div class="flex items-start gap-3">
+<div class="mt-1 bg-primary/10 p-2 rounded-full text-primary shrink-0">
+<span class="material-symbols-outlined" style="font-size: 20px;">domain</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-base font-semibold">Acme Corp</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1 leading-relaxed">
+                            123 Business Rd, Tech City<br/>
+                            California, 94025, USA
+                        </p>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-slate-400" style="font-size: 14px;">mail</span> billing@acme.com
+                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Line Items -->
+<div class="px-4 mt-6">
+<h3 class="text-slate-900 dark:text-white text-base font-bold leading-tight px-1 pb-3">Items</h3>
+<div class="flex flex-col gap-3">
+<!-- Item 1 -->
+<div class="flex items-center justify-between bg-white dark:bg-surface-dark p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-white text-sm font-semibold">MacBook Pro M2</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">1 x $1,200.00</p>
+</div>
+<p class="text-slate-900 dark:text-white text-sm font-bold font-mono">$1,200.00</p>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between bg-white dark:bg-surface-dark p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-white text-sm font-semibold">USB-C Multiport Adapter</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">1 x $50.00</p>
+</div>
+<p class="text-slate-900 dark:text-white text-sm font-bold font-mono">$50.00</p>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between bg-white dark:bg-surface-dark p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-white text-sm font-semibold">Software Setup Fee</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">2h x $50.00</p>
+</div>
+<p class="text-slate-900 dark:text-white text-sm font-bold font-mono">$100.00</p>
+</div>
+</div>
+</div>
+<!-- Financial Summary -->
+<div class="px-4 mt-8 mb-8">
+<div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-3">
+<div class="flex justify-between items-center">
+<p class="text-slate-500 dark:text-slate-400 text-sm">Subtotal</p>
+<p class="text-slate-900 dark:text-white text-sm font-medium font-mono">$1,350.00</p>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-slate-500 dark:text-slate-400 text-sm">Tax (8%)</p>
+<p class="text-slate-900 dark:text-white text-sm font-medium font-mono">$108.00</p>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-slate-500 dark:text-slate-400 text-sm">Discount</p>
+<p class="text-green-600 dark:text-green-400 text-sm font-medium font-mono">-$108.00</p>
+</div>
+<div class="h-px w-full bg-gray-200 dark:bg-gray-700 my-2"></div>
+<div class="flex justify-between items-center">
+<p class="text-slate-900 dark:text-white text-base font-bold">Grand Total</p>
+<p class="text-primary text-lg font-bold font-mono">$1,350.00</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Fixed Action Bar -->
+<div class="fixed bottom-0 left-0 w-full bg-white dark:bg-[#111418] border-t border-gray-200 dark:border-gray-800 p-4 pb-8 z-40">
+<div class="flex gap-3 max-w-md mx-auto">
+<!-- Secondary Actions -->
+<button class="flex flex-1 flex-col gap-1 items-center justify-center h-14 rounded-lg bg-gray-100 dark:bg-gray-800 text-slate-900 dark:text-white font-medium text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">download</span>
+<span>PDF</span>
+</button>
+<button class="flex flex-1 flex-col gap-1 items-center justify-center h-14 rounded-lg bg-gray-100 dark:bg-gray-800 text-slate-900 dark:text-white font-medium text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">mark_email_read</span>
+<span>Send</span>
+</button>
+<!-- Primary Action -->
+<button class="flex-[2] flex items-center justify-center gap-2 h-14 rounded-lg bg-primary text-white font-bold text-base hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">
+<span class="material-symbols-outlined" style="font-size: 20px;">check_circle</span>
+<span>Mark Paid</span>
+</button>
+</div>
+</div>
+</body></html>

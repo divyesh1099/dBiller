@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html class="light dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Permissions Matrix - dBiller</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-switch input:checked ~ div {
+            background-color: #137fec;
+        }
+        .ios-switch input:checked ~ div div {
+            transform: translateX(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800">
+<div class="flex items-center px-4 py-3 justify-between">
+<div class="flex items-center gap-2">
+<button class="text-primary p-1">
+<span class="material-symbols-outlined align-middle">arrow_back_ios</span>
+</button>
+<h1 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-tight">Permissions Matrix</h1>
+</div>
+<button class="text-primary">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<main class="flex-1 pb-32">
+<!-- Role Information Section -->
+<section class="p-4">
+<div class="bg-white dark:bg-gray-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-4 mb-3">
+<div class="bg-primary/10 rounded-lg p-3 text-primary">
+<span class="material-symbols-outlined" style="font-size: 32px;">manage_accounts</span>
+</div>
+<div>
+<h2 class="text-[#111418] dark:text-white text-xl font-bold">Inventory Manager</h2>
+<p class="text-[#617589] text-sm font-normal">Full control over logistics and stock.</p>
+</div>
+</div>
+<div class="flex items-center gap-2 text-xs text-[#617589] dark:text-gray-400">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>Last updated: Oct 24, 2023 • Admin</span>
+</div>
+</div>
+</section>
+<!-- Feature Permissions Sections -->
+<section class="px-4 space-y-4">
+<h3 class="text-[#111418] dark:text-white text-sm font-bold uppercase tracking-widest px-1">Feature Modules</h3>
+<!-- Invoices Module -->
+<details class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden" open="">
+<summary class="flex cursor-pointer items-center justify-between p-4 list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">receipt_long</span>
+<span class="text-[#111418] dark:text-white font-semibold">Invoices</span>
+</div>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
+</summary>
+<div class="px-4 pb-4 space-y-1">
+<p class="text-[#617589] dark:text-gray-400 text-xs mb-3">Access control for billing and payment tracking.</p>
+<!-- Action Toggles -->
+<div class="flex items-center justify-between py-3 border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-gray-400">visibility</span>
+<span class="text-sm dark:text-gray-200">View Invoices</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ios-switch">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors">
+<div class="absolute top-[2px] left-[2px] bg-white border border-gray-300 dark:border-transparent rounded-full h-5 w-5 transition-transform shadow-md"></div>
+</div>
+</label>
+</div>
+<div class="flex items-center justify-between py-3 border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-gray-400">add_circle</span>
+<span class="text-sm dark:text-gray-200">Create Invoices</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ios-switch">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors">
+<div class="absolute top-[2px] left-[2px] bg-white border border-gray-300 dark:border-transparent rounded-full h-5 w-5 transition-transform shadow-md"></div>
+</div>
+</label>
+</div>
+<div class="flex items-center justify-between py-3 border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-gray-400">edit</span>
+<span class="text-sm dark:text-gray-200">Edit Details</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ios-switch">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors">
+<div class="absolute top-[2px] left-[2px] bg-white border border-gray-300 dark:border-transparent rounded-full h-5 w-5 transition-transform shadow-md"></div>
+</div>
+</label>
+</div>
+</div>
+</details>
+<!-- Inventory Module -->
+<details class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden" open="">
+<summary class="flex cursor-pointer items-center justify-between p-4 list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">inventory_2</span>
+<span class="text-[#111418] dark:text-white font-semibold">Inventory</span>
+</div>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
+</summary>
+<div class="px-4 pb-4 space-y-1">
+<div class="flex items-center justify-between py-3 border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-gray-400">visibility</span>
+<span class="text-sm dark:text-gray-200">View Stock</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ios-switch">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors">
+<div class="absolute top-[2px] left-[2px] bg-white border border-gray-300 dark:border-transparent rounded-full h-5 w-5 transition-transform shadow-md"></div>
+</div>
+</label>
+</div>
+<div class="flex items-center justify-between py-3 border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-gray-400">edit</span>
+<span class="text-sm dark:text-gray-200">Update Quantity</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ios-switch">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors">
+<div class="absolute top-[2px] left-[2px] bg-white border border-gray-300 dark:border-transparent rounded-full h-5 w-5 transition-transform shadow-md"></div>
+</div>
+</label>
+</div>
+<div class="flex items-center justify-between py-3 border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-gray-400">delete</span>
+<span class="text-sm dark:text-gray-200">Delete Records</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ios-switch">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors">
+<div class="absolute top-[2px] left-[2px] bg-white border border-gray-300 dark:border-transparent rounded-full h-5 w-5 transition-transform shadow-md"></div>
+</div>
+</label>
+</div>
+</div>
+</details>
+<!-- Suppliers Module -->
+<details class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+<summary class="flex cursor-pointer items-center justify-between p-4 list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">group</span>
+<span class="text-[#111418] dark:text-white font-semibold">Suppliers</span>
+</div>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
+</summary>
+<div class="px-4 pb-4">
+<p class="text-sm text-gray-500 italic">Expand to manage supplier permissions.</p>
+</div>
+</details>
+<!-- Analytics Module -->
+<details class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+<summary class="flex cursor-pointer items-center justify-between p-4 list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">bar_chart</span>
+<span class="text-[#111418] dark:text-white font-semibold">Analytics</span>
+</div>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
+</summary>
+<div class="px-4 pb-4">
+<p class="text-sm text-gray-500 italic">Expand to manage reporting access.</p>
+</div>
+</details>
+</section>
+</main>
+<!-- Fixed Action Footer -->
+<footer class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-800">
+<div class="max-w-md mx-auto flex flex-col gap-3">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98]">
+                Save Permissions
+            </button>
+<button class="w-full bg-transparent text-[#617589] dark:text-gray-400 font-medium py-2 rounded-xl text-sm">
+                Discard Changes
+            </button>
+</div>
+</footer>
+</body></html>

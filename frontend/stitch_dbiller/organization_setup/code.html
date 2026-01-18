@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Organization Setup</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-[430px] mx-auto overflow-x-hidden border-x border-gray-200 dark:border-gray-800 shadow-xl">
+<!-- TopAppBar -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+<div class="text-gray-900 dark:text-white flex size-12 shrink-0 items-center cursor-pointer">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</div>
+<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Organization Setup</h2>
+<div class="size-12 shrink-0"></div> <!-- Spacer for centering -->
+</div>
+<!-- ProgressBar -->
+<div class="flex flex-col gap-3 p-4 bg-background-light dark:bg-background-dark">
+<div class="flex gap-6 justify-between items-center">
+<p class="text-gray-900 dark:text-white text-base font-medium leading-normal">Onboarding Progress</p>
+<p class="text-gray-900 dark:text-white text-sm font-normal leading-normal">Step 2 of 2</p>
+</div>
+<div class="rounded-full bg-gray-200 dark:bg-[#3b4754]">
+<div class="h-2 rounded-full bg-primary" style="width: 100%;"></div>
+</div>
+</div>
+<!-- HeadlineText -->
+<div class="px-4 pt-4">
+<h3 class="text-gray-900 dark:text-white tracking-light text-2xl font-bold leading-tight pb-2">Tell us about your business</h3>
+<p class="text-gray-600 dark:text-[#9dabb9] text-sm font-normal">Please provide your legal business details for billing and compliance.</p>
+</div>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto pb-24">
+<!-- EmptyState / Upload Logo -->
+<div class="flex flex-col p-4">
+<div class="flex flex-col items-center gap-6 rounded-xl border-2 border-dashed border-gray-300 dark:border-[#3b4754] px-6 py-10 bg-white dark:bg-[#1c2127]/50">
+<div class="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined !text-4xl" data-icon="add_a_photo">add_a_photo</span>
+</div>
+<div class="flex max-w-[480px] flex-col items-center gap-2">
+<p class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] text-center">Upload Logo</p>
+<p class="text-gray-600 dark:text-[#9dabb9] text-xs font-normal leading-normal text-center">PNG, JPG or SVG up to 5MB</p>
+</div>
+<button class="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Select File</span>
+</button>
+</div>
+</div>
+<!-- Form Fields -->
+<div class="flex flex-col gap-1">
+<!-- Company Name Field -->
+<div class="flex flex-wrap items-end gap-4 px-4 py-3">
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-gray-900 dark:text-white text-sm font-medium leading-normal pb-2">Company Name</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-gray-300 dark:border-[#3b4754] bg-white dark:bg-[#1c2127] placeholder:text-gray-400 dark:placeholder:text-[#9dabb9] h-14 p-[15px] text-base font-normal leading-normal" placeholder="e.g., Acme Corp" value=""/>
+</label>
+</div>
+<!-- Business Type Field -->
+<div class="flex flex-wrap items-end gap-4 px-4 py-3">
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-gray-900 dark:text-white text-sm font-medium leading-normal pb-2">Business Type</p>
+<div class="relative">
+<select class="form-select appearance-none flex w-full min-w-0 flex-1 rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-gray-300 dark:border-[#3b4754] bg-white dark:bg-[#1c2127] h-14 p-[15px] text-base font-normal leading-normal">
+<option disabled="" selected="" value="">Select industry</option>
+<option>Software / SaaS</option>
+<option>E-commerce</option>
+<option>Retail</option>
+<option>Service Provider</option>
+<option>Manufacturing</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400">
+<span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</label>
+</div>
+<!-- Tax ID Field -->
+<div class="flex flex-wrap items-end gap-4 px-4 py-3">
+<label class="flex flex-col min-w-40 flex-1">
+<div class="flex justify-between items-center pb-2">
+<p class="text-gray-900 dark:text-white text-sm font-medium leading-normal">Tax ID (GST/VAT)</p>
+<span class="text-primary text-xs font-medium cursor-help flex items-center gap-1">
+<span class="material-symbols-outlined !text-sm" data-icon="info">info</span>
+                                Why?
+                            </span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-gray-300 dark:border-[#3b4754] bg-white dark:bg-[#1c2127] placeholder:text-gray-400 dark:placeholder:text-[#9dabb9] h-14 p-[15px] text-base font-normal leading-normal uppercase" placeholder="e.g., US123456789" value=""/>
+</label>
+</div>
+</div>
+</div>
+<!-- Footer Action Button -->
+<div class="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto p-4 bg-background-light dark:bg-background-dark/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800">
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98]">
+<span class="truncate">Complete Setup</span>
+</button>
+</div>
+</div>
+</body></html>

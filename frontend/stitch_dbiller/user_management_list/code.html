@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>dBiller User Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl bg-background-light dark:bg-background-dark pb-24">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="flex items-center p-4 pb-2 justify-between">
+<div class="text-primary flex size-10 shrink-0 items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios</span>
+</div>
+<div class="flex flex-col items-center flex-1">
+<h2 class="text-lg font-bold leading-tight tracking-tight">User Management</h2>
+<p class="text-xs text-slate-500 font-medium">Organization: dBiller</p>
+</div>
+<div class="flex w-10 items-center justify-end">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-transparent text-primary">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Search Bar Section -->
+<div class="px-4 py-3">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full shadow-sm">
+<div class="text-slate-400 flex border-none bg-white dark:bg-[#1a242f] items-center justify-center pl-4 rounded-l-xl">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-white dark:bg-[#1a242f] h-full placeholder:text-slate-400 px-4 pl-2 text-base font-normal leading-normal" placeholder="Search by name, email, or role..."/>
+</div>
+</label>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-3 px-4 pb-4 overflow-x-auto no-scrollbar">
+<div class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-5 shadow-sm">
+<p class="text-white text-sm font-semibold">All <span class="ml-1 opacity-70">24</span></p>
+</div>
+<div class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-[#1a242f] px-5 border border-slate-200 dark:border-slate-800">
+<p class="text-slate-600 dark:text-slate-300 text-sm font-medium">Admin</p>
+</div>
+<div class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-[#1a242f] px-5 border border-slate-200 dark:border-slate-800">
+<p class="text-slate-600 dark:text-slate-300 text-sm font-medium">Manager</p>
+</div>
+<div class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-[#1a242f] px-5 border border-slate-200 dark:border-slate-800">
+<p class="text-slate-600 dark:text-slate-300 text-sm font-medium">Staff</p>
+</div>
+</div>
+</header>
+<!-- User List Body -->
+<main class="flex-1 px-4 space-y-1">
+<!-- List Item 1 -->
+<div class="flex items-center gap-4 bg-white dark:bg-[#1a242f] px-4 min-h-[80px] py-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-all active:scale-[0.98]">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-white dark:border-slate-700" data-alt="Portrait of Alex Rivera, professional headshot" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD4C0B6-C0fFTvZpOW5ar6n9mPd5rkOfsnNKsTsYpqhy8DCPMuTwhahtMzqc1IVhxZlEFgs8sN-twTqjCWXTldPk4e3NuDVY5D_8C-2XLfRJxZ3IBEbnVHGUG0UN-Uah6DGNPoAHKrMea6Gd7g1_8Rybvr7ELJbZeFxbN9pNKUhqxPmSple0U0-kQ96Da6GzE5PKf27B-Jy8ptFJnDXxEe8oiFCH13UaOegC4PXqCqVedDurnMe10-hhQamu4IqR44yRTeeqi1ca-9k");'></div>
+<div class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-[#1a242f]"></div>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-semibold leading-tight">Alex Rivera</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-primary/10 text-primary uppercase tracking-wider">Admin</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs">•</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs">alex.r@dbiller.io</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="text-slate-400 hover:text-primary transition-colors p-2 rounded-lg">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+<div class="text-slate-300 dark:text-slate-600">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- List Item 2 -->
+<div class="flex items-center gap-4 bg-white dark:bg-[#1a242f] px-4 min-h-[80px] py-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-all active:scale-[0.98]">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-white dark:border-slate-700" data-alt="Portrait of Jordan Smith, staff member" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBu2JN-IXMRegqjkItuVtItHYN9mZnQppSqeOHkspunwH85BKnU3dbFa8rqkRF3RyDb4L88TOa8lB6rZxa_G45XJS7twOOI-ov3rXpgNO1D2hKBcj8dElkadAHrmYYgn4h0LsuzhYNzrpo_5vkdUBzfkUrUSXGLprFoCcBYaEn5NCZl9BzOJatt1sAwV9YnkkvTPY9etrKZfW2pzfQjxjS5MqCwO4rsZKqomA6d0Py39i4yMbMvvUolwCGOav0aq-YQYYUiB2hDYs2W");'></div>
+<div class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-[#1a242f]"></div>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-semibold leading-tight">Jordan Smith</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider">Staff</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs">•</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs">j.smith@dbiller.io</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="text-slate-400 hover:text-primary transition-colors p-2 rounded-lg">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+<div class="text-slate-300 dark:text-slate-600">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- List Item 3 (Inactive) -->
+<div class="flex items-center gap-4 bg-white dark:bg-[#1a242f] px-4 min-h-[80px] py-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-all active:scale-[0.98] opacity-75">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-white dark:border-slate-700 grayscale" data-alt="Portrait of Taylor Chen, inactive user" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBhPaq-tHyChX29VPqvA5FZQjuejDe2d3hVAS-jvWSemRTfpnuPUKNfSh8r1DZgmdh3g9_WmMIxUO8vBfyKat7hAgmF9xIT9ivjuOfbXmrpsH-MoSILG7XYGflCXfqmIeOUBl8kEBwf3ARD0AeAmNpBDZcCLYekqi9-7GHEY_OHTVL-9znOH9S-is_aqSqCj3ih0MDLBbUnbKlCxp0lR_mpmA542TBmh0mgUgOZeoObJty9MrEKzetj-xqBZaaaZXZmw5KFMUaxHBig");'></div>
+<div class="absolute bottom-0 right-0 h-4 w-4 bg-slate-400 rounded-full border-2 border-white dark:border-[#1a242f]"></div>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-semibold leading-tight">Taylor Chen</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-600 uppercase tracking-wider">Manager</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs">•</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs italic">Inactive</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="text-slate-400 hover:text-primary transition-colors p-2 rounded-lg">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+<div class="text-slate-300 dark:text-slate-600">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- List Item 4 -->
+<div class="flex items-center gap-4 bg-white dark:bg-[#1a242f] px-4 min-h-[80px] py-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-all active:scale-[0.98]">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-white dark:border-slate-700" data-alt="Portrait of Morgan Lee, staff member" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA3WWEC3eq1KS2cZOxcEsZoMQi6qo-6vu3JUS5kD-0TFH98wqey2ui7GIZUYWiA1DwgmVBjS73RLHrrJfpH9SQBHMaVRpBdVP3kd1-L0YIQdGhXTwleYJCZH15n_HPBSYEHezO4SkIxYkPSaoYhemQBAWeVQ36zWkRMpWo4Uut8P6-sgywZ01EqQ3m5uHY1Kpi0Q1t8tC1aRjfuee9_zLQ5ZBRHnyT0fu3jwenq0tL_x_HaPvYFoanJbUsvb4zPx8zH9hj1ukMjDyVK");'></div>
+<div class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-[#1a242f]"></div>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-semibold leading-tight">Morgan Lee</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider">Staff</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs">•</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs">m.lee@dbiller.io</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="text-slate-400 hover:text-primary transition-colors p-2 rounded-lg">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+<div class="text-slate-300 dark:text-slate-600">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- List Item 5 -->
+<div class="flex items-center gap-4 bg-white dark:bg-[#1a242f] px-4 min-h-[80px] py-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-all active:scale-[0.98]">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-white dark:border-slate-700" data-alt="Portrait of Casey Wright, manager" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBuxHnUlANbp54iucUUtiMcr-pR78IM3DMg9onUz3jsLiG8X-bP8Y0hjH-1HOiPhpueJzzQpxfb6mAf_ROR6gyi-V5HoEJh3WlUuRp5ko4_oCLssh6a22uZdfsZHDutDWlIuJl4wNwZvblWz3oRdeV9n3EKumpddu8OXZBBy5wGmL2ZJ23QVdkS9zRbwFvm5ncwrPGO2BJEytW94IPVoZpbLZFd_wt5qcNwNpC8Q-W9maBgFVB_IvWpSKyu8d_qDQX2iMZ2qHqDM-LA");'></div>
+<div class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-[#1a242f]"></div>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-semibold leading-tight">Casey Wright</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-600 uppercase tracking-wider">Manager</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs">•</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs">c.wright@dbiller.io</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="text-slate-400 hover:text-primary transition-colors p-2 rounded-lg">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+<div class="text-slate-300 dark:text-slate-600">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-6 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:right-[calc(50%-200px)] w-[85%] max-w-[340px] flex items-center justify-center gap-2 h-14 bg-primary text-white rounded-2xl shadow-lg shadow-primary/30 z-30 transition-transform active:scale-95 font-bold text-base tracking-wide">
+<span class="material-symbols-outlined text-2xl">person_add</span>
+            Add New User
+        </button>
+<!-- Bottom Tab Bar (iOS Style) -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 h-20 flex items-start justify-around px-6 pt-3 z-20">
+<div class="flex flex-col items-center gap-1 text-slate-400 cursor-pointer">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-medium">Dashboard</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-primary cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-[10px] font-bold">Users</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-400 cursor-pointer">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[10px] font-medium">Billing</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-400 cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</div>
+</nav>
+</div>
+</body></html>

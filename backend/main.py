@@ -47,14 +47,73 @@ models.Base.metadata.create_all(bind=engine)
 def ensure_optional_columns():
     """Add columns that may be missing on older databases without requiring a full migration tool."""
     with engine.begin() as conn:
-        try:
-            conn.execute(text("ALTER TABLE products ADD COLUMN category VARCHAR"))
-        except Exception:
-            pass  # Column already exists or table missing; safe to ignore for idempotency
-        try:
-            conn.execute(text("ALTER TABLE stores ADD COLUMN dummy_check INTEGER"))
-        except Exception:
-            pass  # table likely exists if this fails; create_all will create if missing
+        def add_column(table: str, column_def: str):
+            try:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column_def}"))
+            except Exception:
+                pass  # Column already exists or table missing; safe to ignore for idempotency
+
+        add_column("products", "category VARCHAR")
+        add_column("stores", "dummy_check INTEGER")
+        add_column("users", "email VARCHAR")
+        add_column("users", "phone VARCHAR")
+        add_column("users", "profile_photo VARCHAR")
+        add_column("users", "organization_id INTEGER")
+        add_column("users", "full_name VARCHAR")
+        add_column("users", "user_code VARCHAR")
+        add_column("organizations", "logo_url VARCHAR")
+        add_column("organizations", "status VARCHAR")
+        add_column("organizations", "subscription_id INTEGER")
+        add_column("organizations", "trial_ends_at DATETIME")
+        add_column("organizations", "current_period_end DATETIME")
+        add_column("organizations", "node_limit INTEGER")
+        add_column("subscriptions", "currency VARCHAR")
+        add_column("subscriptions", "monthly_price FLOAT")
+        add_column("subscriptions", "annual_price FLOAT")
+        add_column("subscriptions", "features TEXT")
+        add_column("subscriptions", "limits TEXT")
+        add_column("subscriptions", "description TEXT")
+        add_column("subscriptions", "badge_text VARCHAR")
+        add_column("subscriptions", "is_featured BOOLEAN")
+        add_column("subscriptions", "is_active BOOLEAN")
+        add_column("subscriptions", "created_at DATETIME")
+        add_column("suppliers", "contact_name VARCHAR")
+        add_column("suppliers", "status VARCHAR")
+        add_column("suppliers", "logo_url VARCHAR")
+        add_column("suppliers", "category VARCHAR")
+        add_column("suppliers", "supplier_code VARCHAR")
+        add_column("items", "category VARCHAR")
+        add_column("items", "tags TEXT")
+        add_column("items", "barcode VARCHAR")
+        add_column("items", "reorder_point INTEGER")
+        add_column("items", "min_stock INTEGER")
+        add_column("items", "max_stock INTEGER")
+        add_column("items", "warehouse_aisle VARCHAR")
+        add_column("items", "bin_location VARCHAR")
+        add_column("items", "ai_verified BOOLEAN")
+        add_column("items", "ai_confidence FLOAT")
+        add_column("orders", "order_number VARCHAR")
+        add_column("orders", "supplier_id INTEGER")
+        add_column("orders", "customer_name VARCHAR")
+        add_column("orders", "customer_email VARCHAR")
+        add_column("orders", "customer_phone VARCHAR")
+        add_column("orders", "billing_address TEXT")
+        add_column("orders", "notes TEXT")
+        add_column("orders", "confirmed_at DATETIME")
+        add_column("orders", "shipped_at DATETIME")
+        add_column("orders", "delivered_at DATETIME")
+        add_column("orders", "cancelled_at DATETIME")
+        add_column("orders", "expected_delivery_at DATETIME")
+        add_column("order_items", "sku VARCHAR")
+        add_column("order_items", "image_url VARCHAR")
+        add_column("order_items", "ai_verified BOOLEAN")
+        add_column("order_items", "ai_confidence FLOAT")
+        add_column("invoices", "source_url VARCHAR")
+        add_column("invoices", "source_type VARCHAR")
+        add_column("invoices", "ai_extracted BOOLEAN")
+        add_column("invoices", "paid_at DATETIME")
+        add_column("invoice_items", "sku VARCHAR")
+        add_column("invoice_items", "image_url VARCHAR")
 
 
 ensure_optional_columns()
@@ -94,6 +153,147 @@ app.add_middleware(
 def normalize_product_url(product: models.Product):
     """Pass-through: Validation moved to client-side to support relative local URLs."""
     return product
+
+def get_roles_by_ids(db: database.SessionLocal, role_ids: Optional[List[int]]):
+    if not role_ids:
+        return []
+    unique_ids = list({rid for rid in role_ids if rid is not None})
+    if not unique_ids:
+        return []
+    roles = db.query(models.Role).filter(models.Role.id.in_(unique_ids)).all()
+    if len(roles) != len(unique_ids):
+        raise HTTPException(status_code=404, detail="One or more roles not found")
+    return roles
+
+def get_permissions_by_ids(db: database.SessionLocal, permission_ids: Optional[List[int]]):
+    if not permission_ids:
+        return []
+    unique_ids = list({pid for pid in permission_ids if pid is not None})
+    if not unique_ids:
+        return []
+    permissions = db.query(models.Permission).filter(models.Permission.id.in_(unique_ids)).all()
+    if len(permissions) != len(unique_ids):
+        raise HTTPException(status_code=404, detail="One or more permissions not found")
+    return permissions
+
+def get_subscription_by_id(db: database.SessionLocal, subscription_id: Optional[int]):
+    if subscription_id is None:
+        return None
+    subscription = db.query(models.Subscription).filter(models.Subscription.id == subscription_id).first()
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+    return subscription
+
+def get_supplier_by_id(db: database.SessionLocal, supplier_id: Optional[int]):
+    if supplier_id is None:
+        return None
+    supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    return supplier
+
+def build_order_items(db: database.SessionLocal, items: List[schemas.OrderItemCreate]):
+    if not items:
+        raise HTTPException(status_code=400, detail="Order requires at least one item")
+    order_items = []
+    subtotal = 0.0
+    for item in items:
+        if not item.item_id and not item.description:
+            raise HTTPException(status_code=400, detail="Order item requires item_id or description")
+        unit_price = item.unit_price
+        description = item.description
+        sku = item.sku
+        image_url = item.image_url
+        ai_verified = item.ai_verified
+        ai_confidence = item.ai_confidence
+        if item.item_id:
+            db_item = db.query(models.Item).filter(models.Item.id == item.item_id).first()
+            if not db_item:
+                raise HTTPException(status_code=404, detail=f"Item with id {item.item_id} not found")
+            if unit_price is None:
+                unit_price = db_item.unit_price
+            if not description:
+                description = db_item.name
+            if not sku:
+                sku = db_item.sku
+            if not image_url:
+                image_url = db_item.image_url
+            if ai_verified is None:
+                ai_verified = db_item.ai_verified
+            if ai_confidence is None:
+                ai_confidence = db_item.ai_confidence
+        if unit_price is None:
+            raise HTTPException(status_code=400, detail="unit_price required when item_id is not provided")
+        line_total = unit_price * item.quantity
+        subtotal += line_total
+        order_items.append(
+            models.OrderItem(
+                item_id=item.item_id,
+                description=description,
+                sku=sku,
+                image_url=image_url,
+                quantity=item.quantity,
+                unit_price=unit_price,
+                line_total=line_total,
+                ai_verified=ai_verified or False,
+                ai_confidence=ai_confidence,
+            )
+        )
+    return subtotal, order_items
+
+def build_invoice_items(db: database.SessionLocal, items: List[schemas.InvoiceItemCreate]):
+    if not items:
+        raise HTTPException(status_code=400, detail="Invoice requires at least one item")
+    invoice_items = []
+    subtotal = 0.0
+    for item in items:
+        if not item.item_id and not item.description:
+            raise HTTPException(status_code=400, detail="Invoice item requires item_id or description")
+        unit_price = item.unit_price
+        description = item.description
+        sku = item.sku
+        image_url = item.image_url
+        if item.item_id:
+            db_item = db.query(models.Item).filter(models.Item.id == item.item_id).first()
+            if not db_item:
+                raise HTTPException(status_code=404, detail=f"Item with id {item.item_id} not found")
+            if unit_price is None:
+                unit_price = db_item.unit_price
+            if not description:
+                description = db_item.name
+            if not sku:
+                sku = db_item.sku
+            if not image_url:
+                image_url = db_item.image_url
+        if unit_price is None:
+            raise HTTPException(status_code=400, detail="unit_price required when item_id is not provided")
+        line_total = unit_price * item.quantity
+        subtotal += line_total
+        invoice_items.append(
+            models.InvoiceItem(
+                item_id=item.item_id,
+                description=description,
+                sku=sku,
+                image_url=image_url,
+                quantity=item.quantity,
+                unit_price=unit_price,
+                line_total=line_total,
+            )
+        )
+    return subtotal, invoice_items
+
+def generate_invoice_number():
+    return f"INV-{datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+
+def generate_order_number(order_type: Optional[str]):
+    prefix = "ORD"
+    if order_type:
+        lowered = order_type.lower()
+        if lowered.startswith("purchase"):
+            prefix = "PO"
+        elif lowered.startswith("sales"):
+            prefix = "SO"
+    return f"{prefix}-{datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
 
 @app.get("/")
 def read_root():
@@ -200,12 +400,971 @@ def create_user(user: schemas.UserCreate, db: database.SessionLocal = Depends(da
     db_user = db.query(models.User).filter(models.User.username == user.username).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
+    if user.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == user.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
     hashed_password = auth.get_password_hash(user.password)
-    db_user = models.User(username=user.username, hashed_password=hashed_password, role=user.role)
+    db_user = models.User(
+        username=user.username,
+        hashed_password=hashed_password,
+        role=user.role,
+        full_name=user.full_name,
+        user_code=user.user_code,
+        email=user.email,
+        phone=user.phone,
+        profile_photo=user.profile_photo,
+        organization_id=user.organization_id,
+    )
+    db_user.active_account = user.active_account
+    if user.role_ids is not None:
+        db_user.roles = get_roles_by_ids(db, user.role_ids)
+    if user.permission_ids is not None:
+        db_user.permissions = get_permissions_by_ids(db, user.permission_ids)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
+# Roles and Permissions
+@app.post("/permissions/", response_model=schemas.Permission)
+def create_permission(
+    permission: schemas.PermissionCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    existing = db.query(models.Permission).filter(models.Permission.name == permission.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Permission already exists")
+    db_permission = models.Permission(**permission.dict())
+    db.add(db_permission)
+    db.commit()
+    db.refresh(db_permission)
+    return db_permission
+
+@app.get("/permissions/", response_model=List[schemas.Permission])
+def read_permissions(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return db.query(models.Permission).offset(skip).limit(limit).all()
+
+@app.get("/permissions/{permission_id}", response_model=schemas.Permission)
+def read_permission(
+    permission_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    permission = db.query(models.Permission).filter(models.Permission.id == permission_id).first()
+    if not permission:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    return permission
+
+@app.put("/permissions/{permission_id}", response_model=schemas.Permission)
+def update_permission(
+    permission_id: int,
+    permission: schemas.PermissionUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_permission = db.query(models.Permission).filter(models.Permission.id == permission_id).first()
+    if not db_permission:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    if permission.name and permission.name != db_permission.name:
+        existing = db.query(models.Permission).filter(models.Permission.name == permission.name).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Permission already exists")
+        db_permission.name = permission.name
+    if permission.description is not None:
+        db_permission.description = permission.description
+    db.commit()
+    db.refresh(db_permission)
+    return db_permission
+
+@app.delete("/permissions/{permission_id}")
+def delete_permission(
+    permission_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_permission = db.query(models.Permission).filter(models.Permission.id == permission_id).first()
+    if not db_permission:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    db.delete(db_permission)
+    db.commit()
+    return {"message": "Permission deleted successfully"}
+
+@app.post("/roles/", response_model=schemas.Role)
+def create_role(
+    role: schemas.RoleCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    existing = db.query(models.Role).filter(models.Role.name == role.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Role already exists")
+    db_role = models.Role(**role.dict())
+    db.add(db_role)
+    db.commit()
+    db.refresh(db_role)
+    return db_role
+
+@app.get("/roles/", response_model=List[schemas.Role])
+def read_roles(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return db.query(models.Role).offset(skip).limit(limit).all()
+
+@app.get("/roles/{role_id}", response_model=schemas.Role)
+def read_role(
+    role_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    role = db.query(models.Role).filter(models.Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    return role
+
+@app.put("/roles/{role_id}", response_model=schemas.Role)
+def update_role(
+    role_id: int,
+    role: schemas.RoleUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_role = db.query(models.Role).filter(models.Role.id == role_id).first()
+    if not db_role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    if role.name and role.name != db_role.name:
+        existing = db.query(models.Role).filter(models.Role.name == role.name).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Role already exists")
+        db_role.name = role.name
+    if role.description is not None:
+        db_role.description = role.description
+    db.commit()
+    db.refresh(db_role)
+    return db_role
+
+@app.put("/roles/{role_id}/permissions", response_model=schemas.Role)
+def update_role_permissions(
+    role_id: int,
+    payload: schemas.PermissionAssignment,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_role = db.query(models.Role).filter(models.Role.id == role_id).first()
+    if not db_role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    db_role.permissions = get_permissions_by_ids(db, payload.permission_ids)
+    db.commit()
+    db.refresh(db_role)
+    return db_role
+
+@app.delete("/roles/{role_id}")
+def delete_role(
+    role_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_role = db.query(models.Role).filter(models.Role.id == role_id).first()
+    if not db_role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    db.delete(db_role)
+    db.commit()
+    return {"message": "Role deleted successfully"}
+
+# User Management
+@app.get("/users/", response_model=List[schemas.User])
+def read_users(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return db.query(models.User).offset(skip).limit(limit).all()
+
+@app.get("/users/{user_id}", response_model=schemas.User)
+def read_user(
+    user_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
+@app.put("/users/{user_id}", response_model=schemas.User)
+def update_user(
+    user_id: int,
+    user: schemas.UserUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.username and user.username != db_user.username:
+        existing = db.query(models.User).filter(models.User.username == user.username).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Username already registered")
+        db_user.username = user.username
+    if user.full_name is not None:
+        db_user.full_name = user.full_name
+    if user.user_code is not None:
+        db_user.user_code = user.user_code
+    if user.email is not None:
+        db_user.email = user.email
+    if user.phone is not None:
+        db_user.phone = user.phone
+    if user.role is not None:
+        db_user.role = user.role
+    if user.active_account is not None:
+        db_user.active_account = user.active_account
+    if user.profile_photo is not None:
+        db_user.profile_photo = user.profile_photo
+    if user.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == user.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+        db_user.organization_id = user.organization_id
+    if user.password:
+        db_user.hashed_password = auth.get_password_hash(user.password)
+    if user.role_ids is not None:
+        db_user.roles = get_roles_by_ids(db, user.role_ids)
+    if user.permission_ids is not None:
+        db_user.permissions = get_permissions_by_ids(db, user.permission_ids)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.put("/users/{user_id}/roles", response_model=schemas.User)
+def set_user_roles(
+    user_id: int,
+    payload: schemas.RoleAssignment,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    db_user.roles = get_roles_by_ids(db, payload.role_ids)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.put("/users/{user_id}/permissions", response_model=schemas.User)
+def set_user_permissions(
+    user_id: int,
+    payload: schemas.PermissionAssignment,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    db_user.permissions = get_permissions_by_ids(db, payload.permission_ids)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.delete("/users/{user_id}")
+def delete_user(
+    user_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    db.delete(db_user)
+    db.commit()
+    return {"message": "User deleted successfully"}
+
+# Organization CRUD
+@app.post("/organizations/", response_model=schemas.Organization)
+def create_organization(
+    organization: schemas.OrganizationCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    if organization.subscription_id is not None:
+        get_subscription_by_id(db, organization.subscription_id)
+    db_org = models.Organization(**organization.dict())
+    db.add(db_org)
+    db.commit()
+    db.refresh(db_org)
+    return db_org
+
+@app.get("/organizations/", response_model=List[schemas.Organization])
+def read_organizations(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return db.query(models.Organization).offset(skip).limit(limit).all()
+
+@app.get("/organizations/{organization_id}", response_model=schemas.Organization)
+def read_organization(
+    organization_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    organization = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
+    if not organization:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    return organization
+
+@app.put("/organizations/{organization_id}", response_model=schemas.Organization)
+def update_organization(
+    organization_id: int,
+    organization: schemas.OrganizationUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
+    if not db_org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    update_data = organization.dict(exclude_unset=True)
+    if "subscription_id" in update_data and update_data["subscription_id"] is not None:
+        get_subscription_by_id(db, update_data["subscription_id"])
+    for key, value in update_data.items():
+        setattr(db_org, key, value)
+    db.commit()
+    db.refresh(db_org)
+    return db_org
+
+@app.delete("/organizations/{organization_id}")
+def delete_organization(
+    organization_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
+    if not db_org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    db.delete(db_org)
+    db.commit()
+    return {"message": "Organization deleted successfully"}
+
+# Subscription CRUD
+@app.post("/subscriptions/", response_model=schemas.Subscription)
+def create_subscription(
+    subscription: schemas.SubscriptionCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_subscription = models.Subscription(**subscription.dict())
+    db.add(db_subscription)
+    db.commit()
+    db.refresh(db_subscription)
+    return db_subscription
+
+@app.get("/subscriptions/", response_model=List[schemas.Subscription])
+def read_subscriptions(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return db.query(models.Subscription).offset(skip).limit(limit).all()
+
+@app.get("/subscriptions/{subscription_id}", response_model=schemas.Subscription)
+def read_subscription(
+    subscription_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    subscription = db.query(models.Subscription).filter(models.Subscription.id == subscription_id).first()
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+    return subscription
+
+@app.put("/subscriptions/{subscription_id}", response_model=schemas.Subscription)
+def update_subscription(
+    subscription_id: int,
+    subscription: schemas.SubscriptionUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_subscription = db.query(models.Subscription).filter(models.Subscription.id == subscription_id).first()
+    if not db_subscription:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+    update_data = subscription.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_subscription, key, value)
+    db.commit()
+    db.refresh(db_subscription)
+    return db_subscription
+
+@app.delete("/subscriptions/{subscription_id}")
+def delete_subscription(
+    subscription_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_subscription = db.query(models.Subscription).filter(models.Subscription.id == subscription_id).first()
+    if not db_subscription:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+    db.delete(db_subscription)
+    db.commit()
+    return {"message": "Subscription deleted successfully"}
+
+# Supplier CRUD
+@app.post("/suppliers/", response_model=schemas.Supplier)
+def create_supplier(
+    supplier: schemas.SupplierCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    if supplier.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == supplier.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+    db_supplier = models.Supplier(**supplier.dict())
+    db.add(db_supplier)
+    db.commit()
+    db.refresh(db_supplier)
+    return db_supplier
+
+@app.get("/suppliers/", response_model=List[schemas.Supplier])
+def read_suppliers(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return db.query(models.Supplier).offset(skip).limit(limit).all()
+
+@app.get("/suppliers/{supplier_id}", response_model=schemas.Supplier)
+def read_supplier(
+    supplier_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    return supplier
+
+@app.put("/suppliers/{supplier_id}", response_model=schemas.Supplier)
+def update_supplier(
+    supplier_id: int,
+    supplier: schemas.SupplierUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
+    if not db_supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    if supplier.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == supplier.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+    update_data = supplier.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_supplier, key, value)
+    db.commit()
+    db.refresh(db_supplier)
+    return db_supplier
+
+@app.delete("/suppliers/{supplier_id}")
+def delete_supplier(
+    supplier_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
+    if not db_supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    db.delete(db_supplier)
+    db.commit()
+    return {"message": "Supplier deleted successfully"}
+
+# Item CRUD
+@app.post("/items/", response_model=schemas.Item)
+def create_item(
+    item: schemas.ItemCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    if item.supplier_id is not None:
+        supplier = db.query(models.Supplier).filter(models.Supplier.id == item.supplier_id).first()
+        if not supplier:
+            raise HTTPException(status_code=404, detail="Supplier not found")
+    if item.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == item.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+    db_item = models.Item(**item.dict())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+@app.get("/items/", response_model=List[schemas.Item])
+def read_items(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return db.query(models.Item).offset(skip).limit(limit).all()
+
+@app.get("/items/{item_id}", response_model=schemas.Item)
+def read_item(
+    item_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
+
+@app.put("/items/{item_id}", response_model=schemas.Item)
+def update_item(
+    item_id: int,
+    item: schemas.ItemUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    if item.supplier_id is not None:
+        supplier = db.query(models.Supplier).filter(models.Supplier.id == item.supplier_id).first()
+        if not supplier:
+            raise HTTPException(status_code=404, detail="Supplier not found")
+    if item.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == item.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+    update_data = item.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_item, key, value)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+@app.delete("/items/{item_id}")
+def delete_item(
+    item_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    db.delete(db_item)
+    db.commit()
+    return {"message": "Item deleted successfully"}
+
+# Stock Movement CRUD
+@app.post("/stock_movements/", response_model=schemas.StockMovement)
+def create_stock_movement(
+    movement: schemas.StockMovementCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_item = db.query(models.Item).filter(models.Item.id == movement.item_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    if movement.user_id is not None:
+        user = db.query(models.User).filter(models.User.id == movement.user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+    db_movement = models.StockMovement(
+        item_id=movement.item_id,
+        movement_type=movement.movement_type,
+        quantity_change=movement.quantity_change,
+        status=movement.status,
+        reference=movement.reference,
+        notes=movement.notes,
+        user_id=movement.user_id or current_user.id,
+    )
+    db_item.stock = (db_item.stock or 0) + movement.quantity_change
+    db.add(db_movement)
+    db.commit()
+    db.refresh(db_movement)
+    return db_movement
+
+@app.get("/stock_movements/", response_model=List[schemas.StockMovement])
+def read_stock_movements(
+    item_id: Optional[int] = None,
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    query = db.query(models.StockMovement)
+    if item_id is not None:
+        query = query.filter(models.StockMovement.item_id == item_id)
+    return query.order_by(models.StockMovement.created_at.desc()).offset(skip).limit(limit).all()
+
+@app.get("/stock_movements/{movement_id}", response_model=schemas.StockMovement)
+def read_stock_movement(
+    movement_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    movement = db.query(models.StockMovement).filter(models.StockMovement.id == movement_id).first()
+    if not movement:
+        raise HTTPException(status_code=404, detail="Stock movement not found")
+    return movement
+
+@app.put("/stock_movements/{movement_id}", response_model=schemas.StockMovement)
+def update_stock_movement(
+    movement_id: int,
+    movement: schemas.StockMovementUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_movement = db.query(models.StockMovement).filter(models.StockMovement.id == movement_id).first()
+    if not db_movement:
+        raise HTTPException(status_code=404, detail="Stock movement not found")
+    if movement.user_id is not None:
+        user = db.query(models.User).filter(models.User.id == movement.user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        db_movement.user_id = movement.user_id
+    if movement.movement_type is not None:
+        db_movement.movement_type = movement.movement_type
+    if movement.status is not None:
+        db_movement.status = movement.status
+    if movement.reference is not None:
+        db_movement.reference = movement.reference
+    if movement.notes is not None:
+        db_movement.notes = movement.notes
+    if movement.quantity_change is not None:
+        delta = movement.quantity_change - db_movement.quantity_change
+        db_item = db.query(models.Item).filter(models.Item.id == db_movement.item_id).first()
+        if db_item:
+            db_item.stock = (db_item.stock or 0) + delta
+        db_movement.quantity_change = movement.quantity_change
+    db.commit()
+    db.refresh(db_movement)
+    return db_movement
+
+@app.delete("/stock_movements/{movement_id}")
+def delete_stock_movement(
+    movement_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_movement = db.query(models.StockMovement).filter(models.StockMovement.id == movement_id).first()
+    if not db_movement:
+        raise HTTPException(status_code=404, detail="Stock movement not found")
+    db_item = db.query(models.Item).filter(models.Item.id == db_movement.item_id).first()
+    if db_item:
+        db_item.stock = (db_item.stock or 0) - db_movement.quantity_change
+    db.delete(db_movement)
+    db.commit()
+    return {"message": "Stock movement deleted successfully"}
+
+# Order CRUD
+@app.post("/orders/", response_model=schemas.Order)
+def create_order(
+    order: schemas.OrderCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    if order.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == order.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+    if order.supplier_id is not None:
+        get_supplier_by_id(db, order.supplier_id)
+    if order.user_id is not None:
+        user = db.query(models.User).filter(models.User.id == order.user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+    subtotal, order_items = build_order_items(db, order.items)
+    shipping_fee = order.shipping_fee or 0
+    tax = order.tax or 0
+    total_amount = subtotal + shipping_fee + tax
+    order_number = order.order_number or generate_order_number(order.order_type)
+    db_order = models.Order(
+        order_number=order_number,
+        status=order.status,
+        order_type=order.order_type,
+        supplier_id=order.supplier_id,
+        customer_name=order.customer_name,
+        customer_email=order.customer_email,
+        customer_phone=order.customer_phone,
+        billing_address=order.billing_address,
+        shipping_address=order.shipping_address,
+        notes=order.notes,
+        subtotal=subtotal,
+        shipping_fee=shipping_fee,
+        tax=tax,
+        total_amount=total_amount,
+        currency=order.currency,
+        user_id=order.user_id or current_user.id,
+        organization_id=order.organization_id,
+        confirmed_at=order.confirmed_at,
+        shipped_at=order.shipped_at,
+        delivered_at=order.delivered_at,
+        cancelled_at=order.cancelled_at,
+        expected_delivery_at=order.expected_delivery_at,
+        items=order_items,
+    )
+    db.add(db_order)
+    db.commit()
+    db.refresh(db_order)
+    return db_order
+
+@app.get("/orders/", response_model=List[schemas.Order])
+def read_orders(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return db.query(models.Order).offset(skip).limit(limit).all()
+
+@app.get("/orders/{order_id}", response_model=schemas.Order)
+def read_order(
+    order_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
+
+@app.put("/orders/{order_id}", response_model=schemas.Order)
+def update_order(
+    order_id: int,
+    order: schemas.OrderUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not db_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == order.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+    if order.supplier_id is not None:
+        get_supplier_by_id(db, order.supplier_id)
+    if order.user_id is not None:
+        user = db.query(models.User).filter(models.User.id == order.user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        db_order.user_id = order.user_id
+    if order.order_number is not None:
+        db_order.order_number = order.order_number
+    if order.status is not None:
+        db_order.status = order.status
+    if order.order_type is not None:
+        db_order.order_type = order.order_type
+    if order.supplier_id is not None:
+        db_order.supplier_id = order.supplier_id
+    if order.customer_name is not None:
+        db_order.customer_name = order.customer_name
+    if order.customer_email is not None:
+        db_order.customer_email = order.customer_email
+    if order.customer_phone is not None:
+        db_order.customer_phone = order.customer_phone
+    if order.billing_address is not None:
+        db_order.billing_address = order.billing_address
+    if order.shipping_address is not None:
+        db_order.shipping_address = order.shipping_address
+    if order.notes is not None:
+        db_order.notes = order.notes
+    if order.currency is not None:
+        db_order.currency = order.currency
+    if order.organization_id is not None:
+        db_order.organization_id = order.organization_id
+    if order.confirmed_at is not None:
+        db_order.confirmed_at = order.confirmed_at
+    if order.shipped_at is not None:
+        db_order.shipped_at = order.shipped_at
+    if order.delivered_at is not None:
+        db_order.delivered_at = order.delivered_at
+    if order.cancelled_at is not None:
+        db_order.cancelled_at = order.cancelled_at
+    if order.expected_delivery_at is not None:
+        db_order.expected_delivery_at = order.expected_delivery_at
+
+    if order.items is not None:
+        subtotal, order_items = build_order_items(db, order.items)
+        db_order.items = order_items
+        db_order.subtotal = subtotal
+    if order.shipping_fee is not None:
+        db_order.shipping_fee = order.shipping_fee
+    if order.tax is not None:
+        db_order.tax = order.tax
+    db_order.total_amount = db_order.subtotal + db_order.shipping_fee + db_order.tax
+    db.commit()
+    db.refresh(db_order)
+    return db_order
+
+@app.delete("/orders/{order_id}")
+def delete_order(
+    order_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not db_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    db.delete(db_order)
+    db.commit()
+    return {"message": "Order deleted successfully"}
+
+# Invoice CRUD
+@app.post("/invoices/", response_model=schemas.Invoice)
+def create_invoice(
+    invoice: schemas.InvoiceCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    if invoice.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == invoice.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+    if invoice.order_id is not None:
+        order = db.query(models.Order).filter(models.Order.id == invoice.order_id).first()
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+    subtotal, invoice_items = build_invoice_items(db, invoice.items)
+    tax = invoice.tax or 0
+    discount = invoice.discount or 0
+    total_amount = subtotal + tax - discount
+    invoice_number = invoice.invoice_number or generate_invoice_number()
+    issue_date = invoice.issue_date or datetime.datetime.utcnow()
+    db_invoice = models.Invoice(
+        invoice_number=invoice_number,
+        status=invoice.status,
+        issue_date=issue_date,
+        due_date=invoice.due_date,
+        source_url=invoice.source_url,
+        source_type=invoice.source_type,
+        ai_extracted=invoice.ai_extracted,
+        paid_at=invoice.paid_at,
+        customer_name=invoice.customer_name,
+        customer_email=invoice.customer_email,
+        billing_address=invoice.billing_address,
+        shipping_address=invoice.shipping_address,
+        subtotal=subtotal,
+        tax=tax,
+        discount=discount,
+        total_amount=total_amount,
+        currency=invoice.currency,
+        order_id=invoice.order_id,
+        organization_id=invoice.organization_id,
+        items=invoice_items,
+    )
+    db.add(db_invoice)
+    db.commit()
+    db.refresh(db_invoice)
+    return db_invoice
+
+@app.get("/invoices/", response_model=List[schemas.Invoice])
+def read_invoices(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return db.query(models.Invoice).offset(skip).limit(limit).all()
+
+@app.get("/invoices/{invoice_id}", response_model=schemas.Invoice)
+def read_invoice(
+    invoice_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    return invoice
+
+@app.put("/invoices/{invoice_id}", response_model=schemas.Invoice)
+def update_invoice(
+    invoice_id: int,
+    invoice: schemas.InvoiceUpdate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
+    if not db_invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    if invoice.organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == invoice.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+    if invoice.order_id is not None:
+        order = db.query(models.Order).filter(models.Order.id == invoice.order_id).first()
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+        db_invoice.order_id = invoice.order_id
+    if invoice.invoice_number is not None:
+        db_invoice.invoice_number = invoice.invoice_number
+    if invoice.status is not None:
+        db_invoice.status = invoice.status
+    if invoice.issue_date is not None:
+        db_invoice.issue_date = invoice.issue_date
+    if invoice.due_date is not None:
+        db_invoice.due_date = invoice.due_date
+    if invoice.source_url is not None:
+        db_invoice.source_url = invoice.source_url
+    if invoice.source_type is not None:
+        db_invoice.source_type = invoice.source_type
+    if invoice.ai_extracted is not None:
+        db_invoice.ai_extracted = invoice.ai_extracted
+    if invoice.paid_at is not None:
+        db_invoice.paid_at = invoice.paid_at
+    if invoice.customer_name is not None:
+        db_invoice.customer_name = invoice.customer_name
+    if invoice.customer_email is not None:
+        db_invoice.customer_email = invoice.customer_email
+    if invoice.billing_address is not None:
+        db_invoice.billing_address = invoice.billing_address
+    if invoice.shipping_address is not None:
+        db_invoice.shipping_address = invoice.shipping_address
+    if invoice.currency is not None:
+        db_invoice.currency = invoice.currency
+    if invoice.organization_id is not None:
+        db_invoice.organization_id = invoice.organization_id
+
+    if invoice.items is not None:
+        subtotal, invoice_items = build_invoice_items(db, invoice.items)
+        db_invoice.items = invoice_items
+        db_invoice.subtotal = subtotal
+    if invoice.tax is not None:
+        db_invoice.tax = invoice.tax
+    if invoice.discount is not None:
+        db_invoice.discount = invoice.discount
+    db_invoice.total_amount = db_invoice.subtotal + db_invoice.tax - db_invoice.discount
+    db.commit()
+    db.refresh(db_invoice)
+    return db_invoice
+
+@app.delete("/invoices/{invoice_id}")
+def delete_invoice(
+    invoice_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    db_invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
+    if not db_invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    db.delete(db_invoice)
+    db.commit()
+    return {"message": "Invoice deleted successfully"}
 
 import storage
 

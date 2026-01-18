@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Details - dBiller</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .step-active { color: #137fec; }
+        body { -webkit-tap-highlight-color: transparent; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+<!-- Top App Bar -->
+<nav class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center p-4 justify-between h-16">
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<div>
+<h2 class="text-lg font-bold leading-tight">Order #ORD-8829</h2>
+<p class="text-xs text-slate-500 dark:text-slate-400">Oct 14, 2023 • 02:45 PM</p>
+</div>
+</div>
+<div class="flex gap-1">
+<button class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="max-w-md mx-auto">
+<!-- Order Status Stepper -->
+<section class="p-4">
+<h4 class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-4 px-1">Order Status</h4>
+<div class="bg-white dark:bg-slate-900/50 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
+<div class="flex items-start">
+<!-- Vertical Timeline -->
+<div class="flex flex-col items-center mr-4 pt-1">
+<div class="text-primary"><span class="material-symbols-outlined text-[24px]">check_circle</span></div>
+<div class="w-[2px] h-8 bg-primary"></div>
+<div class="text-primary"><span class="material-symbols-outlined text-[24px]">check_circle</span></div>
+<div class="w-[2px] h-8 bg-primary"></div>
+<div class="text-primary"><span class="material-symbols-outlined text-[24px]">local_shipping</span></div>
+<div class="w-[2px] h-8 bg-slate-300 dark:bg-slate-700"></div>
+<div class="text-slate-300 dark:text-slate-700"><span class="material-symbols-outlined text-[24px]">radio_button_unchecked</span></div>
+</div>
+<!-- Timeline Labels -->
+<div class="flex-1 space-y-4">
+<div class="h-10 flex flex-col justify-center">
+<p class="text-sm font-bold">Created</p>
+<p class="text-xs text-slate-500">Oct 12, 10:30 AM</p>
+</div>
+<div class="h-10 flex flex-col justify-center">
+<p class="text-sm font-bold">Confirmed</p>
+<p class="text-xs text-slate-500">Oct 12, 02:15 PM</p>
+</div>
+<div class="h-10 flex flex-col justify-center">
+<p class="text-sm font-bold text-primary">Shipped</p>
+<p class="text-xs text-slate-500">Oct 13, 09:00 AM</p>
+</div>
+<div class="h-10 flex flex-col justify-center">
+<p class="text-sm font-bold text-slate-400">Delivered</p>
+<p class="text-xs text-slate-500 italic">Expected Oct 16</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Shipping Address Card -->
+<section class="px-4 pb-4">
+<div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="p-4 flex gap-4">
+<div class="flex-1">
+<p class="text-sm font-bold mb-1">Shipping Address</p>
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                            John Doe<br/>
+                            123 Business Way, Suite 500<br/>
+                            San Francisco, CA 94107
+                        </p>
+<button class="mt-4 flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold">
+<span class="material-symbols-outlined text-sm">map</span>
+                            View on Map
+                        </button>
+</div>
+<div class="w-24 h-24 rounded-lg bg-slate-200 dark:bg-slate-800 bg-cover bg-center" data-alt="Map location showing San Francisco business district" data-location="San Francisco" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBl47Ouv1P5CM4h0KViC7Ucz2IBrY-xr_7VJVuQI2w_VO9ZVGp7FvtkN66ZQUW74-tcqYFKdku6gigEpF1FSHpcYrirDBzCSm04bY13Z-FCtnvFicIvIB7wwtRv7ZtEiCaHC8ygF4YIXDsDdWcfzRqdE1IFyLXht9zPCgrlRqH2gHErMyjy3vz3q1iQqvwcFop68GRqWfDnpuTf8FdBFeCskuO_jomrmhoxvErxQ6GfGTAY6totQ8qi_o8zhMc3dfTQNmY2n08CAjRE');">
+</div>
+</div>
+</div>
+</section>
+<!-- Order Items -->
+<section class="px-4 pb-4">
+<div class="flex justify-between items-center mb-3 px-1">
+<h3 class="text-sm font-bold">Order Items (3)</h3>
+<span class="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Verified by AI</span>
+</div>
+<div class="space-y-3">
+<!-- Item 1 -->
+<div class="bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex gap-3">
+<div class="w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-800 flex-shrink-0 bg-cover bg-center" data-alt="Red athletic running sneaker" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA0e53gxASWoSrFVkyYay5-NdPCE1TZR0n3IHupMlbqs1gVE3mSRvPYFP3eA-TJzIdIq5jfdH13x5LpD4qK3GPflLWbL65NU3-_VE7qhqifA-F7wTCXX1sEWbwJS3Yt3JhmJrgIeca1XsJphky8vRVKUi2pLkmCWh-pPHRAsFbSnmoOy249vwRMg2daR7fmZQ5JcDoP9ZELeyXEyHxaVaVUD8dLfM73jVbWc8xwWVvR5_gCa5ORz0ZJIdjWTzrsrBQ6D0LDfkADFBgl');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h4 class="text-sm font-semibold truncate">Nike Air Max Pro</h4>
+<p class="text-sm font-bold text-primary">$120.00</p>
+</div>
+<p class="text-xs text-slate-500 mb-2">SKU: NK-AM-2023-R</p>
+<div class="flex items-center justify-between">
+<span class="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-400">Qty: 01</span>
+<span class="material-symbols-outlined text-green-500 text-sm" title="Image Recognition Verified">verified</span>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex gap-3">
+<div class="w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-800 flex-shrink-0 bg-cover bg-center" data-alt="Modern minimalist white wristwatch" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDKK24HaO6oAbf8AxytegeCp56uWlKvElPZRPjRqHtinD4D6m2VX6c2TVDBQIQk_WW3_59QIfv-jLOJolXCr0EB0BMoLoeX5P885MPTMd2x9GMlkoxTZpAI6ULQ-El1ZqiCvkD0Of753BuQz7LSQF_GB5OFcCLgl7wQ1nTQM-alUf_hr3AxE2F6FbSL3FKw6TxJudyfB9P6nFPJhf9B7jTBbioNd-RSI6fVafwD-_FtSiAq3Tp4s00L-5hy9EU3oL4L3AK7lsbMt3m_');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h4 class="text-sm font-semibold truncate">Elite Smart Watch</h4>
+<p class="text-sm font-bold text-primary">$299.00</p>
+</div>
+<p class="text-xs text-slate-500 mb-2">SKU: WT-EL-SM-04</p>
+<div class="flex items-center justify-between">
+<span class="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-400">Qty: 01</span>
+<span class="material-symbols-outlined text-green-500 text-sm" title="Image Recognition Verified">verified</span>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex gap-3">
+<div class="w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-800 flex-shrink-0 bg-cover bg-center" data-alt="Black premium wireless headphones" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAfE3oDXMwc0a56x6KV91fmCg1ifAjVOaihsl_a5DMYb2x0sOVvrev1Z9wLUukXMlEh4mBNFmHA3Ae4bs7P4zBE2iGP1fiwPRCnSwEpZmjvltooUp07DZyGikM0tWjtAgaJTxMLnr5ZpJVkpHuJyUq_uy6AAPyC6QAZw9orZNYllBGeLAe6vZAvhnp6j22FzCWO15w0kLQyOJB4ETnI05T_FraRZXaCq0nt_PNvomS6lMrzYcXiQHqTGm8AD9oE7schc1VosMjbsSa-');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h4 class="text-sm font-semibold truncate">Sonic Pro Headphones</h4>
+<p class="text-sm font-bold text-primary">$185.00</p>
+</div>
+<p class="text-xs text-slate-500 mb-2">SKU: AU-SO-PH-09</p>
+<div class="flex items-center justify-between">
+<span class="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-400">Qty: 02</span>
+<span class="material-symbols-outlined text-green-500 text-sm" title="Image Recognition Verified">verified</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Payment Summary -->
+<section class="px-4 pb-8">
+<h3 class="text-sm font-bold mb-3 px-1">Payment Summary</h3>
+<div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Subtotal</span>
+<span class="font-medium">$789.00</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Shipping Fee</span>
+<span class="font-medium text-green-500">Free</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Tax (8%)</span>
+<span class="font-medium">$63.12</span>
+</div>
+<div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+<span class="text-base font-bold">Total Amount</span>
+<span class="text-xl font-black text-primary">$852.12</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Bar -->
+<footer class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 p-4 pb-8 safe-area-bottom">
+<div class="max-w-md mx-auto flex gap-3">
+<button class="flex-1 bg-primary text-white h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">edit_note</span>
+                Update Status
+            </button>
+<button class="w-12 h-12 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">print</span>
+</button>
+<button class="w-12 h-12 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">chat</span>
+</button>
+</div>
+</footer>
+</body></html>

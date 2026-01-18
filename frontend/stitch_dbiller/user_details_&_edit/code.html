@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>User Details &amp; Edit - dBiller</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "destructive": "#ff453a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-toggle:checked + .toggle-bg {
+            background-color: #137fec;
+        }
+        .ios-toggle:checked + .toggle-bg .toggle-dot {
+            transform: translateX(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen pb-24">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+<button class="flex items-center text-primary font-medium">
+<span class="material-symbols-outlined mr-1">arrow_back_ios</span>
+<span>Back</span>
+</button>
+<h1 class="text-lg font-semibold">Edit User</h1>
+<button class="text-primary font-semibold">Save</button>
+</header>
+<main class="max-w-lg mx-auto">
+<!-- Profile Header Section -->
+<div class="flex flex-col items-center py-8 px-4">
+<div class="relative">
+<div class="w-28 h-28 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Professional headshot of a male staff member" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh_gSmPYb3xTsZq82qKohqq8lGVE91OZCeko6jS7KRaUyi0K1WKMresrj48inFy55YrguxNw9KV1r74vN-g99d0_z2Cu833i2Vc-Ce9PO2Av2k8_QvsuPgQbHLSmIMmkbgyhOwUkaP2YLtgznSu-7cdp1ggHiVnKXdDBKU8ZnPmI5mo_1QMJ6NubYlvZty8m2RQx7EShoTeyCBEWf5vxaZPcpEviS4rKaluKoId8UguB3GO6VpDkvpfLj2cA0_AFXWRGIThGBbMo9a"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">photo_camera</span>
+</button>
+</div>
+<h2 class="mt-4 text-xl font-bold">Marcus Chen</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Staff Member • ID: DB-9902</p>
+</div>
+<!-- Personal Information Section -->
+<div class="px-4 mb-8">
+<h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-1">Personal Information</h3>
+<div class="bg-white dark:bg-slate-900/50 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+<!-- Full Name Field -->
+<div class="p-4 border-b border-slate-200 dark:border-slate-800">
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Full Name</label>
+<input class="w-full bg-transparent border-none p-0 text-base focus:ring-0 text-slate-900 dark:text-white" type="text" value="Marcus Chen"/>
+</div>
+<!-- Email Address Field -->
+<div class="p-4 border-b border-slate-200 dark:border-slate-800">
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Email Address</label>
+<input class="w-full bg-transparent border-none p-0 text-base focus:ring-0 text-slate-900 dark:text-white" type="email" value="marcus.chen@dbiller.com"/>
+</div>
+<!-- Phone Number Field -->
+<div class="p-4">
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Phone Number</label>
+<input class="w-full bg-transparent border-none p-0 text-base focus:ring-0 text-slate-900 dark:text-white" type="tel" value="+1 (555) 012-3456"/>
+</div>
+</div>
+</div>
+<!-- Role & Permissions Section -->
+<div class="px-4 mb-8">
+<h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-1">Role &amp; Permissions</h3>
+<div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
+<div class="flex items-center justify-between mb-4">
+<span class="text-base font-medium">Account Role</span>
+<div class="flex items-center text-primary font-medium cursor-pointer">
+<span>Organization Staff</span>
+<span class="material-symbols-outlined ml-1">unfold_more</span>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<div class="flex items-start gap-3 p-3 bg-primary/5 dark:bg-primary/10 rounded-lg border border-primary/20">
+<span class="material-symbols-outlined text-primary mt-0.5">verified_user</span>
+<div>
+<p class="text-sm font-semibold text-primary">Limited Administrative Access</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Can manage client billing and view reports, but cannot delete accounts or change organization settings.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Settings Section -->
+<div class="px-4 mb-8">
+<h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-1">Account Status</h3>
+<div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="flex items-center justify-between p-4">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+<span class="text-base font-medium">Active Account</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 rounded-full toggle-bg transition-colors duration-200">
+<div class="toggle-dot absolute top-[2px] left-[2px] bg-white w-5 h-5 rounded-full transition-transform duration-200"></div>
+</div>
+</label>
+</div>
+</div>
+<p class="mt-2 px-1 text-xs text-slate-500 dark:text-slate-400">Deactivating this user will immediately revoke their access to the platform.</p>
+</div>
+<!-- Action Area -->
+<div class="px-4 mt-12 mb-10 flex flex-col gap-4">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 rounded-xl shadow-lg transition-colors">
+                Save Changes
+            </button>
+<button class="w-full bg-transparent hover:bg-destructive/5 text-destructive font-semibold py-4 rounded-xl border border-destructive/20 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-xl">delete</span>
+                Delete User
+            </button>
+</div>
+</main>
+<!-- iOS Bottom Home Indicator Space -->
+<div class="h-8 w-full"></div>
+</body></html>

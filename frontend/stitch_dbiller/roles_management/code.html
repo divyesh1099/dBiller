@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Roles Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center p-4 justify-between max-w-xl mx-auto w-full">
+<div class="flex items-center gap-3">
+<button class="text-slate-600 dark:text-white p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</button>
+<h2 class="text-xl font-bold leading-tight tracking-tight">Roles Management</h2>
+</div>
+<div class="flex items-center">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-transparent text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto max-w-xl mx-auto w-full pb-32">
+<!-- Search Bar -->
+<div class="px-4 py-4">
+<label class="flex flex-col w-full">
+<div class="flex w-full items-stretch rounded-xl h-12 bg-white dark:bg-[#1c2127] border border-slate-200 dark:border-slate-700 shadow-sm">
+<div class="text-slate-400 flex items-center justify-center pl-4">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full border-none bg-transparent focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-400 px-3 text-base font-normal leading-normal" placeholder="Search roles..." value=""/>
+</div>
+</label>
+</div>
+<!-- Section Header -->
+<div class="px-4 pb-2">
+<h3 class="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">Organization Roles</h3>
+</div>
+<!-- Role Card: Administrator -->
+<div class="p-4 pt-2">
+<div class="flex flex-col gap-4 rounded-xl bg-white dark:bg-[#1c2127] p-5 shadow-sm border border-slate-200 dark:border-slate-800 transition-transform active:scale-[0.98]">
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                2 Users
+                            </span>
+</div>
+<h4 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">Administrator</h4>
+<p class="text-slate-500 dark:text-[#9dabb9] text-sm font-normal leading-relaxed mt-1">Full system access, user management, and financial reporting.</p>
+</div>
+<div class="h-16 w-16 rounded-lg bg-cover bg-center shrink-0 border border-slate-100 dark:border-slate-700" data-alt="Abstract blue security shield icon pattern" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDWVdmSm6kBK81R9V8-l2EHpFqGgvOmC6xxzbbdVMELO5DGJZAH1EZ4ZZ4MShQBpR4Y0o8YUsC9VwOw6EqYUtwzfQUqcHaTADghb1eGRKujtg8IBXOg-UC3V26tlvhhtVuPHEg13z_vCO19-N5i5dRgXypsgxqowWzQ7-kpxyJaTwi0XgSSHqwub-StAPNVznWd_2zuvboArSVqsshHCMRNB7CU-IWQlLey3mekTyDw-MOsHhG_5zuzlvsLvTPUUxG7N50PVzdrX7bC");'></div>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex -space-x-2">
+<div class="h-7 w-7 rounded-full border-2 border-white dark:border-[#1c2127] bg-slate-300" data-alt="User avatar profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAAiQXqDSGD9JTpzdKGn7HYgdbEsSKQE7wrvab0TMDG-Qu1bS4ODUcz3jkQ45GWhezodV1uAzZmStAVcVMTPmQUzgM5FiBkyyf78TJ0XfICqrZfsiMZ7rK67gy-d2R5gdqYIPTTvl3rS05sBTxvQzoezbUY4paIxBJqq2FUuSi1dFRER8j-PfiH8-tRbsVMep8oWDvl5JwTb8OyBqlH0oXJez0LsylvwlEM2Tl5mk94T15wFojJCzOrRPPlDPBn_DDb06KSDl-ZiFJM");'></div>
+<div class="h-7 w-7 rounded-full border-2 border-white dark:border-[#1c2127] bg-slate-400" data-alt="User avatar profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA16-fesQZqhjtbW4c_7LXHU6f3v1uKt9rai7BkCkrF3mOMW_f9zhug5sE43D7Hskgc2hj9B2kN0U0S6Q6cgLrU_tbfFZ90dC2j7BEOcOt-cvnyEko32LYMmTz1OGcOXY35jkn4QuWnZjPuk05csOdn1r4LQ9eEUG1VQOn-5viNL5D8aJvyu9XYq0gAlXYE71XDJdExmckRnbCGYJKu-vCjHJAnLg1wHoK2c1ydre7Vc_Gxeo7gNs7DtGNySbtPRhij9qxnjMADKva8");'></div>
+</div>
+<button class="flex items-center justify-center rounded-lg h-9 px-4 bg-slate-100 dark:bg-[#283039] text-slate-700 dark:text-white gap-2 text-sm font-semibold transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-lg">edit</span>
+<span>Edit Role</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Role Card: Inventory Manager -->
+<div class="p-4 pt-0">
+<div class="flex flex-col gap-4 rounded-xl bg-white dark:bg-[#1c2127] p-5 shadow-sm border border-slate-200 dark:border-slate-800 transition-transform active:scale-[0.98]">
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                5 Users
+                            </span>
+</div>
+<h4 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">Inventory Manager</h4>
+<p class="text-slate-500 dark:text-[#9dabb9] text-sm font-normal leading-relaxed mt-1">Stock control, product catalog, and supplier management.</p>
+</div>
+<div class="h-16 w-16 rounded-lg bg-cover bg-center shrink-0 border border-slate-100 dark:border-slate-700" data-alt="Abstract geometric cube pattern for inventory" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCEqp6xF0IVJQiP9VY1iHcTQJf0ss32Qakv5O4YomVnhxHmx8nqy_uPvUEq8BD4uZpkWhXvSFY_amYp2QSeGfab8qbD4Ufl8gTdhyPG5TQp5sOs0IcWsl70xX_XgGLlU9ToX-WoPFA1G-Jy7ttKCZr8xN-W_eZ623TXKBQi8IIj4Ry5oClobbGdLMcAKYoGmueZv-7bK744OAxpxE53TRDMVqTCVw77bQofmEFrMcJM0nSxKth2mbBvFFSpl3KtWnJqc_Tz53Ieg0sJ");'></div>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex -space-x-2">
+<div class="h-7 w-7 rounded-full border-2 border-white dark:border-[#1c2127] bg-slate-300"></div>
+<div class="h-7 w-7 rounded-full border-2 border-white dark:border-[#1c2127] bg-slate-400"></div>
+<div class="h-7 w-7 rounded-full border-2 border-white dark:border-[#1c2127] bg-slate-500"></div>
+<div class="h-7 w-7 rounded-full border-2 border-white dark:border-[#1c2127] bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold">+2</div>
+</div>
+<button class="flex items-center justify-center rounded-lg h-9 px-4 bg-slate-100 dark:bg-[#283039] text-slate-700 dark:text-white gap-2 text-sm font-semibold transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-lg">edit</span>
+<span>Edit Role</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Role Card: Sales Staff -->
+<div class="p-4 pt-0">
+<div class="flex flex-col gap-4 rounded-xl bg-white dark:bg-[#1c2127] p-5 shadow-sm border border-slate-200 dark:border-slate-800 transition-transform active:scale-[0.98]">
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                18 Users
+                            </span>
+</div>
+<h4 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">Sales Staff</h4>
+<p class="text-slate-500 dark:text-[#9dabb9] text-sm font-normal leading-relaxed mt-1">Create invoices, view customers, and process payments.</p>
+</div>
+<div class="h-16 w-16 rounded-lg bg-cover bg-center shrink-0 border border-slate-100 dark:border-slate-700" data-alt="Abstract upward growth chart icon pattern" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBDnBo8szUusvcLew82VOpkKJpL8V_rgHCQA9bx3mMbzYn2PRwqTLlXmw_bu8Slnph25TcGIWERqRJ2xQwmhET9UKY-7KSUlzHZfrDPNgjSmiU6r7nZPZ4cya5I2SsV8qFxxDqD4Hihj3lTrXX4_C8Ka7AzZAeokdtCwSmrhQJD4ppqI35m_6NQz1CE1MMbJM_pCFo8yiAaAOdZ77RDMrGyqvVCt0Bqi7dCT0BuIqOGU3hZu4UT7nhOU_aUC8lBaYuXOyhulBB9QU5l");'></div>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex -space-x-2">
+<div class="h-7 w-7 rounded-full border-2 border-white dark:border-[#1c2127] bg-slate-300"></div>
+<div class="h-7 w-7 rounded-full border-2 border-white dark:border-[#1c2127] bg-slate-400"></div>
+<div class="h-7 w-7 rounded-full border-2 border-white dark:border-[#1c2127] bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 font-bold">+16</div>
+</div>
+<button class="flex items-center justify-center rounded-lg h-9 px-4 bg-slate-100 dark:bg-[#283039] text-slate-700 dark:text-white gap-2 text-sm font-semibold transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-lg">edit</span>
+<span>Edit Role</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Button Container -->
+<div class="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light dark:via-background-dark to-transparent pt-10">
+<div class="max-w-xl mx-auto w-full">
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-white h-14 rounded-xl text-base font-bold shadow-lg shadow-primary/20 active:scale-[0.97] transition-transform">
+<span class="material-symbols-outlined">add</span>
+<span>Create New Role</span>
+</button>
+</div>
+</div>
+</body></html>

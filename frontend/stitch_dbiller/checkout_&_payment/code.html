@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html class="light dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Checkout &amp; Payment - dBiller</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark min-h-screen text-[#111418] dark:text-white transition-colors duration-200">
+<div class="relative flex h-auto min-h-screen w-full max-w-[430px] mx-auto flex-col bg-white dark:bg-[#111418] overflow-x-hidden shadow-2xl">
+<!-- TopAppBar -->
+<div class="flex items-center bg-white dark:bg-[#111418] p-4 pb-2 justify-between border-b dark:border-white/10">
+<div class="text-[#111418] dark:text-white flex size-12 shrink-0 items-center justify-start">
+<span class="material-symbols-outlined cursor-pointer">arrow_back_ios</span>
+</div>
+<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Checkout</h2>
+</div>
+<div class="flex-1 overflow-y-auto">
+<!-- SectionHeader: Order Summary -->
+<h3 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-6">Order Summary</h3>
+<!-- Card: Selected Plan -->
+<div class="p-4">
+<div class="flex items-stretch justify-between gap-4 rounded-xl bg-white dark:bg-[#1c2631] p-4 shadow-[0_0_8px_rgba(0,0,0,0.05)] dark:shadow-none border dark:border-white/5">
+<div class="flex flex-[2_2_0px] flex-col gap-4">
+<div class="flex flex-col gap-1">
+<p class="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal">Plan Selected</p>
+<p class="text-[#111418] dark:text-white text-base font-bold leading-tight">Professional Plan</p>
+<p class="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal">Annual subscription • dBiller Pro</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-primary/10 text-primary text-sm font-semibold leading-normal w-fit">
+<span class="truncate">$199.99/yr</span>
+</button>
+</div>
+</div>
+<div class="w-24 h-24 bg-center bg-no-repeat bg-cover rounded-lg flex-shrink-0 bg-primary/20 flex items-center justify-center" data-alt="Abstract blue gradient representing professional service tier">
+<span class="material-symbols-outlined text-primary text-4xl">workspace_premium</span>
+</div>
+</div>
+</div>
+<!-- SectionHeader: Payment Details -->
+<h3 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Payment Details</h3>
+<!-- Card Type Indicators -->
+<div class="flex items-center gap-4 bg-white dark:bg-[#111418] px-4 py-2 min-h-14">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-[3/2] bg-contain h-6 w-10 shrink-0 border border-gray-100 dark:border-white/10 rounded-sm" data-alt="Visa payment network logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAszgCestCSm9bWu-0N4SkZXMLlk9kWipEZHfFgIjDytJq3ZhccLqEPjRXa2pbA6oT5QdWLzNM19y16AqQ2EUYuXhMdv2utPLgz2DQkjHVxf1De0jbr_nktmE6eHcZYMWLa9mEAenWLeJ8UjnV1xPNb6ZWf632IwO-rxmpoTkBTrlAma9XZsCFdxo8-LHCIUScLo8DiMBsgeYY6Ga1eRp2f2vfvyGQ4GhJ92kBSMKNOgRP963vJWkFyuCituTJDWJ0ns58tgAIO-1EN");'></div>
+<div class="bg-center bg-no-repeat aspect-[3/2] bg-contain h-6 w-10 shrink-0 border border-gray-100 dark:border-white/10 rounded-sm" data-alt="Mastercard payment network logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAlNg36hxE0r3QmZe-J0Jt2Xn1UjCmb8rHKMsWyQRv3APOgrKCqLSJUfZ4X2Nt-ai8X6lT0bPExcBU2hH-I2oxBubRz2UQA7hc3E-U3F6x3QkCuDv2w4WDVbsXqW18AORQkQFpduA3f4HEpX0Gy2bszAIOnuY6EWuPQy24RoiQ1tEube2NbYYLX_gW_6xE1CH6ErQ7zVJWuZ9X4y0M4tR5vXwR12MDyTE7kcbTTqQcdeQMHuXwr3APEIl1KeSlMkllwHzfIR9HZ7Id-");'></div>
+<div class="bg-center bg-no-repeat aspect-[3/2] bg-contain h-6 w-10 shrink-0 border border-gray-100 dark:border-white/10 rounded-sm" data-alt="American Express payment network logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC2veQSrQPuZEbJSOzQF9LOIcIOgWSf8QF4EZaswO-rTjbLqXt8nzyt8T1ZFdU9Z9QuNDy12o7e5zDgTDWlXtBy9eAfRrfHdX4nSgHbYc8m0MDRFLPJ4wHBHU8zgWIx-_S2IA0jPF18XIQaHz5P6BKHp2Qn1wyyPN65XGATiBA8gtKagSEWmzvupLnmE6dsfW4fu3A8Te_T4-S5ckMHGMOKjQ1BRDEjg7uxY6439sJMg4l-h8rkQMqPEq9BIi_fqJq_HKsbWxbndfkL");'></div>
+</div>
+<p class="text-[#617589] dark:text-gray-400 text-xs font-normal leading-normal flex-1 text-right">Encrypted &amp; Secure</p>
+</div>
+<!-- Form Inputs -->
+<div class="px-4 flex flex-col gap-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-medium text-[#111418] dark:text-gray-200">Cardholder Name</label>
+<input class="w-full rounded-lg border-[#dce0e5] dark:border-white/10 dark:bg-[#1c2631] focus:border-primary focus:ring-1 focus:ring-primary p-3 text-sm" placeholder="John Doe" type="text"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-medium text-[#111418] dark:text-gray-200">Card Number</label>
+<div class="relative">
+<input class="w-full rounded-lg border-[#dce0e5] dark:border-white/10 dark:bg-[#1c2631] focus:border-primary focus:ring-1 focus:ring-primary p-3 text-sm pr-10" placeholder="0000 0000 0000 0000" type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">credit_card</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-1 flex flex-col gap-1.5">
+<label class="text-sm font-medium text-[#111418] dark:text-gray-200">Expiry Date</label>
+<input class="w-full rounded-lg border-[#dce0e5] dark:border-white/10 dark:bg-[#1c2631] focus:border-primary focus:ring-1 focus:ring-primary p-3 text-sm" placeholder="MM/YY" type="text"/>
+</div>
+<div class="flex-1 flex flex-col gap-1.5">
+<label class="text-sm font-medium text-[#111418] dark:text-gray-200">CVV</label>
+<div class="relative">
+<input class="w-full rounded-lg border-[#dce0e5] dark:border-white/10 dark:bg-[#1c2631] focus:border-primary focus:ring-1 focus:ring-primary p-3 text-sm" placeholder="***" type="password"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">help</span>
+</div>
+</div>
+</div>
+<!-- Promo Code -->
+<div class="mt-4 flex flex-col gap-1.5">
+<label class="text-sm font-medium text-[#111418] dark:text-gray-200">Promo Code</label>
+<div class="flex gap-2">
+<input class="flex-1 rounded-lg border-[#dce0e5] dark:border-white/10 dark:bg-[#1c2631] focus:border-primary focus:ring-1 focus:ring-primary p-3 text-sm uppercase" placeholder="Enter code" type="text"/>
+<button class="bg-gray-100 dark:bg-white/5 text-[#111418] dark:text-white px-6 rounded-lg font-medium text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">Apply</button>
+</div>
+</div>
+</div>
+<!-- Detailed Breakdown -->
+<div class="px-4 py-6 mt-4 border-t dark:border-white/10 flex flex-col gap-3">
+<div class="flex justify-between text-sm">
+<span class="text-[#617589] dark:text-gray-400">Subtotal</span>
+<span class="font-medium">$199.99</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-[#617589] dark:text-gray-400">Taxes (Estimated)</span>
+<span class="font-medium">$16.00</span>
+</div>
+<div class="flex justify-between text-lg font-bold pt-2">
+<span>Total Amount</span>
+<span class="text-primary">$215.99</span>
+</div>
+</div>
+</div>
+<!-- Sticky Footer Action -->
+<div class="p-4 border-t dark:border-white/10 bg-white dark:bg-[#111418]">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">lock</span>
+                Pay $215.99 Now
+            </button>
+<p class="text-center text-[10px] text-gray-400 mt-4 leading-normal px-6">
+                By clicking "Pay Now", you agree to dBiller's Terms of Service and Privacy Policy. Your transaction is secured with 256-bit SSL encryption.
+            </p>
+</div>
+<div class="h-8 bg-white dark:bg-[#111418]"></div>
+</div>
+</body></html>

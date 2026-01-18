@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Inventory Management</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "primary-dark": "#0b62b8",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1c2630",
+                        "surface-dark": "#233648",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display h-screen flex flex-col overflow-hidden">
+<!-- Top Status Bar Area (Simulated) -->
+<div class="h-10 w-full bg-background-light dark:bg-background-dark shrink-0"></div>
+<!-- Header -->
+<header class="flex items-center justify-between px-4 pb-2 bg-background-light dark:bg-background-dark shrink-0 z-10">
+<h1 class="text-2xl font-bold tracking-tight">Inventory</h1>
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-white" style="font-size: 24px;">filter_list</span>
+</button>
+</header>
+<!-- Scrollable Main Content -->
+<main class="flex-1 overflow-y-auto no-scrollbar pb-24 relative">
+<!-- Search & Action Zone -->
+<div class="px-4 py-2 sticky top-0 bg-background-light dark:bg-background-dark z-10">
+<!-- Search Bar -->
+<div class="relative mb-3">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400" style="font-size: 20px;">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border-none rounded-xl text-sm bg-white dark:bg-surface-dark text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary shadow-sm" placeholder="Search by name, SKU, or tag..." type="text"/>
+</div>
+<!-- Primary CTA: Scan to Identify -->
+<button class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark active:scale-[0.98] transition-all text-white py-3 px-4 rounded-xl shadow-md shadow-primary/20">
+<span class="material-symbols-outlined" style="font-size: 20px;">center_focus_strong</span>
+<span class="font-semibold text-sm">Scan to Identify</span>
+</button>
+</div>
+<!-- Inventory List -->
+<div class="px-4 pt-2 space-y-3">
+<!-- List Header -->
+<div class="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400 px-1 mt-2 mb-1">
+<span>All Items (142)</span>
+<span>Sort by: Date</span>
+</div>
+<!-- Item 1 -->
+<div class="group flex items-center gap-3 bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-transparent active:scale-[0.99] transition-transform">
+<div class="shrink-0 relative">
+<div class="w-16 h-16 rounded-lg bg-cover bg-center bg-no-repeat bg-slate-200 dark:bg-slate-700" data-alt="Modern electronics circuit board macro shot" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDeOJrEppsxUStwrJ8a7ocuJu05X8L9RbjGGpvMkSdPHT9KJEB2Jq_mqMYv61vMHxxZ4w0pmdOgVwtAmj81BUC-zenb-iNW7kqUWyDkfq_Vo4neqjSNU4JKjsAvxqWUy_zcscuEWIkXcAHtKiDyY1g8oRV52KA7Ifr6npY4_qglb_oPDF29Ybo1dUjS4FYeCLJxTDja8Vg8j_2H-c6JenxBgGIVdtWJH8REUlmiwPpEu4GuKWsvkUag3OsIUR9vY2HksWZV1OKQ-SDZ");'>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate pr-2">Wireless Barcode Scanner</h3>
+<p class="text-sm font-semibold text-slate-900 dark:text-white shrink-0">$120.00</p>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">SKU-99283 • Electronics</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+<p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">42 units in stock</p>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="group flex items-center gap-3 bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-transparent active:scale-[0.99] transition-transform">
+<div class="shrink-0 relative">
+<div class="w-16 h-16 rounded-lg bg-cover bg-center bg-no-repeat bg-slate-200 dark:bg-slate-700" data-alt="Thermal receipt printer on desk" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA7p7gcyTaklnJTI-PT3OEtBv5TP_rDCiUmLqM3TrzV_l1aMN9yVUDZFBAnOIBK_sprLzEyD8yTHEKuZlyhqkBngSDf8H7kiW6L_AHE3TyyX16JCvoOiqJzkbQAO-aPQ9gk4RaQV92vauFywNYQ7xpI8V6QPCM7H9LnsOWe8bqFuAAjuxsWMebkCGY0mZ14Jm52We4GW7rI5jjGnYpPvEGpAb8So_OCIXssnoyncPCYt1yjcPhoepxSRZ5oZGGGAs9oGAGoSIkEvQX4");'>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate pr-2">Thermal Receipt Printer</h3>
+<p class="text-sm font-semibold text-slate-900 dark:text-white shrink-0">$250.00</p>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">SKU-12044 • POS Hardware</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="flex h-2 w-2 rounded-full bg-orange-500"></span>
+<p class="text-xs font-medium text-orange-600 dark:text-orange-400">15 units (Low Stock)</p>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="group flex items-center gap-3 bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-transparent active:scale-[0.99] transition-transform">
+<div class="shrink-0 relative">
+<div class="w-16 h-16 rounded-lg bg-cover bg-center bg-no-repeat bg-slate-200 dark:bg-slate-700" data-alt="Stacked cardboard shipping boxes" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBa7165zY6Hw6kXIL7yOY4TSHtpGCg-mkiUNJzhB3tBxzjMJLxR7Y7b0_EKPk6RrasVRXmOemoXqvQZrrTp_mvTfFib_wtAXhXSd_Lg9WUW4ITEHGq5J47Vj86p9DjrFvzn8AMA6QKv8ORMggKb_FEZBRifMOV4YxokV9HwQB23LV0tjzxyTzRVv8ywb4W7lO7oFQjdz7Asz-z7Q1UXUC6meV6K4qXWD4nsA1TsdSmEPQP92lE7kChy2eWTQU1cKhukc2vzPiDJJppi");'>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate pr-2">Shipping Boxes (Medium)</h3>
+<p class="text-sm font-semibold text-slate-900 dark:text-white shrink-0">$1.50</p>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">SKU-BOX-M • Packaging</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+<p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">1,200 units in stock</p>
+</div>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="group flex items-center gap-3 bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-transparent active:scale-[0.99] transition-transform">
+<div class="shrink-0 relative">
+<div class="w-16 h-16 rounded-lg bg-cover bg-center bg-no-repeat bg-slate-200 dark:bg-slate-700" data-alt="Roll of bubble wrap packing material" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAcasL61Ja2nj0P8lvHpZIQcaUJamdMma-5qGB3reA80hu4pL2ho8ci_rJfuNUMpKYYBiZN-4FmmR5k5SUc9ksewiOCE4A_8FBbPw-jwkenclrILY0vlZA-3ixAznRvQLcvSq-EZTurUhUr2t-6BroxMcTJ9uYfOPPw8Y3nZ_w1hF4VC-W3FRXcPK_GjOD1qihJqSuxejZg1a0eN7JDCt0JLa5tXl9WmQ24AidHX7r87OzKyIT57M2rfw5lyc8r9iz3IBAeiUgt91Oh");'>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate pr-2">Bubble Wrap Roll 50m</h3>
+<p class="text-sm font-semibold text-slate-900 dark:text-white shrink-0">$18.99</p>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">SKU-BW-50 • Packaging</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="flex h-2 w-2 rounded-full bg-red-500"></span>
+<p class="text-xs font-medium text-red-600 dark:text-red-400">2 units (Critical)</p>
+</div>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="group flex items-center gap-3 bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-transparent active:scale-[0.99] transition-transform">
+<div class="shrink-0 relative">
+<div class="w-16 h-16 rounded-lg bg-cover bg-center bg-no-repeat bg-slate-200 dark:bg-slate-700" data-alt="USB cables coiled on table" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDMQxyei-WYqkH5z4Im1l4bGQH3YDO6YVrwT96rKJNE8UaCaJ5wIozeiLttQPOVMJUV-_Egut7ckM7tnBmX1UkXfJftx2o1KFrwZB7bkIN8rFo_dPPmMfgH_hC9kNSw4QOgquUU7h1ZUrmoz5gFx0H1kCG_DcqD8wjz9SFG6ExBOP5iOTk76aDy_YFteZ7_r6HqVdAZgIAfboOAqCW9dXZpJ5i8CaHa5Xn2gjKYd5b6nERevQWkD7LRD8E-2eIUEJm7Wjs-LMzdEJs7");'>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate pr-2">USB-C Cables (2m)</h3>
+<p class="text-sm font-semibold text-slate-900 dark:text-white shrink-0">$8.50</p>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">SKU-CBL-200 • Accessories</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+<p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">85 units in stock</p>
+</div>
+</div>
+</div>
+<!-- Item 6 -->
+<div class="group flex items-center gap-3 bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-sm border border-slate-100 dark:border-transparent active:scale-[0.99] transition-transform">
+<div class="shrink-0 relative">
+<div class="w-16 h-16 rounded-lg bg-cover bg-center bg-no-repeat bg-slate-200 dark:bg-slate-700" data-alt="Ergonomic office mouse" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAwb0nCBiQZ4s8Q6TaXGuL_qrzymu1DOXShThg4hHAgGtKsMup0TmUxWhp85GTUJkZJRpBeQeuW-ucGto-9X9Mc6tmopD7cLyhA5hzrBuHu3CiMuPc1Ob3f6qk70_yBEU2D1gs4jVSbapH_rlL9Ewoc5SF08vfy6VYDFM5i0uiTm4wAiCaalHQGKMwoKm_xFp_GAkvmtJ2MLlocI8JQnrXP6acnvY7YOwGfMYLOToVB3Ge4G-WtnX1PH3SmWsugqL9gngzwLsGxwCRq");'>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate pr-2">Ergo Mouse Pro</h3>
+<p class="text-sm font-semibold text-slate-900 dark:text-white shrink-0">$45.00</p>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">SKU-MSE-PRO • Accessories</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+<p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">12 units in stock</p>
+</div>
+</div>
+</div>
+<div class="h-6"></div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<div class="absolute bottom-24 right-4 z-20">
+<button class="flex items-center justify-center w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/40 hover:bg-primary-dark active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-size: 28px;">add</span>
+</button>
+</div>
+<!-- Bottom Navigation -->
+<nav class="shrink-0 bg-white/95 dark:bg-[#111a22]/95 backdrop-blur-md border-t border-slate-200 dark:border-white/5 pb-6 pt-2 z-30">
+<div class="grid grid-cols-4 h-full">
+<a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined filled" style="font-size: 24px;">dashboard</span>
+<span class="text-[10px] font-medium">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">receipt_long</span>
+<span class="text-[10px] font-medium">Billing</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px; font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="text-[10px] font-medium">Inventory</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

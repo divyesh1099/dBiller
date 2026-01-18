@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>dBiller - Item List</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-dark": "#1c2630",
+                        "warning": "#f59e0b",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center p-4 justify-between max-w-md mx-auto">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary" data-alt="User profile avatar photo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAY6pyHkqNeb24lihxZiVM6ygPxUQJSl6k7TbR1P5NO4EAsj9IgQbkdeWJa_T8TTlanwb6fBOElur7KX0hdPugqlQPXhd7zMsGf5SkQruEdhLXVFiaiazUb-rrAhqOX6DNgKM-zfMB5yXD6oDZVo243U6Sw9W2j7ac-qG9xyT_EIjm1Gd-F4b97GggE2iwR9OMZLeEHRnifLad0tBu7GWXqdSn9Cr9oY579smlHkEn9wbGDbQmDI9sEW9GziyPu-wLEnF9ga6OGueSb");'></div>
+<h1 class="text-xl font-bold tracking-tight">Inventory</h1>
+</div>
+<div class="flex gap-1">
+<button class="flex items-center justify-center rounded-full size-10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-full size-10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-md mx-auto pb-24">
+<!-- Scan to Search - AI Feature -->
+<div class="px-4 py-4">
+<button class="w-full flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-2xl">photo_camera</span>
+<span class="text-base">Scan to Search</span>
+<span class="bg-white/20 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider">AI</span>
+</button>
+</div>
+<!-- Search Bar -->
+<div class="px-4 pb-2">
+<div class="relative flex items-center w-full group">
+<span class="absolute left-4 text-slate-400 dark:text-[#92adc9] material-symbols-outlined">search</span>
+<input class="w-full h-12 pl-12 pr-4 rounded-xl border-none bg-white dark:bg-card-dark text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#92adc9] focus:ring-2 focus:ring-primary shadow-sm" placeholder="Search by name, SKU or category" type="text"/>
+</div>
+</div>
+<!-- Category Filter Chips -->
+<div class="flex gap-3 px-4 py-3 overflow-x-auto no-scrollbar">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-5 text-white shadow-sm">
+<span class="text-sm font-semibold">All</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-card-dark px-5 text-slate-600 dark:text-white border border-slate-200 dark:border-transparent">
+<span class="text-sm font-medium">Electronics</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-card-dark px-5 text-slate-600 dark:text-white border border-slate-200 dark:border-transparent">
+<span class="text-sm font-medium">Stationery</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-card-dark px-5 text-slate-600 dark:text-white border border-slate-200 dark:border-transparent">
+<span class="text-sm font-medium">Food</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-card-dark px-5 text-slate-600 dark:text-white border border-slate-200 dark:border-transparent">
+<span class="text-sm font-medium">Hardware</span>
+</button>
+</div>
+<!-- Inventory Grid -->
+<div class="grid grid-cols-2 gap-4 p-4">
+<!-- Item Card 1 -->
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="relative w-full aspect-square bg-slate-100 dark:bg-slate-800">
+<div class="absolute inset-0 bg-center bg-cover" data-alt="High-end wireless mouse product photo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCAZNMdQ8OXYJajUHKYdHjQib6nklkOVUNrtmI4Q6lVmvpCEA-0bgWRGFeEfp2NSLoJySSiLth5iaTDdEtiKSpFJTZ8QNHsvKM0UwudvyzGzmLcT4LyYPoCxQs-ALyrLWiQYb8DCzVwp9AGtEiY4XiUT0jWCunMX6Zq-NczayQo9-RcuwBRfHmhJAkoLjoQbqiRh4loFpI7Dy3KXokcfZetW12jbr6HfssVVc3XN5dA_2E5NOku0uT76tyK82WdUjSA8j65VuZSsx-P");'></div>
+<div class="absolute top-2 right-2 bg-black/40 backdrop-blur-md rounded-lg px-2 py-1 text-[10px] text-white font-bold">#WM-102</div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-white text-sm font-bold leading-tight truncate">Logitech Wireless Mouse</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<p class="text-slate-500 dark:text-[#92adc9] text-[11px] font-medium">In Stock: 142</p>
+</div>
+<p class="text-primary text-sm font-bold mt-1">$25.00</p>
+</div>
+</div>
+<!-- Item Card 2 (Low Stock Variant) -->
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 ring-1 ring-warning/30">
+<div class="relative w-full aspect-square bg-slate-100 dark:bg-slate-800">
+<div class="absolute inset-0 bg-center bg-cover" data-alt="Ergonomic office chair in grey fabric" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBlx21MlgM-iLpIYJRAOKP20FGlS3B6YCthRNj8T2ywosRF236RPQKiCCYb8UJGPA9w1Z-b6kRfRMtNSeXvWhsdNRgNdwnJOnmdJUXBCXXkHQZAhFFadNEODThvhH8Jo_Pl5xzQSLHSRc1zxE-ytoKZ583wEMYnULa3BH8vU1qanMF7zi6dLsWpTyqPcTjjn0kaFGIrD5h_9QHl7VtriRkJqYk2JdMKdDQTC2c4kgjw86QhjpWlR9RqpxM_Q5Hb_Ho1jlFrU9orZv5N");'></div>
+<div class="absolute top-2 right-2 bg-warning/90 backdrop-blur-md rounded-lg px-2 py-1 text-[10px] text-white font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">warning</span> LOW
+                    </div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-white text-sm font-bold leading-tight truncate">Executive Office Chair</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="size-2 rounded-full bg-warning animate-pulse"></span>
+<p class="text-warning text-[11px] font-bold">Only 5 left</p>
+</div>
+<p class="text-primary text-sm font-bold mt-1">$150.00</p>
+</div>
+</div>
+<!-- Item Card 3 -->
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="relative w-full aspect-square bg-slate-100 dark:bg-slate-800">
+<div class="absolute inset-0 bg-center bg-cover" data-alt="Modern black desk lamp with LED" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCtm-PvAnyNal4IrVERGx7k-2y-SFAKkhQpyyvsUlr-CfSaMwy-c_HOOkNs98_SmiI1iuZN8JRXSq6RptpDsUAYGXhFrsnkKdm7M_BXKHZ_Zenjr23fcAWQnN4vBV7CA-qVKRcrzSdH7Turh7CcK-6VMJsq4lOpq_TJ-1_wHW24SkuvnvxcIbsPk1iXDRNEFVILmP876tEOKFulIpPEVudTR22-8tmUWGJmahxJhy9XQ5gd2t41k-WC93l-_VO-XyFDznxJS6Cg2hHL");'></div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-white text-sm font-bold leading-tight truncate">LED Desk Lamp</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<p class="text-slate-500 dark:text-[#92adc9] text-[11px] font-medium">In Stock: 28</p>
+</div>
+<p class="text-primary text-sm font-bold mt-1">$45.00</p>
+</div>
+</div>
+<!-- Item Card 4 (Critical Low Stock) -->
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 ring-1 ring-red-500/30">
+<div class="relative w-full aspect-square bg-slate-100 dark:bg-slate-800">
+<div class="absolute inset-0 bg-center bg-cover" data-alt="Premium leather bound notebook" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAPBs1cFbLNIClGE7C-FB5hsh4DnvjNAg6_h7V1eibVHJtZspcL6yGOMapfZqQTHrYhRZqZBwE3e8ERgY6KhYutuKXuZEuGa6S8SbtZRa0ccWUkEWaCWLi1lF3kXr7BK47tFbOSme8q7ALc6buSioKIt6YQY1ziioJK7DbYvhIwi4r7H2KO35RT6WZ3oHu26F7a5cnKbxf4RY6BceEGUfkUiKACoFYm6F_k79caoO4ZvXDu-7_F2qOVM0iZlqqjti6ujNt7i4-n4kAO");'></div>
+<div class="absolute top-2 right-2 bg-red-500/90 backdrop-blur-md rounded-lg px-2 py-1 text-[10px] text-white font-bold">REORDER</div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-white text-sm font-bold leading-tight truncate">Hardcover Notebook</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="size-2 rounded-full bg-red-500 animate-pulse"></span>
+<p class="text-red-500 text-[11px] font-bold">Only 2 left</p>
+</div>
+<p class="text-primary text-sm font-bold mt-1">$5.00</p>
+</div>
+</div>
+<!-- Item Card 5 -->
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="relative w-full aspect-square bg-slate-100 dark:bg-slate-800">
+<div class="absolute inset-0 bg-center bg-cover" data-alt="Mechanical keyboard with RGB lighting" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA7JIEiDse0BipI8PL6KZhnAD-JgLFqMc11I3FxhenkwKqaEGpj98dlX_ItOgJB-avXokkZ3O4m6Ikh6zJO-fOVHM09EUYFuA-JvlL9ZLcyt8IdLHzJAU5oI7AAgbKmhbNKvPfRbr16gHgjPTlyjROMm7XX3UQ3i3OumS0EQ5nu_rzM9NsFcDGFp7bm1ziG3uHKRzLyvCToofyXUtqWSysOoPHZfXj4Ryv5RLYWGONpjBqm0oqQbRRyWUvhuDZ87sr1hGOm2-ikpELr");'></div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-white text-sm font-bold leading-tight truncate">Mechanical Keyboard</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<p class="text-slate-500 dark:text-[#92adc9] text-[11px] font-medium">In Stock: 56</p>
+</div>
+<p class="text-primary text-sm font-bold mt-1">$89.00</p>
+</div>
+</div>
+<!-- Item Card 6 -->
+<div class="flex flex-col bg-white dark:bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="relative w-full aspect-square bg-slate-100 dark:bg-slate-800">
+<div class="absolute inset-0 bg-center bg-cover" data-alt="USB-C multi-port adapter hub" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDseRQhbLPTFfJRBcQVKWM0cvbrUI4tiE50uA2jA2YNqyGV6XSp1vFVcaKojWGoc4X67MbyWjU1ULbj82SF9u3RFYqhpCpBs8i_8jjXP_f56lKXN4gwVgMmPdKtntKqndfgvtzxWnG17a6P54E0IPqZL4sX1KCQKmQ9LK74ic1f8Ms6XZ38YzgR4sHyEWTj0KeDcwEVDas0Bt5BntOB-6itAeIe5eE6HjkSGCd7SezCwrd2srBWq14GCW8sM3cCBsr-GNXtUEJWe-hA");'></div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-white text-sm font-bold leading-tight truncate">USB-C Dock Station</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<p class="text-slate-500 dark:text-[#92adc9] text-[11px] font-medium">In Stock: 18</p>
+</div>
+<p class="text-primary text-sm font-bold mt-1">$65.00</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-6 size-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- Bottom Navigation Bar (iOS Style) -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-6 pb-6 pt-3 flex justify-between items-center max-w-md mx-auto">
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-[10px] font-bold">Inventory</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-medium">Invoices</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px] font-medium">Analytics</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px] font-medium">Clients</span>
+</div>
+</nav>
+<!-- Bottom Safe Area Indicator (iOS) -->
+<div class="fixed bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-300 dark:bg-slate-700 rounded-full opacity-50"></div>
+</body></html>

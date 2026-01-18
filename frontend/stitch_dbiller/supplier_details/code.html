@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Supplier Details - dBiller</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-white font-display min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+<div class="flex items-center p-4 justify-between max-w-xl mx-auto">
+<div class="flex items-center gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-primary text-[28px]">chevron_left</span>
+</div>
+<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight">Supplier Details</h2>
+<div class="flex items-center justify-end">
+<button class="text-primary text-base font-semibold">Edit</button>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-xl mx-auto w-full pb-32">
+<!-- Profile Header -->
+<div class="flex p-6 @container">
+<div class="flex w-full flex-col gap-4 items-center">
+<div class="flex gap-4 flex-col items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 border-4 border-primary/20 shadow-xl" data-alt="Professional logo of Global Tech Supplies with abstract circuitry" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB0Wd3V9mgM8v8Ik-IEX5sZYYyIRMT9iNCbBVjh1psTmfAASISW1rF8HWiVQ-2fLEyiIYgyKwDTpq6SRyLL18zi2AN3AASiTsRwfYPpq_nKi351pK-a3XN9EM-Ezzocy391vUleP_jQllBpQ8UOddPLUuMVQhzd8e5uBrp8zMGmivCaumg01FuDT99PMA4ewC1WrlAwCE_Pn8EzkaFTngg40Uv_SYPU-151V-Mjtnxd-q2ePBZfvuWBaAWJtvg93jBK8CNhtWW7-Rl5");'>
+</div>
+<div class="flex flex-col items-center justify-center">
+<p class="text-gray-900 dark:text-white text-[24px] font-bold leading-tight tracking-tight text-center">Global Tech Supplies</p>
+<p class="text-gray-500 dark:text-[#92adc9] text-base font-normal leading-normal text-center">Electronics &amp; Components</p>
+<div class="mt-1 px-3 py-1 bg-primary/10 rounded-full">
+<p class="text-primary text-xs font-bold uppercase tracking-wider">ID: SUP-99201</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="@container mb-6">
+<div class="px-6 grid grid-cols-3 gap-4">
+<div class="flex flex-col items-center gap-2 bg-white dark:bg-gray-800/40 rounded-xl py-4 shadow-sm cursor-pointer border border-gray-100 dark:border-gray-700">
+<div class="rounded-full bg-primary/10 p-3 text-primary">
+<span class="material-symbols-outlined text-[24px]">call</span>
+</div>
+<p class="text-gray-900 dark:text-white text-xs font-semibold">Call</p>
+</div>
+<div class="flex flex-col items-center gap-2 bg-white dark:bg-gray-800/40 rounded-xl py-4 shadow-sm cursor-pointer border border-gray-100 dark:border-gray-700">
+<div class="rounded-full bg-primary/10 p-3 text-primary">
+<span class="material-symbols-outlined text-[24px]">mail</span>
+</div>
+<p class="text-gray-900 dark:text-white text-xs font-semibold">Email</p>
+</div>
+<div class="flex flex-col items-center gap-2 bg-white dark:bg-gray-800/40 rounded-xl py-4 shadow-sm cursor-pointer border border-gray-100 dark:border-gray-700">
+<div class="rounded-full bg-primary/10 p-3 text-primary">
+<span class="material-symbols-outlined text-[24px]">map</span>
+</div>
+<p class="text-gray-900 dark:text-white text-xs font-semibold">Address</p>
+</div>
+</div>
+</div>
+<!-- Metrics Stats -->
+<div class="flex flex-wrap gap-4 px-6 mb-8">
+<div class="flex min-w-[150px] flex-1 flex-col gap-2 rounded-xl p-5 bg-white dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700 shadow-sm">
+<p class="text-gray-500 dark:text-[#92adc9] text-sm font-medium">Total Spent</p>
+<p class="text-gray-900 dark:text-white tracking-tight text-2xl font-bold leading-tight">$42,500.00</p>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[#0bda5b] text-xs">trending_up</span>
+<p class="text-[#0bda5b] text-sm font-bold">+12%</p>
+</div>
+</div>
+<div class="flex min-w-[150px] flex-1 flex-col gap-2 rounded-xl p-5 bg-white dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700 shadow-sm">
+<p class="text-gray-500 dark:text-[#92adc9] text-sm font-medium">Active Orders</p>
+<p class="text-gray-900 dark:text-white tracking-tight text-2xl font-bold leading-tight">4</p>
+<p class="text-gray-400 dark:text-[#92adc9] text-sm font-medium">Stable volume</p>
+</div>
+</div>
+<!-- History Section Header -->
+<div class="px-6 flex items-center justify-between mb-2">
+<h2 class="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-tight">Recent Activity</h2>
+<button class="text-primary text-sm font-medium">View All</button>
+</div>
+<!-- Filter Tabs (Custom Component) -->
+<div class="px-6 mb-4">
+<div class="flex gap-2 p-1 bg-gray-200 dark:bg-gray-800 rounded-lg">
+<button class="flex-1 py-1.5 text-sm font-bold bg-white dark:bg-primary text-gray-900 dark:text-white rounded-md shadow-sm">Purchase Orders</button>
+<button class="flex-1 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">Invoices</button>
+</div>
+</div>
+<!-- Scrollable History List -->
+<div class="px-6 flex flex-col gap-3">
+<!-- Order Item 1 -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-700">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined">inventory_2</span>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white font-bold text-sm">PO-88219</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">Oct 24, 2023</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-gray-900 dark:text-white font-bold text-sm">$1,240.00</p>
+<span class="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 text-[10px] font-bold rounded uppercase">Pending</span>
+</div>
+</div>
+<!-- Order Item 2 -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-700">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white font-bold text-sm">PO-88204</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">Oct 18, 2023</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-gray-900 dark:text-white font-bold text-sm">$4,500.00</p>
+<span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 text-[10px] font-bold rounded uppercase">Delivered</span>
+</div>
+</div>
+<!-- Order Item 3 -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-700">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white font-bold text-sm">PO-88192</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">Oct 12, 2023</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-gray-900 dark:text-white font-bold text-sm">$890.00</p>
+<span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 text-[10px] font-bold rounded uppercase">Delivered</span>
+</div>
+</div>
+<!-- Order Item 4 -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-700">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined">local_shipping</span>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white font-bold text-sm">PO-88155</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">Oct 05, 2023</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-gray-900 dark:text-white font-bold text-sm">$3,100.00</p>
+<span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded uppercase">Shipped</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Fixed Action Button Footer -->
+<footer class="fixed bottom-0 left-0 right-0 p-6 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 z-50">
+<div class="max-w-xl mx-auto">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">chat_bubble</span>
+                Contact Supplier
+            </button>
+</div>
+</footer>
+</body></html>

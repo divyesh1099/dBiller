@@ -35,7 +35,7 @@ class DBillerApp extends ConsumerWidget {
       title: 'dBiller',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light, // lock to minimal light theme
+      themeMode: ThemeMode.dark,
       routerConfig: router,
     );
   }

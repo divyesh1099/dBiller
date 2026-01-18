@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Item Details - dBiller</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center p-4 justify-between max-w-md mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined cursor-pointer">arrow_back_ios</span>
+<h2 class="text-lg font-bold leading-tight tracking-tight">Item Details</h2>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined cursor-pointer">share</span>
+<span class="material-symbols-outlined cursor-pointer">more_horiz</span>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto max-w-md mx-auto w-full pb-32">
+<!-- Header Image Section -->
+<div class="px-4 py-3">
+<div class="relative w-full bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden min-h-72 aspect-square shadow-xl">
+<div class="absolute inset-0 bg-center bg-no-repeat bg-cover" data-alt="Professional wireless mouse product photography" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD6yZmSGDyQwuj_QIpmoQB5cv3AVDz51j5cxAlg-c45WMNyXiwDaPYZsIRPjehlY7IBZ3nSLGP7R7o0unY-n3kb5ETKWtFFqB_TXG1-xckmcKLwUNXcH3JN8gsDj5tjjTph_eP0GVG5zFZxEfzblN2UIUk9DzYEfq45gUhfAkDbGShwC-NStDWinllBC_OkUu7A4jI1q1FuWVXm1BlHMUbIsGclTHxe4qgVLZvavg8QEIqOMO0MscWXOkRcT1sEJl66fdhTiqi_iK3c");'>
+</div>
+<!-- Image Recognition Badge -->
+<div class="absolute top-4 left-4 bg-primary/90 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg backdrop-blur-sm">
+<span class="material-symbols-outlined text-sm">filter_center_focus</span>
+                    AI VERIFIED
+                </div>
+</div>
+</div>
+<!-- Headline & Meta -->
+<div class="px-4 pt-4">
+<div class="flex justify-between items-start">
+<div>
+<h1 class="text-2xl font-bold leading-tight">Logitech MX Master 3S</h1>
+<p class="text-slate-500 dark:text-[#92adc9] text-sm font-medium mt-1">Professional Wireless Mouse</p>
+</div>
+<div class="bg-primary/10 text-primary p-2 rounded-lg">
+<span class="material-symbols-outlined">inventory_2</span>
+</div>
+</div>
+</div>
+<!-- Stock Status Card -->
+<div class="px-4 mt-6">
+<div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+<div class="flex justify-between items-center mb-3">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Current Stock Level</h3>
+<span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500">In Stock</span>
+</div>
+<div class="flex items-end gap-2 mb-4">
+<span class="text-4xl font-bold">42</span>
+<span class="text-slate-400 pb-1">/ 100 units</span>
+</div>
+<!-- Visual Stock Progress Bar -->
+<div class="w-full bg-slate-200 dark:bg-slate-700 h-3 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 42%;"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] font-bold text-slate-400">MIN: 15</span>
+<span class="text-[10px] font-bold text-slate-400">MAX: 100</span>
+</div>
+</div>
+</div>
+<!-- Specification Grid -->
+<div class="px-4 mt-6">
+<h3 class="text-lg font-bold mb-3 px-1">Specifications</h3>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+<p class="text-xs text-slate-500 dark:text-[#92adc9] mb-1">SKU</p>
+<p class="font-bold font-mono">DB-9902-X</p>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+<p class="text-xs text-slate-500 dark:text-[#92adc9] mb-1">Category</p>
+<p class="font-bold">Peripherals</p>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 col-span-2">
+<div class="flex justify-between items-center">
+<div>
+<p class="text-xs text-slate-500 dark:text-[#92adc9] mb-1">Supplier</p>
+<p class="font-bold">TechDistro Corp</p>
+</div>
+<span class="material-symbols-outlined text-primary">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Stock History Chart Mockup -->
+<div class="px-4 mt-6">
+<div class="flex items-center justify-between mb-3 px-1">
+<h3 class="text-lg font-bold">Stock History</h3>
+<span class="text-xs text-primary font-bold">Last 30 Days</span>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 h-48 relative flex items-end justify-between overflow-hidden">
+<!-- Simple SVG Area Chart Mockup -->
+<div class="absolute inset-0 opacity-20 bg-gradient-to-t from-primary to-transparent pointer-events-none"></div>
+<svg class="absolute inset-0 w-full h-full px-4 pt-12" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0,80 L10,75 L20,85 L30,60 L40,65 L50,40 L60,45 L70,30 L80,35 L90,20 L100,25" fill="none" stroke="#137fec" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<path d="M0,80 L10,75 L20,85 L30,60 L40,65 L50,40 L60,45 L70,30 L80,35 L90,20 L100,25 L100,100 L0,100 Z" fill="#137fec" fill-opacity="0.1"></path>
+</svg>
+<!-- Tooltip Mock -->
+<div class="absolute top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg flex flex-col items-center">
+<span class="font-bold">42 units</span>
+<span class="opacity-70">Today</span>
+</div>
+<!-- Chart Labels -->
+<div class="w-full flex justify-between text-[10px] font-bold text-slate-400 mt-2 z-10">
+<span>1 Oct</span>
+<span>10 Oct</span>
+<span>20 Oct</span>
+<span>30 Oct</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 p-4 z-50">
+<div class="max-w-md mx-auto grid grid-cols-5 gap-3">
+<button class="col-span-1 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-800 rounded-xl py-3 hover:bg-slate-300 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">edit</span>
+</button>
+<button class="col-span-3 bg-primary text-white font-bold rounded-xl py-3 shadow-lg shadow-primary/30 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-xl">add_shopping_cart</span>
+                Adjust Stock
+            </button>
+<button class="col-span-1 flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-800 rounded-xl py-3 hover:bg-slate-300 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">visibility</span>
+</button>
+</div>
+<!-- iOS Safe Area Spacer -->
+<div class="h-6"></div>
+</div>
+</body></html>

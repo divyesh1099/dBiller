@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Invoices List - dBiller</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#0d141b] dark:text-white transition-colors duration-200">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden pb-24">
+<!-- Header Section -->
+<header class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+<div class="flex items-center p-4 pb-2 justify-between">
+<!-- Back/Menu Icon -->
+<button class="text-[#0d141b] dark:text-white flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="text-[#0d141b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Invoices</h2>
+<!-- Options Icon -->
+<div class="flex w-12 items-center justify-end">
+<button class="flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-[#0d141b] dark:text-white">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="px-4 py-2">
+<label class="flex flex-col h-10 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full shadow-sm">
+<div class="text-[#4c739a] flex border-none bg-white dark:bg-gray-800 items-center justify-center pl-4 rounded-l-xl border-r-0">
+<span class="material-symbols-outlined text-gray-400">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0d141b] dark:text-white focus:outline-0 focus:ring-0 border-none bg-white dark:bg-gray-800 focus:border-none h-full placeholder:text-gray-400 px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal leading-normal" placeholder="Search invoice # or client" value=""/>
+</div>
+</label>
+</div>
+<!-- Filter Tabs -->
+<div class="pt-2">
+<div class="flex border-b border-[#cfdbe7] dark:border-gray-800 px-4 justify-between gap-4 overflow-x-auto hide-scrollbar">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-primary pb-3 pt-2 min-w-[60px]" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">All</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#4c739a] dark:text-gray-400 pb-3 pt-2 min-w-[60px] hover:text-[#0d141b] dark:hover:text-gray-200" href="#">
+<p class="text-sm font-medium leading-normal tracking-[0.015em]">Paid</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#4c739a] dark:text-gray-400 pb-3 pt-2 min-w-[60px] hover:text-[#0d141b] dark:hover:text-gray-200" href="#">
+<p class="text-sm font-medium leading-normal tracking-[0.015em]">Pending</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#4c739a] dark:text-gray-400 pb-3 pt-2 min-w-[60px] hover:text-[#0d141b] dark:hover:text-gray-200" href="#">
+<p class="text-sm font-medium leading-normal tracking-[0.015em]">Overdue</p>
+</a>
+</div>
+</div>
+</header>
+<!-- Main Content List -->
+<main class="flex-1 px-4 py-4 flex flex-col gap-3">
+<!-- List Item: Paid -->
+<div class="flex gap-4 bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 shrink-0 border border-gray-100 dark:border-gray-700" data-alt="Apple Logo on white background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBJpAXg385RonVD9VblV1T5ChmUbBtvt49TCp-25UiFCNsv2xF99f7VdbYItIg6i-eyVT53JzOsLF7i13GCk0lZjoQYKFgJWq5Nuzr2H_LL-KuFvvnB-mU5vzgAB_TjpsOgfs8WAXR1hDKb0os9zV3y8sJzFxE7f6t8bFED5U4RR--9GjdiZSheVZsDFLCzDn058Geye0r35CgLazQxd_9_37jjXHDUpjgW9Rtnk1FgQLrVl6yGXyM5Q5vQ2aPMki0VW07iNknAb7Z-");'></div>
+<div class="flex flex-col justify-center">
+<p class="text-[#0d141b] dark:text-white text-base font-semibold leading-tight">Apple Inc.</p>
+<p class="text-[#4c739a] dark:text-gray-400 text-xs font-normal leading-normal mt-1">#INV-2023-001 • Oct 24, 2023</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1 shrink-0">
+<span class="text-[#0d141b] dark:text-white font-bold text-base">$1,250.00</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400">
+                        PAID
+                    </span>
+</div>
+</div>
+<!-- List Item: Overdue -->
+<div class="flex gap-4 bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 shrink-0 border border-gray-100 dark:border-gray-700" data-alt="Microsoft Logo abstract" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB5p4lDKv13lrH68VSxJl-Mv_oJGBlckBdfJrDlsB-DoxcUpm9JBLF9E5fMdIq88q8vIbVzwvOVVHxdNY-tX1JnRUgSXrl_gOkpTqIxhN6IaMhv0ljDT98Mfp06Yv3aH41p2kPQPpm4JHa3t92rABMq46ox3YVENwfUSs52M9QBe_eF9N-KG-cCH71lu9QEsollu4hAp1R67NQzm_OT-hMjlOBY2jHYK1wVtaJbddzFGvCk328OEgX8XGTtMJ4dwiIhJzjsqjlNgNwI");'></div>
+<div class="flex flex-col justify-center">
+<p class="text-[#0d141b] dark:text-white text-base font-semibold leading-tight">Microsoft Corp.</p>
+<p class="text-[#4c739a] dark:text-gray-400 text-xs font-normal leading-normal mt-1">#INV-2023-002 • Oct 22, 2023</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1 shrink-0">
+<span class="text-[#0d141b] dark:text-white font-bold text-base">$3,400.00</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-400">
+                        OVERDUE
+                    </span>
+</div>
+</div>
+<!-- List Item: Pending -->
+<div class="flex gap-4 bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 shrink-0 border border-gray-100 dark:border-gray-700" data-alt="Google Logo abstract" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA2JtyLrPBjRzbtfe2yWbD17r4SYs_rTp-_tM9g7YNP8ttIxs49DJHGFJa66MGCe8XwVkB9HfieLkewjjFpBGlWvXuWIqF2qrYeu3Fn_cxELynzEYwzGLokYm63F-4_rE7BodaB-IKXLkxh4gsP40XOBOu08afECDlhOkKABVwPTC_e4QlGZTHo7Co_IEeGw8nDkD8_TjhndwR5hOEDUQzg1MVjcZUYqLrWzun-4qDEcf930OTCvDxog0T50rl6u8BIcH634FSchI8u");'></div>
+<div class="flex flex-col justify-center">
+<p class="text-[#0d141b] dark:text-white text-base font-semibold leading-tight">Google LLC</p>
+<p class="text-[#4c739a] dark:text-gray-400 text-xs font-normal leading-normal mt-1">#INV-2023-004 • Nov 01, 2023</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1 shrink-0">
+<span class="text-[#0d141b] dark:text-white font-bold text-base">$850.00</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400">
+                        PENDING
+                    </span>
+</div>
+</div>
+<!-- List Item: Paid -->
+<div class="flex gap-4 bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 shrink-0 border border-gray-100 dark:border-gray-700" data-alt="Amazon Logo abstract" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDMVdPjsEO8ply-pyRWEof2BqardaaJ8DFXCs9avI7pCZxEkLJ3Qcqu2YSKezOtYTOFpxt_qMKNsCHf5anZ4ES3QSj_sTeg_Yi22UMdYqRSAZ1L3kPdP-6KVelFn_bQzOfJv_jPGdyi2ds5TTAGcL3Lj1ES3L4rWLJeq3zVe27oxBlOAeBxz8T8ywsaU8uUb6W-zoRJiBE6fkaOk2GQOWUPMkd9cPbHaY3aITmRph8OCL9Ozt0Lfn0YpBSD-K1bf7eVkEahc6eKHACy");'></div>
+<div class="flex flex-col justify-center">
+<p class="text-[#0d141b] dark:text-white text-base font-semibold leading-tight">Amazon Inc.</p>
+<p class="text-[#4c739a] dark:text-gray-400 text-xs font-normal leading-normal mt-1">#INV-2023-005 • Nov 03, 2023</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1 shrink-0">
+<span class="text-[#0d141b] dark:text-white font-bold text-base">$4,120.50</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400">
+                        PAID
+                    </span>
+</div>
+</div>
+<!-- List Item: Pending -->
+<div class="flex gap-4 bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 shrink-0 border border-gray-100 dark:border-gray-700" data-alt="Tesla Logo abstract" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDdTtX3D-1Dyz80No8eEuy6pbuZ1ZEy-vnPG3376y3F4CVVQcNSIDF9gdj8154Go1mUwdijRgkiJ-C7-sMooVPc4nXk2MbhLKu05TlShap16eDUESS2-ezmUMf7_H1wzEsaCSy4i0GYEMyv8WRhyG-eYapHhk-lGKGijBE5woAnmF_ji-BJlocvHwn6jQoKm6eZVIsoELRJvsTxCX-RPw9YYOA6js68XUkSmT5cD00Z2-E2HG262J4EIfwB_O91cjW_wMYU7IWfVVCT");'></div>
+<div class="flex flex-col justify-center">
+<p class="text-[#0d141b] dark:text-white text-base font-semibold leading-tight">Tesla Motors</p>
+<p class="text-[#4c739a] dark:text-gray-400 text-xs font-normal leading-normal mt-1">#INV-2023-006 • Nov 05, 2023</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1 shrink-0">
+<span class="text-[#0d141b] dark:text-white font-bold text-base">$9,500.00</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400">
+                        PENDING
+                    </span>
+</div>
+</div>
+<!-- Bottom spacer for FAB and Nav -->
+<div class="h-24"></div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-4 z-30 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:bg-blue-600 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 z-40 w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pb-safe">
+<div class="flex justify-around items-center h-16">
+<a class="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full space-y-1 text-primary dark:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl font-variation-settings-fill">receipt_long</span>
+<span class="text-[10px] font-medium">Invoices</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">inventory_2</span>
+<span class="text-[10px] font-medium">Inventory</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</a>
+</div>
+</nav>
+</div>
+<!-- Style for Material Symbols fill variation -->
+<style>
+        .font-variation-settings-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Safe area spacing for mobile devices with home indicator */
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+    </style>
+</body></html>

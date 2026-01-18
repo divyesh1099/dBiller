@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>dBiller Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-dark": "#1c252e", // Slightly lighter than background-dark
+                        "text-secondary": "#93a2b7",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl">
+<!-- Header -->
+<div class="flex items-center p-4 pb-2 justify-between pt-12 sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="Profile picture of user Alex smiling" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCThVPJmF49NN5iBMNc1cnQFXAIqF-NasLXykfd20YImZUJNTHiQgMtkky1189JiJ7YkOfFh8FGvyDap2tGsQVIkx8ksIbGTsuPzSNQpjXy1pW8kv01F12-ZRd3KY9eIzC97lRzrcQU1QDz1XUEY0xRUlQ2c6AiidrJYQwpdK0KIaQTPhxAbI6P7K2APD1Z_rBOP764Kq5OjSpBSEDTTBooVT_QwY0_ckXgahtVLxl5UsFD1X_Ad3CIVVS8ogjqVvlwbmF2OhxBef4N");'>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-medium text-text-secondary">Welcome back</span>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Alex Johnson</h2>
+</div>
+</div>
+<div class="flex items-center justify-end">
+<button class="flex items-center justify-center rounded-full size-10 bg-background-light dark:bg-card-dark text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">notifications</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 pb-24"> <!-- Added padding bottom for nav bar -->
+<!-- Stats Carousel -->
+<div class="flex overflow-x-auto no-scrollbar gap-4 p-4 snap-x snap-mandatory">
+<!-- Card 1: Total Sales -->
+<div class="flex min-w-[280px] snap-center flex-col gap-4 rounded-xl p-5 bg-primary shadow-lg shadow-primary/20 relative overflow-hidden group">
+<!-- Decorational background circle -->
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all"></div>
+<div class="flex justify-between items-start z-10">
+<div class="flex flex-col gap-1">
+<p class="text-white/80 text-sm font-medium">Total Sales</p>
+<p class="text-white text-3xl font-bold tracking-tight">$12,450.00</p>
+</div>
+<div class="bg-white/20 rounded-lg p-2 backdrop-blur-sm">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">trending_up</span>
+</div>
+</div>
+<div class="flex items-center gap-2 z-10">
+<span class="bg-white/20 text-white text-xs px-2 py-1 rounded-md font-bold flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">arrow_upward</span> 12%
+                        </span>
+<span class="text-white/70 text-xs">vs last month</span>
+</div>
+</div>
+<!-- Card 2: Active Invoices -->
+<div class="flex min-w-[160px] snap-center flex-col justify-between rounded-xl p-5 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 shadow-sm">
+<div>
+<div class="flex justify-between items-start mb-2">
+<div class="p-2 bg-orange-500/10 rounded-lg">
+<span class="material-symbols-outlined text-orange-500" style="font-size: 20px;">pending_actions</span>
+</div>
+</div>
+<p class="text-slate-500 dark:text-text-secondary text-sm font-medium">Active Invoices</p>
+</div>
+<p class="text-slate-900 dark:text-white text-2xl font-bold mt-1">8</p>
+</div>
+<!-- Card 3: Inventory Value -->
+<div class="flex min-w-[200px] snap-center flex-col justify-between rounded-xl p-5 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 shadow-sm">
+<div>
+<div class="flex justify-between items-start mb-2">
+<div class="p-2 bg-emerald-500/10 rounded-lg">
+<span class="material-symbols-outlined text-emerald-500" style="font-size: 20px;">inventory_2</span>
+</div>
+</div>
+<p class="text-slate-500 dark:text-text-secondary text-sm font-medium">Inventory Value</p>
+</div>
+<p class="text-slate-900 dark:text-white text-2xl font-bold mt-1">$45,200.00</p>
+</div>
+</div>
+<!-- Quick Actions Section -->
+<div class="px-4 pt-2">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight px-0 pb-3">Quick Actions</h3>
+<div class="grid grid-cols-2 gap-3">
+<!-- Scan Item Action -->
+<button class="relative group flex flex-col items-start text-left overflow-hidden rounded-xl h-40 w-full transition-transform active:scale-95">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Camera viewfinder scanning a barcode on a box" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAYRRFAE0GwyzaOhNUvFn5kYKUlF3JeSc5KA5bJaQBjOszVA-osnRSsQitREswI9ndpjDp7eNZhtMx1_LJzCyVy--wAiyvP5adHPkWx--WF8aqshVCFjekv_PdTRotCdpS2XaNEnEEts7_-EH3ZA7t3ViJJhzwhTQQ00gT5Ivo5Q07prqgxftS4HrIXAItSvL6NwMPyKcpLa4XK4fC9hYkMUT9QZ_Q__POXhouUgeIeruzYPr7VZ9RvfsSDBU0LXzcNmiz8sr_AhPTi");'>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
+</div>
+<div class="relative z-10 flex flex-col h-full justify-end p-4 w-full">
+<div class="mb-auto self-end bg-white/20 backdrop-blur-md rounded-full p-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-size: 20px;">qr_code_scanner</span>
+</div>
+<div>
+<p class="text-white text-base font-bold leading-tight">Scan Item</p>
+<p class="text-white/70 text-xs font-normal mt-1">Identify inventory</p>
+</div>
+</div>
+</button>
+<!-- Scan Bill Action -->
+<button class="relative group flex flex-col items-start text-left overflow-hidden rounded-xl h-40 w-full transition-transform active:scale-95">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Smartphone scanning a paper receipt on a table" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCS-7un11MzpqScFcJo48tU8vSgmx3uEfnb3P3IKtgGCSy-B2Z4TvGvClqFjlN7aEqigzYtmvo47uvGrOkLFpFTsIJCYHfQmrFFks6N2Pk3EbdE57GpZVZ-O1qk6bsRa5E7G4ANfyOCc04HnTUFKYY0aDC8_Sr8HWoQTlKAHUj5aL9NrgYFZZ6OYvdFVb_l_3ivhWc2kwj9A7KBtNS7ZMyzuaGj4S_q7Kcjy8GKX8WDFi9dzqy9tnrqqwJ3prUywIUr4FK5TcJ5Fu8y");'>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
+</div>
+<div class="relative z-10 flex flex-col h-full justify-end p-4 w-full">
+<div class="mb-auto self-end bg-white/20 backdrop-blur-md rounded-full p-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-size: 20px;">receipt_long</span>
+</div>
+<div>
+<p class="text-white text-base font-bold leading-tight">Scan Bill</p>
+<p class="text-white/70 text-xs font-normal mt-1">Expense manager</p>
+</div>
+</div>
+</button>
+</div>
+</div>
+<!-- Recent Invoices List -->
+<div class="pt-6 px-4">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">Recent Invoices</h3>
+<button class="text-primary text-sm font-semibold">View All</button>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Invoice Item 1 -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 p-2.5 rounded-lg">
+<span class="material-symbols-outlined" style="font-size: 20px;">description</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-sm font-semibold">Design Services</p>
+<p class="text-slate-500 dark:text-text-secondary text-xs">#INV-0023 • Today</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<p class="text-slate-900 dark:text-white text-sm font-bold">$450.00</p>
+<div class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                                Paid
+                            </div>
+</div>
+</div>
+<!-- Invoice Item 2 -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 p-2.5 rounded-lg">
+<span class="material-symbols-outlined" style="font-size: 20px;">description</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-sm font-semibold">Consulting</p>
+<p class="text-slate-500 dark:text-text-secondary text-xs">#INV-0024 • Yesterday</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<p class="text-slate-900 dark:text-white text-sm font-bold">$120.00</p>
+<div class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+                                Pending
+                            </div>
+</div>
+</div>
+<!-- Invoice Item 3 -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="bg-pink-500/10 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 p-2.5 rounded-lg">
+<span class="material-symbols-outlined" style="font-size: 20px;">description</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-sm font-semibold">Web Hosting</p>
+<p class="text-slate-500 dark:text-text-secondary text-xs">#INV-0022 • Oct 24</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<p class="text-slate-900 dark:text-white text-sm font-bold">$85.00</p>
+<div class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                                Paid
+                            </div>
+</div>
+</div>
+</div>
+</div>
+<div class="h-8"></div>
+</div>
+<!-- Bottom Navigation -->
+<div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 px-6 py-3 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined fill-current" style="font-size: 24px; font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined" style="font-size: 24px;">inventory_2</span>
+<span class="text-[10px] font-medium">Inventory</span>
+</button>
+<div class="relative -top-6">
+<button class="flex items-center justify-center size-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" style="font-size: 28px;">add</span>
+</button>
+</div>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined" style="font-size: 24px;">receipt</span>
+<span class="text-[10px] font-medium">Invoices</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined" style="font-size: 24px;">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</button>
+</div>
+</div>
+</body></html>

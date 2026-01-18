@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<html class="light dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Supplier Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-gray-900 dark:text-gray-100 transition-colors duration-200">
+<div class="relative flex min-h-screen w-full flex-col overflow-hidden max-w-md mx-auto bg-white dark:bg-background-dark border-x dark:border-gray-800 shadow-2xl">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-20 flex items-center justify-between bg-white dark:bg-background-dark p-4 pb-2 border-b border-transparent dark:border-gray-800/50">
+<button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-white">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center">Supplier Management</h2>
+<button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-white">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+<!-- Search Bar -->
+<div class="px-4 py-3 bg-white dark:bg-background-dark sticky top-[60px] z-10">
+<label class="flex flex-col w-full h-12 shadow-sm">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full overflow-hidden bg-slate-100 dark:bg-gray-800 focus-within:ring-2 ring-primary/50 transition-all">
+<div class="flex items-center justify-center pl-4 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 resize-none bg-transparent text-gray-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 px-3 text-base font-normal leading-normal border-none focus:ring-0 focus:outline-none h-full" placeholder="Search by name or ID" value=""/>
+</div>
+</label>
+</div>
+<!-- Spacer for visual separation -->
+<div class="h-2 bg-background-light dark:bg-background-dark"></div>
+<!-- Supplier List -->
+<div class="flex-1 flex flex-col bg-background-light dark:bg-background-dark pb-24">
+<!-- List Item 1 -->
+<div class="group flex gap-4 bg-white dark:bg-[#15202b] px-4 py-4 justify-between items-center border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center gap-4 flex-1 overflow-hidden">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-14 w-14 shadow-sm border border-gray-100 dark:border-gray-700" data-alt="Logo for Acme Corp showing abstract blue shapes" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD-THqVjEsjwAfHgs9296eI9untZgv5VuMjrGule0KBjjA3weQ-U6hzJ1U-Gaf2qaOf0MKsHCcXeNrAUN0Lkv_MXflRZ7_LjiyLTgRyvlqm7Dw5wKc8VCaOFd2rf6UypKS4Dabcb1cxWcB2wUGBjlSt-9BGs0dZx70mERH_vjwUmQSuH74UFP-_bkLAUIMSNBC85z-v90wYdgXwV_PUOlJ0I_PfwTAEI5RMcA-SmGL6qd242RBvNU7RPcdSX-1ep856MYp_0KyNfnvm");'></div>
+<div class="absolute -bottom-1 -right-1 bg-green-500 h-4 w-4 rounded-full border-2 border-white dark:border-[#15202b]"></div>
+</div>
+<div class="flex flex-1 flex-col justify-center min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-normal truncate">Acme Corp.</h3>
+<span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20">Active</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal truncate">Contact: John Doe</p>
+<p class="text-slate-400 dark:text-slate-500 text-xs font-medium leading-normal mt-0.5">Total Orders: 124</p>
+</div>
+</div>
+<button class="shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-400 hover:bg-primary hover:text-white transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">call</span>
+</button>
+</div>
+<!-- List Item 2 -->
+<div class="group flex gap-4 bg-white dark:bg-[#15202b] px-4 py-4 justify-between items-center border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center gap-4 flex-1 overflow-hidden">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-14 w-14 shadow-sm border border-gray-100 dark:border-gray-700" data-alt="Logo for Global Supplies showing a globe icon" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDMzQxZRk_KdQ95HSNQndO6JdQGWWEf8AQFpr_SNWt5YSxGHt58iggzALBH3GfPK3gSugxMGKzbe99xUOMf9cKM-n_oDiG_W9UUSuRgTg7Ku0lDmRWJ5uXeq9-PvOq9_aP96ZKjorXOroHXY2l9srOhrhyHqG3RtT9hrLBq5e8iQsEXWzbT6eqEPuf94KMeQzrPj7uFIkfGyUZA08yh1sMm2j95breIEI_y3hGNF3-SfHT53bDl-6zxy6NHAoAzQEN8jvNmA-fI_nKq");'></div>
+<div class="absolute -bottom-1 -right-1 bg-amber-500 h-4 w-4 rounded-full border-2 border-white dark:border-[#15202b]"></div>
+</div>
+<div class="flex flex-1 flex-col justify-center min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-normal truncate">Global Supplies Ltd.</h3>
+<span class="inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-600/20">Pending</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal truncate">Contact: Jane Smith</p>
+<p class="text-slate-400 dark:text-slate-500 text-xs font-medium leading-normal mt-0.5">Total Orders: 89</p>
+</div>
+</div>
+<button class="shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-400 hover:bg-primary hover:text-white transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">call</span>
+</button>
+</div>
+<!-- List Item 3 -->
+<div class="group flex gap-4 bg-white dark:bg-[#15202b] px-4 py-4 justify-between items-center border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center gap-4 flex-1 overflow-hidden">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-14 w-14 shadow-sm border border-gray-100 dark:border-gray-700" data-alt="Logo for FastTrack Logistics abstract speed lines" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBmUHlmHeWGmDi5tW6FXR-OADrthpzFbvsiFwjd4Ca3pGETv1_QNZqTsVa36sJMEv-T4OvkdPtX6W7_zfI5dz4ViumOJSsZnijT2khuZ6rqrGuSlSEdaQQIjT6nwzVAKC4BhfnnmbWfkVf_NvaeTj3DRdj3OH2CuC7mhAwVTBbd9F5muK-F63OZoUHVlQZ2PIg6Q7pkVea5KaValytFcCCLDYrM-0dJqoF5tPQuFCW73FDhZ-_X4_9BHG_RYb1CJNmMwiya2OYfatBt");'></div>
+<div class="absolute -bottom-1 -right-1 bg-green-500 h-4 w-4 rounded-full border-2 border-white dark:border-[#15202b]"></div>
+</div>
+<div class="flex flex-1 flex-col justify-center min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-normal truncate">FastTrack Logistics</h3>
+<span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20">Active</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal truncate">Contact: Mike Ross</p>
+<p class="text-slate-400 dark:text-slate-500 text-xs font-medium leading-normal mt-0.5">Total Orders: 210</p>
+</div>
+</div>
+<button class="shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-400 hover:bg-primary hover:text-white transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">call</span>
+</button>
+</div>
+<!-- List Item 4 -->
+<div class="group flex gap-4 bg-white dark:bg-[#15202b] px-4 py-4 justify-between items-center border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center gap-4 flex-1 overflow-hidden">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-14 w-14 shadow-sm border border-gray-100 dark:border-gray-700" data-alt="Logo for TechFlow Systems abstract digital dots" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA2LpO5JWUAA4fmhP11mwdSsbS7Lncaup8K8NYS9wpHgkcCOdeiRcjfLsuviNxKeHsc6mDdArigDsqobBHVqxd305Eo7OqS2iK5if0h-I95VFSTkwB5HxPl0K8yl3P2G5RLsIQV8XwojmRSLwGNpcqMaqQdM6pFBdtXnqEpSczLNQyT5ZNtu1gXJd0-oLkqBz00cCfYhdccXL0brSjD2ZS0cZo44mH_igGNyy6VqgAWGXgfsIXs6giDc3ZK1QL34eRsUUG__nYxhOaj");'></div>
+<div class="absolute -bottom-1 -right-1 bg-gray-400 h-4 w-4 rounded-full border-2 border-white dark:border-[#15202b]"></div>
+</div>
+<div class="flex flex-1 flex-col justify-center min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-normal truncate">TechFlow Systems</h3>
+<span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10">Inactive</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal truncate">Contact: Sarah Connor</p>
+<p class="text-slate-400 dark:text-slate-500 text-xs font-medium leading-normal mt-0.5">Total Orders: 12</p>
+</div>
+</div>
+<button class="shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-400 hover:bg-primary hover:text-white transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">call</span>
+</button>
+</div>
+<!-- List Item 5 -->
+<div class="group flex gap-4 bg-white dark:bg-[#15202b] px-4 py-4 justify-between items-center border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center gap-4 flex-1 overflow-hidden">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-14 w-14 shadow-sm border border-gray-100 dark:border-gray-700" data-alt="Logo for PureWater Inc showing water drop" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDHMkD8TWqiTCPwXQtPbExYdGdjuKAoqBvwkQODxZo5uKO9be6nrrneL1PmS6-hgtfSMtpV1biDbFfHm08vPu23I4JRZr-Kg5ugUD6l0ICLiyBWNK1kSoRxizfbENs5W0XBJccZcPXrPRq-1hvlDsCtPCt6wqcVl8CoZbqQt7bq2z-13pfsQITLdpgQ3yy9BAiJ_0w3mmIXAo51Z0VkbYGCYbW_csN7Ocg-PHMtOeacSCrvTrXddgBrgTAbxsaOWqnieVQEHZKdEjEp");'></div>
+<div class="absolute -bottom-1 -right-1 bg-green-500 h-4 w-4 rounded-full border-2 border-white dark:border-[#15202b]"></div>
+</div>
+<div class="flex flex-1 flex-col justify-center min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-normal truncate">PureWater Inc</h3>
+<span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20">Active</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal truncate">Contact: David Miller</p>
+<p class="text-slate-400 dark:text-slate-500 text-xs font-medium leading-normal mt-0.5">Total Orders: 345</p>
+</div>
+</div>
+<button class="shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-400 hover:bg-primary hover:text-white transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">call</span>
+</button>
+</div>
+</div>
+<!-- Floating Action Button -->
+<div class="absolute bottom-6 right-6 z-30">
+<button class="flex items-center justify-center h-14 w-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:bg-blue-600 hover:scale-105 active:scale-95 transition-all duration-200">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+</div>
+</body></html>

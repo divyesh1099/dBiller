@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sales &amp; Inventory Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center p-4 justify-between max-w-md mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<h1 class="text-lg font-bold tracking-tight">Analytics</h1>
+</div>
+<div class="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20 cursor-pointer">
+<span class="text-xs font-semibold text-primary">Last 30 Days</span>
+<span class="material-symbols-outlined text-primary text-sm">expand_more</span>
+</div>
+</div>
+</header>
+<main class="max-w-md mx-auto pb-24">
+<!-- KPI Grid -->
+<div class="grid grid-cols-2 gap-3 p-4">
+<div class="col-span-2 flex flex-col gap-1 rounded-xl p-5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Revenue</p>
+<span class="material-symbols-outlined text-primary">payments</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-2xl font-bold tracking-tight">$42,850.00</p>
+<p class="text-emerald-500 text-xs font-bold flex items-center">
+<span class="material-symbols-outlined text-xs">trending_up</span> 12.5%
+                    </p>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-xl p-4 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Net Profit</p>
+<p class="text-xl font-bold tracking-tight">$18,240</p>
+<p class="text-emerald-500 text-[10px] font-bold">+8.2% vs prev.</p>
+</div>
+<div class="flex flex-col gap-1 rounded-xl p-4 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Top Item</p>
+<p class="text-xl font-bold tracking-tight truncate">Smart Watch</p>
+<p class="text-primary text-[10px] font-bold">142 units sold</p>
+</div>
+</div>
+<!-- Revenue Trend Chart -->
+<div class="px-4 py-2">
+<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Revenue Trends</h3>
+<div class="flex gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-[10px] text-slate-400 font-medium">Current Period</span>
+</div>
+</div>
+<div class="relative h-48 w-full">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 150">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#137fec" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#137fec" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Area path -->
+<path d="M0,120 Q50,110 80,60 T160,80 T240,40 T320,70 T400,30 L400,150 L0,150 Z" fill="url(#chartGradient)"></path>
+<!-- Line path -->
+<path d="M0,120 Q50,110 80,60 T160,80 T240,40 T320,70 T400,30" fill="none" stroke="#137fec" stroke-linecap="round" stroke-width="3"></path>
+<!-- Grid lines -->
+<line class="text-slate-200 dark:text-slate-800" stroke="currentColor" stroke-width="1" x1="0" x2="400" y1="140" y2="140"></line>
+</svg>
+<div class="flex justify-between mt-4 text-[10px] font-bold text-slate-400 px-1">
+<span>OCT 01</span>
+<span>OCT 10</span>
+<span>OCT 20</span>
+<span>OCT 30</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sales by Category (Donut) -->
+<div class="px-4 py-4">
+<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-6">Sales by Category</h3>
+<div class="flex items-center gap-8">
+<div class="relative size-32">
+<!-- Simple SVG Donut -->
+<svg class="size-full rotate-[-90deg]" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="15.915" stroke="#1e293b" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="15.915" stroke="#137fec" stroke-dasharray="45 100" stroke-dashoffset="0" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="15.915" stroke="#0ea5e9" stroke-dasharray="25 100" stroke-dashoffset="-45" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="15.915" stroke="#f59e0b" stroke-dasharray="30 100" stroke-dashoffset="-70" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-xs font-bold">1.2k</span>
+<span class="text-[8px] text-slate-400">Total</span>
+</div>
+</div>
+<div class="flex-1 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-primary"></span>
+<span class="text-xs font-medium">Electronics</span>
+</div>
+<span class="text-xs font-bold text-slate-400">45%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-sky-500"></span>
+<span class="text-xs font-medium">Accessories</span>
+</div>
+<span class="text-xs font-bold text-slate-400">25%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-amber-500"></span>
+<span class="text-xs font-medium">Home Office</span>
+</div>
+<span class="text-xs font-bold text-slate-400">30%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Top Profitable Items -->
+<div class="px-4 py-2">
+<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+<div class="p-5 border-b border-slate-200 dark:border-slate-800">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Top 5 Profitable Items</h3>
+</div>
+<div class="divide-y divide-slate-200 dark:divide-slate-800">
+<!-- Item 1 -->
+<div class="flex items-center p-4 gap-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+<img class="object-cover size-full" data-alt="Modern smart watch showing health metrics" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC065cNXE9Dj5T3lYGMlFGYk3MrVuG3_2OwBNWHYTWenlePsz1rtIzAf1K6p7mG7Nc07DVYTvzvUbMJsbDYsX-vguy6VsLZUFvkqiYn5BhmLlM-mDlGQzqNj6WLIHkvU3lwe2kzUr-gPhB5zvhA9u1dfi78d1ENqzsyHPCFLgThHdP3mdeZbKS65ponix01L_-rIAZLBfkND4V-FLqoHnl7kwAVDLER6xLh0_UH7adhy5W4WyKhE7hea_QkGJ2jX9e5qjY312Ee9s5F"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">Ultra Smart Watch V2</h4>
+<p class="text-xs text-slate-500">Electronics</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-emerald-500">62% Margin</p>
+<p class="text-[10px] text-slate-400">$1,240 profit</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center p-4 gap-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+<img class="object-cover size-full" data-alt="Professional ergonomic wireless computer mouse" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBssjJih6V1hUMRPI3k7pipecLDxZA-wXMKOdbd8kQdY1Lxisl19MvUxPuLfym3qRXbVadLWcLbzmKqFsClVKxdMKcblT1KUqwlzsAlTN4UoJRtYyVpo8SzEimipnn6jMCpzB5NxbY1RsV8lGtusAhyWVX6VRrYbbbwudfZura9gsMX__JMPs0_1MoxalqGzvJSKm8E3AZuhODn6Bs04KEciQC0xYfMNyu1XM3AcbQAVc3gZ4TCZqAyMxDzz5FLjdcsUCWFyStkRKnk"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">Ergo-Wireless Mouse</h4>
+<p class="text-xs text-slate-500">Accessories</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-emerald-500">58% Margin</p>
+<p class="text-[10px] text-slate-400">$840 profit</p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center p-4 gap-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+<img class="object-cover size-full" data-alt="High quality noise cancelling headphones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvQkyxrEYqhOuDvXd1ISwCs8nDyeHkfCUF3rueBo9QlT0rCJ3M32WcpKDOx-yYzbSryN8wNL0WiODW62CXfISGxm4Ph0eZCR2jLtmRmSk-4j6Op8SHTo8YCg4Yb9fn6f7zR4OzqRRyqH1uWDyBQ1HSvvkNg2CcXV5wZbM95VBeJXVJwMxyf9yj4xB2RiSA0VNfImpiHCGyOtnB-y0MxvXtAl2GUY51Rk97S5QLiRX2KG4AHcSVwTx9GIui4jeyId_cUmQ0JJhe0QKV"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">Studio Headphones</h4>
+<p class="text-xs text-slate-500">Electronics</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-emerald-500">54% Margin</p>
+<p class="text-[10px] text-slate-400">$720 profit</p>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="flex items-center p-4 gap-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+<img class="object-cover size-full" data-alt="Compact portable bluetooth speaker" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYt4OIe9p2I12TvVTOy8yq3p5ovv4O1TLSVoGYCvQxDplLHROVqXFIQX7iHaZWXzJdqftTBVmaI9NQfW7VccEP6oTTPh4YO3mcxDlXi6z8z5AkveQarTW-BoaPuDpUCjxwccmG64CIllAHUzdlJGw9BkfkJZHQ7FFkjogT979n95tXAiFPO5w496Fxg2RJtr4coWjlJVNjsuiRwds0H8KSNtG6LmYyZUU_fZIJ3gJvXSwiOxeemkscuOkbCF55R1q2dFq0bjfeNJuR"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">Mini BT Speaker</h4>
+<p class="text-xs text-slate-500">Accessories</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-emerald-500">48% Margin</p>
+<p class="text-[10px] text-slate-400">$450 profit</p>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="flex items-center p-4 gap-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+<img class="object-cover size-full" data-alt="Slim professional laptop sleeve case" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcMuYiwoy7VYzuZTfoaoyUNaMaY0s4wMygEuRh1un5nyLSUSEG_AibSMoeQZ7DsTko8Yq4Q_sl8GhnLTCqMCxo3learkacnkSF_hiVzgDxoaJzr3ker46kKvLyiPqutZtViUT7jUfefBB6Ob2jZUCV9k5yFXvU2UHTKLt7P6lpXajk51EHxxwkx314P0TpuCXNtFklONFH40rt2DgwxH32v6hNhLU7Bgkcg8Uszg6RnNhjth2C0-PYuuKPS5OBYIQqxixfdg5SrVMD"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">Leather Laptop Sleeve</h4>
+<p class="text-xs text-slate-500">Office</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-emerald-500">45% Margin</p>
+<p class="text-[10px] text-slate-400">$380 profit</p>
+</div>
+</div>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-800/50 text-center">
+<button class="text-primary text-xs font-bold uppercase tracking-widest">View Full Inventory</button>
+</div>
+</div>
+</div>
+<div class="p-8 text-center">
+<p class="text-[10px] text-slate-500 uppercase tracking-widest font-medium">Last updated: Today, 2:45 PM</p>
+</div>
+</main>
+<!-- Navigation Bar (iOS Style) -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800">
+<div class="max-w-md mx-auto flex justify-around p-3 pb-6">
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-medium">Billing</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-[10px] font-medium">Stock</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined">bar_chart_4_bars</span>
+<span class="text-[10px] font-bold">Analytics</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">center_focus_weak</span>
+<span class="text-[10px] font-medium">Scanner</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</button>
+</div>
+</nav>
+</body></html>

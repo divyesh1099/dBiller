@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="light dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Subscription Plans - dBiller</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen font-display">
+<!-- Top Navigation Bar -->
+<div class="sticky top-0 z-50 flex items-center bg-white dark:bg-background-dark p-4 border-b border-gray-100 dark:border-gray-800 justify-between">
+<div class="text-[#111418] dark:text-white flex size-12 shrink-0 items-center cursor-pointer">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</div>
+<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Subscription Plans</h2>
+</div>
+<!-- Pricing Toggle -->
+<div class="flex flex-col items-center px-4 pt-8 pb-4">
+<div class="flex h-12 w-full max-w-md items-center justify-center rounded-xl bg-gray-200/50 dark:bg-gray-800 p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-gray-700 has-[:checked]:shadow-sm has-[:checked]:text-[#111418] dark:has-[:checked]:text-white text-[#617589] dark:text-gray-400 text-sm font-semibold transition-all">
+<span class="truncate">Monthly</span>
+<input checked="" class="hidden" name="billing_cycle" type="radio" value="Monthly"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-gray-700 has-[:checked]:shadow-sm has-[:checked]:text-[#111418] dark:has-[:checked]:text-white text-[#617589] dark:text-gray-400 text-sm font-semibold transition-all">
+<span class="truncate">Yearly (Save 20%)</span>
+<input class="hidden" name="billing_cycle" type="radio" value="Yearly"/>
+</label>
+</div>
+<p class="mt-4 text-sm text-[#617589] dark:text-gray-400">Choose the plan that fits your business needs</p>
+</div>
+<!-- Subscription Cards Carousel -->
+<div class="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory px-4 pb-12 gap-5 mt-4">
+<!-- Starter Plan -->
+<div class="snap-center flex h-full flex-col gap-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/40 dark:shadow-none min-w-[85vw] md:min-w-[320px] p-6">
+<div class="flex flex-col gap-2">
+<h3 class="text-[#111418] dark:text-white text-xl font-bold">Starter</h3>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-extrabold text-[#111418] dark:text-white">$0</span>
+<span class="text-[#617589] dark:text-gray-400 font-medium text-sm">/month</span>
+</div>
+<p class="text-sm text-[#617589] dark:text-gray-400 mt-2">Perfect for freelancers starting out.</p>
+</div>
+<div class="flex flex-col gap-4 border-t border-gray-100 dark:border-gray-800 pt-6">
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">Up to 5 invoices</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">10 inventory items</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">Basic business reporting</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[20px]">cancel</span>
+<p class="text-gray-400 dark:text-gray-600 text-sm">AI receipt scanning</p>
+</div>
+</div>
+<button class="mt-auto flex w-full cursor-pointer items-center justify-center rounded-xl h-12 px-4 bg-gray-100 dark:bg-gray-800 text-[#111418] dark:text-white text-base font-bold tracking-tight active:scale-[0.98] transition-transform">
+<span class="truncate">Get Started</span>
+</button>
+</div>
+<!-- Professional Plan (Recommended) -->
+<div class="snap-center relative flex h-full flex-col gap-6 rounded-2xl bg-white dark:bg-gray-900 border-2 border-primary shadow-2xl shadow-primary/10 min-w-[85vw] md:min-w-[320px] p-6 overflow-hidden">
+<div class="absolute top-4 right-[-35px] rotate-45 bg-primary text-white text-[10px] font-bold px-10 py-1 shadow-sm">
+                BEST VALUE
+            </div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<h3 class="text-[#111418] dark:text-white text-xl font-bold">Professional</h3>
+<span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Recommended</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-extrabold text-[#111418] dark:text-white">$19</span>
+<span class="text-[#617589] dark:text-gray-400 font-medium text-sm">/month</span>
+</div>
+<p class="text-sm text-[#617589] dark:text-gray-400 mt-2">For growing businesses scaling fast.</p>
+</div>
+<div class="flex flex-col gap-4 border-t border-gray-100 dark:border-gray-800 pt-6">
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm font-semibold">Unlimited invoices</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">500 inventory items</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">50 AI scans per month</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">Advanced analytics dashboard</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">Priority email support</p>
+</div>
+</div>
+<button class="mt-auto flex w-full cursor-pointer items-center justify-center rounded-xl h-12 px-4 bg-primary text-white text-base font-bold tracking-tight shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
+<span class="truncate">Choose Plan</span>
+</button>
+</div>
+<!-- Enterprise Plan -->
+<div class="snap-center flex h-full flex-col gap-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/40 dark:shadow-none min-w-[85vw] md:min-w-[320px] p-6">
+<div class="flex flex-col gap-2">
+<h3 class="text-[#111418] dark:text-white text-xl font-bold">Enterprise</h3>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-extrabold text-[#111418] dark:text-white">Custom</span>
+</div>
+<p class="text-sm text-[#617589] dark:text-gray-400 mt-2">Tailored solutions for large teams.</p>
+</div>
+<div class="flex flex-col gap-4 border-t border-gray-100 dark:border-gray-800 pt-6">
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">Everything in Professional</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">Unlimited inventory items</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">Unlimited AI scans</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">24/7 Phone support</p>
+</div>
+<div class="flex gap-x-3 items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<p class="text-[#111418] dark:text-gray-200 text-sm">Custom API integration</p>
+</div>
+</div>
+<button class="mt-auto flex w-full cursor-pointer items-center justify-center rounded-xl h-12 px-4 bg-gray-100 dark:bg-gray-800 text-[#111418] dark:text-white text-base font-bold tracking-tight active:scale-[0.98] transition-transform">
+<span class="truncate">Contact Sales</span>
+</button>
+</div>
+</div>
+<!-- Page Indicator Dots -->
+<div class="flex justify-center gap-2 mb-8">
+<div class="h-1.5 w-1.5 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+<div class="h-1.5 w-4 rounded-full bg-primary"></div>
+<div class="h-1.5 w-1.5 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+</div>
+<!-- Additional Info Section -->
+<div class="px-6 py-8 bg-white dark:bg-gray-900 rounded-t-[2.5rem] shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.05)]">
+<h3 class="text-[#111418] dark:text-white text-lg font-bold mb-4">Why choose dBiller?</h3>
+<div class="grid grid-cols-1 gap-6">
+<div class="flex gap-4">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">security</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#111418] dark:text-white">Secure Payments</h4>
+<p class="text-xs text-[#617589] dark:text-gray-400 mt-1">Enterprise-grade encryption for all your transactions and client data.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">rocket_launch</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#111418] dark:text-white">Instant Setup</h4>
+<p class="text-xs text-[#617589] dark:text-gray-400 mt-1">Upgrade and unlock features immediately with zero downtime.</p>
+</div>
+</div>
+</div>
+<div class="mt-10 flex flex-col items-center gap-4 border-t border-gray-100 dark:border-gray-800 pt-6">
+<div class="flex gap-6 text-xs font-medium text-primary">
+<a class="hover:underline" href="#">Terms of Service</a>
+<a class="hover:underline" href="#">Privacy Policy</a>
+<a class="hover:underline" href="#">Restore Purchases</a>
+</div>
+<p class="text-[10px] text-gray-400 dark:text-gray-600 text-center uppercase tracking-widest font-bold">dBiller Enterprise v2.4.0</p>
+</div>
+</div>
+<!-- Safe Area Spacer for iOS -->
+<div class="h-8 bg-white dark:bg-gray-900"></div>
+</body></html>

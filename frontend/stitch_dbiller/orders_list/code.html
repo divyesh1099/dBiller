@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Orders List - dBiller</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#0b0f13",
+                        "card-dark": "#1a1f26",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen">
+<div class="relative flex min-h-screen w-full flex-col max-w-[480px] mx-auto bg-background-light dark:bg-background-dark overflow-x-hidden pb-24">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="flex items-center p-4 pb-2 justify-between">
+<div class="text-primary flex size-12 shrink-0 items-center justify-start cursor-pointer">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Orders</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-transparent text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-2xl">tune</span>
+</button>
+</div>
+</div>
+<!-- SearchBar -->
+<div class="px-4 py-2">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full shadow-sm">
+<div class="text-slate-400 dark:text-[#92adc9] flex border-none bg-white dark:bg-card-dark items-center justify-center pl-4 rounded-l-xl">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-white dark:bg-card-dark focus:border-none h-full placeholder:text-slate-400 dark:placeholder:text-[#92adc9] px-4 pl-2 text-base font-normal" placeholder="Search by ID or Vendor..." value=""/>
+</div>
+</label>
+</div>
+<!-- SegmentedButtons -->
+<div class="flex px-4 py-3">
+<div class="flex h-11 flex-1 items-center justify-center rounded-xl bg-slate-200 dark:bg-card-dark p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-background-dark has-[:checked]:shadow-sm has-[:checked]:text-primary text-slate-500 dark:text-[#92adc9] text-sm font-semibold transition-all">
+<span class="truncate">Purchase Orders</span>
+<input checked="" class="invisible w-0" name="order-type" type="radio" value="Purchase Orders"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-background-dark has-[:checked]:shadow-sm has-[:checked]:text-primary text-slate-500 dark:text-[#92adc9] text-sm font-semibold transition-all">
+<span class="truncate">Sales Orders</span>
+<input class="invisible w-0" name="order-type" type="radio" value="Sales Orders"/>
+</label>
+</div>
+</div>
+</header>
+<!-- Orders List Content -->
+<main class="flex flex-col gap-1 mt-2">
+<!-- Card 1: Purchase Order -->
+<div class="px-4 py-2">
+<div class="flex items-stretch justify-between gap-4 rounded-xl bg-white dark:bg-card-dark p-4 shadow-sm border border-slate-100 dark:border-white/5">
+<div class="flex flex-[2_2_0px] flex-col justify-between">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="bg-blue-100 dark:bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Shipped</span>
+<p class="text-slate-400 dark:text-[#92adc9] text-xs font-normal">Oct 24, 2023</p>
+</div>
+<p class="text-slate-900 dark:text-white text-lg font-bold leading-tight mt-1">#PO-8821</p>
+<p class="text-slate-500 dark:text-[#92adc9] text-sm font-medium">Supplier: TechCorp Solutions</p>
+</div>
+<div class="mt-4">
+<span class="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white text-base font-bold">
+                                $1,240.00
+                            </span>
+</div>
+</div>
+<div class="w-24 h-24 bg-center bg-no-repeat bg-cover rounded-xl shrink-0 border border-slate-100 dark:border-white/5" data-alt="Stock items related to technology order" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAXqQGg5-RlD7S9EIooodhDH0ZtwaBNuGU1KVy3U0EO3JqlwM7HlOmf7e_p3geQgnNp44pg0AG23S5GPxzYbsUj6dfpxQlhuKkM63GCPlbMljFIyTDApWEPE6JAlndUwVj7Js0Vqek_dhscYiVADo0vLMGAu_32h10q_fIsu801cAzIvopc3jo757GDnvQXvmpMfJn73Zp3RjWCZ_yjhvqZTbK2f3OlNs8r7Vk_8UdwRsq5ipd-v3WNdKuf_g4Kx0bKCTzIB36C6Etv");'></div>
+</div>
+</div>
+<!-- Card 2: Purchase Order -->
+<div class="px-4 py-2">
+<div class="flex items-stretch justify-between gap-4 rounded-xl bg-white dark:bg-card-dark p-4 shadow-sm border border-slate-100 dark:border-white/5">
+<div class="flex flex-[2_2_0px] flex-col justify-between">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Pending</span>
+<p class="text-slate-400 dark:text-[#92adc9] text-xs font-normal">Oct 23, 2023</p>
+</div>
+<p class="text-slate-900 dark:text-white text-lg font-bold leading-tight mt-1">#PO-8820</p>
+<p class="text-slate-500 dark:text-[#92adc9] text-sm font-medium">Supplier: Global Parts Co.</p>
+</div>
+<div class="mt-4">
+<span class="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white text-base font-bold">
+                                $850.50
+                            </span>
+</div>
+</div>
+<div class="w-24 h-24 bg-center bg-no-repeat bg-cover rounded-xl shrink-0 border border-slate-100 dark:border-white/5" data-alt="Automotive mechanical parts inventory" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuChsXuRtqt7fbKh-t4T7XZZ2UKEhfpvnvd4x8QQEdFVe-GS9S1xZYwRQt67hXnpyXSlGgid4-xrm8EFVy2NViWAtNqVTSbpVOzfrIsk23rpHo-Qb1MbizXg1_ianMeH72r0PZFyA7bGwOE9twYwh-K4WOrsjM20JS4JISrS4QzFU3sEXFoODH5-R_qTmcaOvfUAZHpbU1mHCITqIT4LWoc07ASQH7lMpLIRrhiHeU31fradkeIwuA8MNECKN_zKhvbahdZPWI4xlfeh");'></div>
+</div>
+</div>
+<!-- Card 3: Purchase Order -->
+<div class="px-4 py-2">
+<div class="flex items-stretch justify-between gap-4 rounded-xl bg-white dark:bg-card-dark p-4 shadow-sm border border-slate-100 dark:border-white/5">
+<div class="flex flex-[2_2_0px] flex-col justify-between">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Received</span>
+<p class="text-slate-400 dark:text-[#92adc9] text-xs font-normal">Oct 22, 2023</p>
+</div>
+<p class="text-slate-900 dark:text-white text-lg font-bold leading-tight mt-1">#PO-8815</p>
+<p class="text-slate-500 dark:text-[#92adc9] text-sm font-medium">Supplier: Office Hub</p>
+</div>
+<div class="mt-4">
+<span class="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white text-base font-bold">
+                                $2,100.00
+                            </span>
+</div>
+</div>
+<div class="w-24 h-24 bg-center bg-no-repeat bg-cover rounded-xl shrink-0 border border-slate-100 dark:border-white/5" data-alt="Office furniture and equipment boxes" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD2m4SNirL1TDFRJUl181y5g3kRYc8QHp6X_ubdRA4PvTCcFNTc6RewP3xnlRVgTwiE9GzsrSoZQz5zUy3-v4qBTKVTgeTPUr2a6QR0Gh1gCP8FYa7gX4BEhOIJiWdTBd9Uk_h0JX85LDVCmt0UuAfOKDYzsDzykWwRc5B-eXth7kAoIfGR8ZbpEFudXSAs7Y3rlLtScPzpc6-yXN-QPFnWEAKKP-6pHdNrw-24-HB1nDw2CrL3A-ZQUcOT5Lha-2ZAmr4Gr0TCTl7Y");'></div>
+</div>
+</div>
+<!-- Card 4: Purchase Order -->
+<div class="px-4 py-2 opacity-80">
+<div class="flex items-stretch justify-between gap-4 rounded-xl bg-white dark:bg-card-dark p-4 shadow-sm border border-slate-100 dark:border-white/5">
+<div class="flex flex-[2_2_0px] flex-col justify-between">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-[#92adc9] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Cancelled</span>
+<p class="text-slate-400 dark:text-[#92adc9] text-xs font-normal">Oct 20, 2023</p>
+</div>
+<p class="text-slate-900 dark:text-white text-lg font-bold leading-tight mt-1">#PO-8799</p>
+<p class="text-slate-500 dark:text-[#92adc9] text-sm font-medium">Supplier: Quick Logistics</p>
+</div>
+<div class="mt-4">
+<span class="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 text-base font-bold line-through">
+                                $45.00
+                            </span>
+</div>
+</div>
+<div class="w-24 h-24 bg-center bg-no-repeat bg-cover rounded-xl shrink-0 border border-slate-100 dark:border-white/5 grayscale" data-alt="Delivery logistics and cardboard box" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDo6M6EQQqmqwmFT-6dbConnzP70jCa2xoG07bU8NQWh62YcK6wBOv0oouzPfRAodvItsUEy0ejufhmPTc5n22ldjOQCaCCeiMYU13xN_ALj3tf-YS86zw6bV1RpAZz5yk7fN3-JA464gr6abP9C9tZJq4zVMXdMdwX_Z2bW7zW3dI5_Yi9kCdocagIXn-rK8rIv0AgQS99-gPfyh_8QtVMTnhoZ1797HqY8WkRaYwo-DZT7xTqsIvwbsG4vHkIPHvCy8gcPXpbPthi");'></div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<div class="fixed bottom-8 right-8 z-30">
+<button class="flex items-center justify-center w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 hover:scale-105 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+<!-- Bottom Navigation Spacer (iOS Home Indicator) -->
+<div class="h-8 bg-background-light dark:bg-background-dark"></div>
+</div>
+</body></html>

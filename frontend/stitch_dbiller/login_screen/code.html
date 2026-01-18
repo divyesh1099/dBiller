@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html class="light dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>dBiller - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .ios-gradient {
+            background: linear-gradient(135deg, rgba(19, 127, 236, 0.08) 0%, rgba(255, 255, 255, 1) 100%);
+        }
+        .dark .ios-gradient {
+            background: linear-gradient(135deg, rgba(19, 127, 236, 0.15) 0%, rgba(16, 25, 34, 1) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
+<div class="relative flex h-screen min-h-screen w-full flex-col ios-gradient overflow-hidden">
+<!-- Top App Bar (iOS Style) -->
+<div class="flex items-center px-4 pt-12 pb-2 justify-between">
+<div class="w-10"></div> <!-- Spacer for balance -->
+<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Login</h2>
+<div class="w-10"></div>
+</div>
+<div class="flex-1 flex flex-col justify-center px-6">
+<!-- Logo Section -->
+<div class="flex flex-col items-center mb-10">
+<div class="w-20 h-20 bg-primary rounded-xl flex items-center justify-center shadow-lg mb-4">
+<span class="material-symbols-outlined text-white text-5xl">receipt_long</span>
+</div>
+<h1 class="text-3xl font-extrabold tracking-tight text-[#111418] dark:text-white">dBiller</h1>
+<p class="text-[#617589] dark:text-gray-400 text-sm mt-1">Smart Invoicing Solutions</p>
+</div>
+<!-- Form Section -->
+<div class="space-y-4">
+<!-- Email Field -->
+<div class="flex flex-col gap-2">
+<label class="flex flex-col w-full">
+<p class="text-[#111418] dark:text-gray-200 text-sm font-medium leading-normal pb-1">Email Address</p>
+<div class="flex w-full items-stretch rounded-lg shadow-sm">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg rounded-r-none border-r-0 text-[#111418] dark:text-white dark:bg-background-dark/50 focus:outline-0 focus:ring-0 border-[#dbe0e6] dark:border-gray-700 focus:border-primary h-14 placeholder:text-[#617589] p-[15px] text-base font-normal" placeholder="example@dbiller.com" type="email"/>
+<div class="text-[#617589] dark:text-gray-400 flex border border-[#dbe0e6] dark:border-gray-700 bg-white dark:bg-background-dark/50 items-center justify-center pr-[15px] rounded-r-lg border-l-0">
+<span class="material-symbols-outlined">mail</span>
+</div>
+</div>
+</label>
+</div>
+<!-- Password Field -->
+<div class="flex flex-col gap-2">
+<label class="flex flex-col w-full">
+<div class="flex justify-between items-center pb-1">
+<p class="text-[#111418] dark:text-gray-200 text-sm font-medium leading-normal">Password</p>
+</div>
+<div class="flex w-full items-stretch rounded-lg shadow-sm">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg rounded-r-none border-r-0 text-[#111418] dark:text-white dark:bg-background-dark/50 focus:outline-0 focus:ring-0 border-[#dbe0e6] dark:border-gray-700 focus:border-primary h-14 placeholder:text-[#617589] p-[15px] text-base font-normal" placeholder="Enter your password" type="password"/>
+<div class="text-[#617589] dark:text-gray-400 flex border border-[#dbe0e6] dark:border-gray-700 bg-white dark:bg-background-dark/50 items-center justify-center pr-[15px] rounded-r-lg border-l-0">
+<span class="material-symbols-outlined">lock</span>
+</div>
+</div>
+</label>
+</div>
+<!-- Forgot Password -->
+<div class="flex justify-end">
+<a class="text-primary text-sm font-medium hover:underline" href="#">Forgot Password?</a>
+</div>
+<!-- Login Button -->
+<div class="pt-4">
+<button class="w-full bg-primary text-white font-bold h-14 rounded-xl shadow-md hover:bg-primary/90 transition-colors active:scale-[0.98]">
+                        Login
+                    </button>
+</div>
+</div>
+<!-- Alternative Login -->
+<div class="flex items-center my-8">
+<div class="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+<span class="px-3 text-[#617589] text-xs uppercase font-semibold">Or continue with</span>
+<div class="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+</div>
+<div class="flex gap-4">
+<button class="flex-1 flex items-center justify-center h-12 border border-[#dbe0e6] dark:border-gray-700 rounded-lg bg-white dark:bg-background-dark/50 active:bg-gray-50">
+<svg class="w-5 h-5 mr-2" viewbox="0 0 24 24">
+<path d="M12.48 10.92v3.28h7.84c-.24 1.84-.9 3.47-2.16 4.69a10 10 0 0 1-15.68-2.5 10 10 0 0 1 0-11.4c2.25-3.37 6.13-5.38 10.16-5.38 2.84 0 5.42 1.04 7.4 2.82l2.63-2.63C19.83 1.95 16.14 0 12 0 7.46 0 3.5 2.65 1.58 6.51a11.96 11.96 0 0 0 0 10.98C3.5 21.35 7.46 24 12 24c3.24 0 5.96-1.08 7.94-2.92 2.18-1.99 3.45-4.97 3.45-8.62 0-.58-.06-1.14-.17-1.68l-10.74.14z" fill="#EA4335"></path>
+</svg>
+<span class="text-sm font-medium">Google</span>
+</button>
+<button class="flex-1 flex items-center justify-center h-12 border border-[#dbe0e6] dark:border-gray-700 rounded-lg bg-white dark:bg-background-dark/50 active:bg-gray-50">
+<svg class="w-5 h-5 mr-2" viewbox="0 0 24 24">
+<path d="M17.05 20.28c-.96.95-2.1 1.72-3.4 1.72-1.25 0-1.88-.7-3.4-.7-1.55 0-2.3.73-3.4.73-1.4 0-2.75-.98-3.9-2.58-2.12-3-2.12-7.58 0-10.58 1.15-1.6 2.5-2.58 3.9-2.58 1.1 0 1.85.73 3.4.73 1.52 0 2.15-.73 3.4-.73 1.15 0 2.25.75 3 1.83-2.8 1.3-2.35 5.25.5 6.43-.65 1.7-1.55 2.8-2.55 3.75zM12 4.1c-.05-1.85 1.45-3.6 3.4-3.6.15 2-1.45 3.75-3.4 3.6z" fill="currentColor"></path>
+</svg>
+<span class="text-sm font-medium">Apple</span>
+</button>
+</div>
+</div>
+<!-- Footer Sign Up -->
+<div class="p-8 flex flex-col items-center">
+<p class="text-[#617589] dark:text-gray-400 text-sm">
+                Don't have an account? 
+                <a class="text-primary font-bold ml-1 hover:underline" href="#">Sign up</a>
+</p>
+<!-- iOS Indicator Spacer -->
+<div class="h-2 mt-4 w-32 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
+</div>
+</div>
+</body></html>

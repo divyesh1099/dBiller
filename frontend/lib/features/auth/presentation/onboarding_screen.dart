@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/app_colors.dart';
 import 'auth_controller.dart';
 import '../../../../core/device_utils.dart';
 
@@ -66,78 +67,118 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Onboarding')),
-      body: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                Text(
-                  'Create Account',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _licenseController,
-                  decoration: const InputDecoration(labelText: 'License Key'),
-                  validator: (v) => v!.isEmpty ? 'Required to join' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _storeNameController,
-                  decoration: const InputDecoration(labelText: 'Store Name'),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: _pickLogo,
-                      child: CircleAvatar(
-                        radius: 30,
-                        backgroundImage: _logoBytes != null ? MemoryImage(_logoBytes!) : null,
-                        child: _logoBytes == null ? const Icon(Icons.camera_alt) : null,
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            children: [
+              Row(
+                children: [
+                  IconButton(onPressed: () => context.pop(), icon: const Icon(Icons.arrow_back_ios)),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'License Activation',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    const Text('Add Logo (optional)'),
-                  ],
+                  ),
+                  const SizedBox(width: 40),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.account_balance_wallet, color: AppColors.primary, size: 36),
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(labelText: 'Username'),
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Activate Your Account',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Enter your license key to set up your organization and begin billing.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _licenseController,
+                decoration: const InputDecoration(
+                  labelText: 'License Key',
+                  hintText: 'XXXX-XXXX-XXXX-XXXX',
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
-                ),
-                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _confirmController,
-                  decoration: const InputDecoration(labelText: 'Confirm Password'),
-                  obscureText: true,
-                  validator: (v) => v != _passwordController.text ? 'Passwords do not match' : null,
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
+                validator: (v) => v == null || v.isEmpty ? 'Required to join' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _storeNameController,
+                decoration: const InputDecoration(labelText: 'Organization Name'),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: _pickLogo,
+                    child: CircleAvatar(
+                      radius: 26,
+                      backgroundImage: _logoBytes != null ? MemoryImage(_logoBytes!) : null,
+                      child: _logoBytes == null ? const Icon(Icons.camera_alt) : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Add Logo (optional)'),
+                ],
+              ),
+              const SizedBox(height: 18),
+              TextFormField(
+                controller: _usernameController,
+                decoration: const InputDecoration(labelText: 'Username'),
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                validator: (v) => v != null && v.length < 6 ? 'Min 6 chars' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _confirmController,
+                decoration: const InputDecoration(labelText: 'Confirm Password'),
+                obscureText: true,
+                validator: (v) => v != _passwordController.text ? 'Passwords do not match' : null,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
                   onPressed: _isLoading ? null : _submit,
-                  child: _isLoading ? const CircularProgressIndicator() : const Text('Register'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Activate Organization'),
                 ),
-                TextButton(
-                  onPressed: () => context.go('/login'),
-                  child: const Text('Already have an account? Login'),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => context.go('/login'),
+                child: const Text('Already have an account? Login'),
+              ),
+            ],
           ),
         ),
       ),
