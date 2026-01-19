@@ -443,13 +443,14 @@ def ensure_admin_email_present(db: database.SessionLocal, org_id: Optional[int])
         db.query(models.User)
         .filter(
             models.User.organization_id == org_id,
-            models.User.role == auth.ROLE_ADMIN,
+            models.User.role.in_([auth.ROLE_ADMIN, auth.ROLE_SUPERADMIN]),
             models.User.is_active == True,
             models.User.email.isnot(None),
+            models.User.email != "",
         )
         .first()
     )
-    if not admin or not admin.email or not admin.email.strip():
+    if not admin:
         raise HTTPException(status_code=400, detail="Admin email is required for subscription management")
 
 def require_permission(permission_name: str):
