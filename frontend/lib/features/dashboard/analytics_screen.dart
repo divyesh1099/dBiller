@@ -1,12 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/app_colors.dart';
+import '../../core/formatters.dart';
+import '../invoices/data/invoice.dart';
+import '../invoices/presentation/invoices_controller.dart';
+import '../items/data/item.dart';
+import '../items/presentation/items_controller.dart';
+import '../orders/data/order.dart';
+import '../orders/presentation/orders_controller.dart';
 
-class AnalyticsScreen extends StatelessWidget {
+class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final invoicesAsync = ref.watch(invoicesProvider);
+    final ordersAsync = ref.watch(ordersProvider);
+    final itemsAsync = ref.watch(itemsProvider);
+    final invoices = invoicesAsync.asData?.value ?? const <Invoice>[];
+    final orders = ordersAsync.asData?.value ?? const <Order>[];
+    final items = itemsAsync.asData?.value ?? const <Item>[];
+    final currency = invoices.isNotEmpty ? invoices.first.currency : 'USD';
+    final totalRevenue = invoices
+        .where((invoice) => invoice.status.toLowerCase() == 'paid')
+        .fold(0.0, (sum, invoice) => sum + invoice.totalAmount);
+    final paidInvoices = invoices.where((invoice) => invoice.status.toLowerCase() == 'paid').length;
+    final openOrders = orders.where((order) {
+      final status = order.status.toLowerCase();
+      return status != 'delivered' && status != 'completed' && status != 'cancelled';
+    }).length;
+    final lowStockItems = items.where(_isLowStock).length;
+    final loading = invoicesAsync.isLoading || ordersAsync.isLoading || itemsAsync.isLoading;
+    final hasError = invoicesAsync.hasError || ordersAsync.hasError || itemsAsync.hasError;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -19,9 +46,28 @@ class AnalyticsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _MetricCard(title: 'Total Revenue', value: '\$12,450', change: '+12%'),
-            _MetricCard(title: 'Orders', value: '342', change: '+4%'),
-            _MetricCard(title: 'Low Stock Items', value: '18', change: '-3%'),
+            if (loading) const LinearProgressIndicator(),
+            if (hasError)
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Text('Unable to load analytics right now.', style: TextStyle(color: AppColors.textMuted)),
+              ),
+            const SizedBox(height: 12),
+            _MetricCard(
+              title: 'Total Revenue',
+              value: formatCurrency(totalRevenue, currency: currency),
+              helper: '$paidInvoices paid invoices',
+            ),
+            _MetricCard(
+              title: 'Orders',
+              value: orders.length.toString(),
+              helper: '$openOrders open orders',
+            ),
+            _MetricCard(
+              title: 'Low Stock Items',
+              value: lowStockItems.toString(),
+              helper: 'Needs replenishment',
+            ),
             const SizedBox(height: 12),
             _ChartPlaceholder(title: 'Sales Trend'),
             const SizedBox(height: 12),
@@ -36,9 +82,9 @@ class AnalyticsScreen extends StatelessWidget {
 class _MetricCard extends StatelessWidget {
   final String title;
   final String value;
-  final String change;
+  final String helper;
 
-  const _MetricCard({required this.title, required this.value, required this.change});
+  const _MetricCard({required this.title, required this.value, required this.helper});
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +93,20 @@ class _MetricCard extends StatelessWidget {
       child: ListTile(
         title: Text(title, style: const TextStyle(color: AppColors.textMuted)),
         subtitle: Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        trailing: Text(change, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+        trailing: Text(helper, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
       ),
     );
   }
+}
+
+bool _isLowStock(Item item) {
+  if (item.minStock != null && item.stock <= item.minStock!) {
+    return true;
+  }
+  if (item.reorderPoint != null && item.stock <= item.reorderPoint!) {
+    return true;
+  }
+  return false;
 }
 
 class _ChartPlaceholder extends StatelessWidget {

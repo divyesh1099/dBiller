@@ -68,6 +68,11 @@ class UserRepository {
     return UserProfile.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<UserProfile> fetchCurrentUser() async {
+    final response = await _client.get('/me');
+    return UserProfile.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<UserProfile> createUser(UserDraft draft) async {
     final response = await _client.post('/users/', data: draft.toJson());
     return UserProfile.fromJson(response.data as Map<String, dynamic>);

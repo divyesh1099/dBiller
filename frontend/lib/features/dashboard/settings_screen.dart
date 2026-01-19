@@ -3,12 +3,57 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/app_colors.dart';
 import '../auth/presentation/auth_controller.dart';
+import '../users/presentation/users_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(currentUserProvider);
+    final user = userAsync.asData?.value;
+    final isAdmin = user?.role == 'admin' || user?.role == 'superadmin';
+    final isSuperadmin = user?.role == 'superadmin';
+    final adminTiles = <Widget>[
+      _NavTile(
+        icon: Icons.groups,
+        label: 'User Management',
+        onTap: () => context.push('/users'),
+      ),
+      _NavTile(
+        icon: Icons.security,
+        label: 'Roles',
+        onTap: () => context.push('/roles'),
+      ),
+      _NavTile(
+        icon: Icons.grid_view,
+        label: 'Permissions Matrix',
+        onTap: () => context.push('/permissions'),
+      ),
+      _NavTile(
+        icon: Icons.corporate_fare,
+        label: 'Organizations',
+        onTap: () => context.push('/organizations'),
+      ),
+      _NavTile(
+        icon: Icons.subscriptions,
+        label: 'Subscription Plans',
+        onTap: () => context.push('/subscriptions'),
+      ),
+      if (isSuperadmin)
+        _NavTile(
+          icon: Icons.workspace_premium,
+          label: 'Plan Manager',
+          onTap: () => context.push('/plans'),
+        ),
+      if (isSuperadmin)
+        _NavTile(
+          icon: Icons.admin_panel_settings,
+          label: 'Superadmin Dashboard',
+          onTap: () => context.push('/superadmin'),
+        ),
+    ];
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -17,6 +62,8 @@ class SettingsScreen extends ConsumerWidget {
             'Settings',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
+          if (userAsync.isLoading) const SizedBox(height: 12),
+          if (userAsync.isLoading) const LinearProgressIndicator(),
           const SizedBox(height: 16),
           _Section(title: 'Operations', children: [
             _NavTile(
@@ -47,53 +94,12 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.push('/checkout'),
             ),
           ]),
-          _Section(title: 'Administration', children: [
-            _NavTile(
-              icon: Icons.groups,
-              label: 'User Management',
-              onTap: () => context.push('/users'),
-            ),
-            _NavTile(
-              icon: Icons.security,
-              label: 'Roles',
-              onTap: () => context.push('/roles'),
-            ),
-            _NavTile(
-              icon: Icons.grid_view,
-              label: 'Permissions Matrix',
-              onTap: () => context.push('/permissions'),
-            ),
-            _NavTile(
-              icon: Icons.corporate_fare,
-              label: 'Organizations',
-              onTap: () => context.push('/organizations'),
-            ),
-            _NavTile(
-              icon: Icons.workspace_premium,
-              label: 'Plan Manager',
-              onTap: () => context.push('/plans'),
-            ),
-            _NavTile(
-              icon: Icons.subscriptions,
-              label: 'Subscription Plans',
-              onTap: () => context.push('/subscriptions'),
-            ),
-            _NavTile(
-              icon: Icons.admin_panel_settings,
-              label: 'Superadmin Dashboard',
-              onTap: () => context.push('/superadmin'),
-            ),
-          ]),
+          if (isAdmin) _Section(title: 'Administration', children: adminTiles),
           _Section(title: 'Insights', children: [
             _NavTile(
               icon: Icons.analytics,
               label: 'Sales & Inventory Analytics',
               onTap: () => context.push('/analytics'),
-            ),
-            _NavTile(
-              icon: Icons.heat_pump,
-              label: 'Dashboard Heatmap',
-              onTap: () => context.push('/heatmap'),
             ),
           ]),
           const SizedBox(height: 12),

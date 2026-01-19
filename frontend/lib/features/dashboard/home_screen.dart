@@ -7,6 +7,7 @@ import '../invoices/data/invoice.dart';
 import '../invoices/presentation/invoices_controller.dart';
 import '../items/data/item.dart';
 import '../items/presentation/items_controller.dart';
+import '../users/presentation/users_controller.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -15,6 +16,11 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final invoicesAsync = ref.watch(invoicesProvider);
     final itemsAsync = ref.watch(itemsProvider);
+    final userAsync = ref.watch(currentUserProvider);
+    final user = userAsync.asData?.value;
+    final displayName = (user?.fullName != null && user!.fullName!.isNotEmpty)
+        ? user.fullName!
+        : (user?.username ?? 'User');
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -22,7 +28,10 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Header(),
+            _Header(
+              name: displayName,
+              profilePhoto: user?.profilePhoto,
+            ),
             const SizedBox(height: 12),
             _StatsRow(invoicesAsync: invoicesAsync, itemsAsync: itemsAsync),
             const SizedBox(height: 16),
@@ -134,6 +143,11 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
+  final String name;
+  final String? profilePhoto;
+
+  const _Header({required this.name, this.profilePhoto});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -143,16 +157,17 @@ class _Header extends StatelessWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: AppColors.primary.withOpacity(0.2),
-            child: const Icon(Icons.person, color: Colors.white),
+            backgroundImage: profilePhoto != null ? NetworkImage(profilePhoto!) : null,
+            child: profilePhoto == null ? const Icon(Icons.person, color: Colors.white) : null,
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Welcome back', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
-                SizedBox(height: 4),
-                Text('Alex Johnson', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text('Welcome back', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                const SizedBox(height: 4),
+                Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -176,14 +191,15 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     double totalSales = 0;
     int activeInvoices = 0;
+    int paidInvoices = 0;
     invoicesAsync.whenData((invoices) {
       for (final invoice in invoices) {
         final status = (invoice.status ?? '').toString().toLowerCase();
-        if (status != 'paid') {
-          activeInvoices += 1;
-        }
         if (status == 'paid') {
           totalSales += invoice.totalAmount;
+          paidInvoices += 1;
+        } else {
+          activeInvoices += 1;
         }
       }
     });
@@ -220,10 +236,13 @@ class _StatsRow extends StatelessWidget {
                 ),
                 const Spacer(),
                 Row(
-                  children: const [
-                    Icon(Icons.trending_up, color: Colors.white, size: 18),
-                    SizedBox(width: 6),
-                    Text('12% vs last month', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  children: [
+                    const Icon(Icons.receipt_long, color: Colors.white, size: 18),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Paid invoices: $paidInvoices',
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
                   ],
                 ),
               ],

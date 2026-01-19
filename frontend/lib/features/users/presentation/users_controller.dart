@@ -9,3 +9,7 @@ final usersProvider = FutureProvider<List<UserProfile>>((ref) async {
 final userProvider = FutureProvider.family<UserProfile, int>((ref, id) async {
   return ref.read(userRepositoryProvider).fetchUser(id);
 });
+
+final currentUserProvider = FutureProvider<UserProfile>((ref) async {
+  return ref.read(userRepositoryProvider).fetchCurrentUser();
+});

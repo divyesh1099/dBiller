@@ -20,11 +20,19 @@ class AuthRepository {
       );
       return response.data['access_token'];
     } on DioException catch (e) {
+      if (e.response == null) {
+        throw 'Network error: ${e.message}';
+      }
       final data = e.response?.data;
+      if (data == null) {
+        throw 'Server error: ${e.response?.statusCode} ${e.response?.statusMessage}';
+      }
       if (data is Map<String, dynamic> && data.containsKey('detail')) {
         throw data['detail'];
       }
       throw data.toString();
+    } catch (e) {
+      throw e.toString();
     }
   }
 
@@ -41,11 +49,19 @@ class AuthRepository {
       });
       await _client.post('/register', data: form);
     } on DioException catch (e) {
+      if (e.response == null) {
+        throw 'Network error: ${e.message}';
+      }
       final data = e.response?.data;
+      if (data == null) {
+        throw 'Server error: ${e.response?.statusCode} ${e.response?.statusMessage}';
+      }
       if (data is Map<String, dynamic> && data.containsKey('detail')) {
         throw data['detail'];
       }
       throw data.toString();
+    } catch (e) {
+      throw e.toString();
     }
   }
 }

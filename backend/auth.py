@@ -11,6 +11,8 @@ import models, schemas, database
 SECRET_KEY = "SECRET_KEY_GOES_HERE" # In production, use env variable
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 300
+ROLE_SUPERADMIN = "superadmin"
+ROLE_ADMIN = "admin"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -49,3 +51,19 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+
+def is_superadmin(user: models.User) -> bool:
+    return user.role == ROLE_SUPERADMIN
+
+def is_admin(user: models.User) -> bool:
+    return user.role in {ROLE_ADMIN, ROLE_SUPERADMIN}
+
+def require_admin(current_user: models.User = Depends(get_current_user)) -> models.User:
+    if not is_admin(current_user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return current_user
+
+def require_superadmin(current_user: models.User = Depends(get_current_user)) -> models.User:
+    if not is_superadmin(current_user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Superadmin access required")
+    return current_user

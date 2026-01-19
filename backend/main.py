@@ -52,7 +52,7 @@ def ensure_optional_columns():
     
     # Map of table -> list of (column_name, column_type_def)
     required_columns = {
-        "products": [("category", "VARCHAR")],
+        "products": [("category", "VARCHAR"), ("organization_id", "INTEGER")],
         "stores": [("dummy_check", "INTEGER")],
         "users": [
             ("email", "VARCHAR"),
@@ -131,6 +131,9 @@ def ensure_optional_columns():
             ("sku", "VARCHAR"),
             ("image_url", "VARCHAR"),
         ],
+        "bills": [
+            ("organization_id", "INTEGER"),
+        ],
     }
 
     try:
@@ -152,6 +155,61 @@ def ensure_optional_columns():
         print(f"Schema migration failed: {e}")
 
 ensure_optional_columns()
+
+DEFAULT_PERMISSIONS = [
+    ("users.manage", "Create and manage users"),
+    ("roles.manage", "Create and manage roles"),
+    ("permissions.manage", "Assign permissions to roles"),
+    ("subscriptions.manage", "Manage subscription plans"),
+    ("subscriptions.view", "View subscription plans"),
+    ("organizations.manage", "Manage organizations"),
+    ("invoices.manage", "Create and manage invoices"),
+    ("orders.manage", "Create and manage orders"),
+    ("inventory.manage", "Create and manage inventory items"),
+    ("suppliers.manage", "Create and manage suppliers"),
+    ("checkout.manage", "Create checkout bills"),
+]
+
+def seed_permissions():
+    db = database.SessionLocal()
+    try:
+        existing = {p.name for p in db.query(models.Permission).all()}
+        for name, description in DEFAULT_PERMISSIONS:
+            if name in existing:
+                continue
+            db.add(models.Permission(name=name, description=description))
+        db.commit()
+    finally:
+        db.close()
+
+def bootstrap_superadmin():
+    username = os.getenv("SUPERADMIN_USERNAME")
+    password = os.getenv("SUPERADMIN_PASSWORD")
+    if not username or not password:
+        return
+    db = database.SessionLocal()
+    try:
+        existing_superadmin = (
+            db.query(models.User).filter(models.User.role == auth.ROLE_SUPERADMIN).first()
+        )
+        if existing_superadmin:
+            return
+        existing_user = db.query(models.User).filter(models.User.username == username).first()
+        if existing_user:
+            return
+        db_user = models.User(
+            username=username,
+            hashed_password=auth.get_password_hash(password),
+            role=auth.ROLE_SUPERADMIN,
+            is_active=True,
+        )
+        db.add(db_user)
+        db.commit()
+    finally:
+        db.close()
+
+seed_permissions()
+bootstrap_superadmin()
 
 
 app = FastAPI(title="dBiller API")
@@ -190,6 +248,32 @@ def normalize_product_url(product: models.Product):
     """Pass-through: Validation moved to client-side to support relative local URLs."""
     return product
 
+def require_org_id(current_user: schemas.User) -> Optional[int]:
+    if auth.is_superadmin(current_user):
+        return None
+    if current_user.organization_id is None:
+        raise HTTPException(status_code=400, detail="Organization not set for user")
+    return current_user.organization_id
+
+def ensure_org_access(entity_org_id: Optional[int], current_user: schemas.User):
+    if auth.is_superadmin(current_user):
+        return
+    if entity_org_id is None or entity_org_id != current_user.organization_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+def ensure_admin_present(db: database.SessionLocal, org_id: Optional[int], exclude_user_id: Optional[int] = None):
+    if org_id is None:
+        return
+    query = db.query(models.User).filter(
+        models.User.organization_id == org_id,
+        models.User.role == auth.ROLE_ADMIN,
+        models.User.is_active == True,
+    )
+    if exclude_user_id is not None:
+        query = query.filter(models.User.id != exclude_user_id)
+    if query.count() == 0:
+        raise HTTPException(status_code=400, detail="At least one admin is required")
+
 def get_roles_by_ids(db: database.SessionLocal, role_ids: Optional[List[int]]):
     if not role_ids:
         return []
@@ -220,15 +304,16 @@ def get_subscription_by_id(db: database.SessionLocal, subscription_id: Optional[
         raise HTTPException(status_code=404, detail="Subscription not found")
     return subscription
 
-def get_supplier_by_id(db: database.SessionLocal, supplier_id: Optional[int]):
+def get_supplier_by_id(db: database.SessionLocal, supplier_id: Optional[int], current_user: schemas.User):
     if supplier_id is None:
         return None
     supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
+    ensure_org_access(supplier.organization_id, current_user)
     return supplier
 
-def build_order_items(db: database.SessionLocal, items: List[schemas.OrderItemCreate]):
+def build_order_items(db: database.SessionLocal, items: List[schemas.OrderItemCreate], current_user: schemas.User):
     if not items:
         raise HTTPException(status_code=400, detail="Order requires at least one item")
     order_items = []
@@ -246,6 +331,7 @@ def build_order_items(db: database.SessionLocal, items: List[schemas.OrderItemCr
             db_item = db.query(models.Item).filter(models.Item.id == item.item_id).first()
             if not db_item:
                 raise HTTPException(status_code=404, detail=f"Item with id {item.item_id} not found")
+            ensure_org_access(db_item.organization_id, current_user)
             if unit_price is None:
                 unit_price = db_item.unit_price
             if not description:
@@ -277,7 +363,7 @@ def build_order_items(db: database.SessionLocal, items: List[schemas.OrderItemCr
         )
     return subtotal, order_items
 
-def build_invoice_items(db: database.SessionLocal, items: List[schemas.InvoiceItemCreate]):
+def build_invoice_items(db: database.SessionLocal, items: List[schemas.InvoiceItemCreate], current_user: schemas.User):
     if not items:
         raise HTTPException(status_code=400, detail="Invoice requires at least one item")
     invoice_items = []
@@ -293,6 +379,7 @@ def build_invoice_items(db: database.SessionLocal, items: List[schemas.InvoiceIt
             db_item = db.query(models.Item).filter(models.Item.id == item.item_id).first()
             if not db_item:
                 raise HTTPException(status_code=404, detail=f"Item with id {item.item_id} not found")
+            ensure_org_access(db_item.organization_id, current_user)
             if unit_price is None:
                 unit_price = db_item.unit_price
             if not description:
@@ -377,6 +464,12 @@ def login_for_access_token(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+@app.get("/me", response_model=schemas.User)
+def read_current_user(
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    return current_user
+
 @app.post("/register", response_model=schemas.User)
 async def register_user(
     username: str = Form(...),
@@ -398,7 +491,7 @@ async def register_user(
         raise HTTPException(status_code=400, detail="Username already registered")
     
     hashed_password = auth.get_password_hash(password)
-    db_user = models.User(username=username, hashed_password=hashed_password, role="admin") 
+    db_user = models.User(username=username, hashed_password=hashed_password, role="admin")
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -413,12 +506,24 @@ async def register_user(
     db.add(db_device)
     db.commit()
 
-    # Optional: create store
+    # Optional: upload logo once for organization/store reuse
     store_logo_url = None
     if store_logo:
         store_logo_url = await storage.upload_file_to_r2(store_logo, folder="store-logos")
         if store_logo_url and not store_logo_url.startswith("http"):
             store_logo_url = f"{PUBLIC_BASE_URL}{store_logo_url}"
+    # Create organization for the newly registered user
+    org_name = store_name or f"{username}'s Organization"
+    db_org = models.Organization(name=org_name, logo_url=store_logo_url)
+    db.add(db_org)
+    db.commit()
+    db.refresh(db_org)
+
+    db_user.organization_id = db_org.id
+    db.commit()
+    db.refresh(db_user)
+
+    # Optional: create store
     if store_name or store_logo_url:
         final_name = store_name or f"{username}'s Store"
         store = models.Store(
@@ -432,12 +537,24 @@ async def register_user(
     return db_user
 
 @app.post("/users/", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: database.SessionLocal = Depends(database.get_db)):
+def create_user(
+    user: schemas.UserCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.require_admin),
+):
     db_user = db.query(models.User).filter(models.User.username == user.username).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
-    if user.organization_id is not None:
-        org = db.query(models.Organization).filter(models.Organization.id == user.organization_id).first()
+    if user.role == auth.ROLE_SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Superadmin can only be created by backend")
+    organization_id = user.organization_id
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        if organization_id is not None and organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Cannot create user for another organization")
+        organization_id = org_id
+    elif organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
     hashed_password = auth.get_password_hash(user.password)
@@ -450,7 +567,7 @@ def create_user(user: schemas.UserCreate, db: database.SessionLocal = Depends(da
         email=user.email,
         phone=user.phone,
         profile_photo=user.profile_photo,
-        organization_id=user.organization_id,
+        organization_id=organization_id,
     )
     db_user.active_account = user.active_account
     if user.role_ids is not None:
@@ -467,23 +584,16 @@ def create_user(user: schemas.UserCreate, db: database.SessionLocal = Depends(da
 def create_permission(
     permission: schemas.PermissionCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
-    existing = db.query(models.Permission).filter(models.Permission.name == permission.name).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Permission already exists")
-    db_permission = models.Permission(**permission.dict())
-    db.add(db_permission)
-    db.commit()
-    db.refresh(db_permission)
-    return db_permission
+    raise HTTPException(status_code=403, detail="Permissions are fixed and cannot be modified")
 
 @app.get("/permissions/", response_model=List[schemas.Permission])
 def read_permissions(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     return db.query(models.Permission).offset(skip).limit(limit).all()
 
@@ -491,7 +601,7 @@ def read_permissions(
 def read_permission(
     permission_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     permission = db.query(models.Permission).filter(models.Permission.id == permission_id).first()
     if not permission:
@@ -503,40 +613,23 @@ def update_permission(
     permission_id: int,
     permission: schemas.PermissionUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
-    db_permission = db.query(models.Permission).filter(models.Permission.id == permission_id).first()
-    if not db_permission:
-        raise HTTPException(status_code=404, detail="Permission not found")
-    if permission.name and permission.name != db_permission.name:
-        existing = db.query(models.Permission).filter(models.Permission.name == permission.name).first()
-        if existing:
-            raise HTTPException(status_code=400, detail="Permission already exists")
-        db_permission.name = permission.name
-    if permission.description is not None:
-        db_permission.description = permission.description
-    db.commit()
-    db.refresh(db_permission)
-    return db_permission
+    raise HTTPException(status_code=403, detail="Permissions are fixed and cannot be modified")
 
 @app.delete("/permissions/{permission_id}")
 def delete_permission(
     permission_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
-    db_permission = db.query(models.Permission).filter(models.Permission.id == permission_id).first()
-    if not db_permission:
-        raise HTTPException(status_code=404, detail="Permission not found")
-    db.delete(db_permission)
-    db.commit()
-    return {"message": "Permission deleted successfully"}
+    raise HTTPException(status_code=403, detail="Permissions are fixed and cannot be modified")
 
 @app.post("/roles/", response_model=schemas.Role)
 def create_role(
     role: schemas.RoleCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     existing = db.query(models.Role).filter(models.Role.name == role.name).first()
     if existing:
@@ -552,7 +645,7 @@ def read_roles(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     return db.query(models.Role).offset(skip).limit(limit).all()
 
@@ -560,7 +653,7 @@ def read_roles(
 def read_role(
     role_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     role = db.query(models.Role).filter(models.Role.id == role_id).first()
     if not role:
@@ -572,7 +665,7 @@ def update_role(
     role_id: int,
     role: schemas.RoleUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     db_role = db.query(models.Role).filter(models.Role.id == role_id).first()
     if not db_role:
@@ -593,7 +686,7 @@ def update_role_permissions(
     role_id: int,
     payload: schemas.PermissionAssignment,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     db_role = db.query(models.Role).filter(models.Role.id == role_id).first()
     if not db_role:
@@ -607,7 +700,7 @@ def update_role_permissions(
 def delete_role(
     role_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     db_role = db.query(models.Role).filter(models.Role.id == role_id).first()
     if not db_role:
@@ -622,19 +715,29 @@ def read_users(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
-    return db.query(models.User).offset(skip).limit(limit).all()
+    if auth.is_superadmin(current_user):
+        return db.query(models.User).offset(skip).limit(limit).all()
+    org_id = require_org_id(current_user)
+    return (
+        db.query(models.User)
+        .filter(models.User.organization_id == org_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 @app.get("/users/{user_id}", response_model=schemas.User)
 def read_user(
     user_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
+    ensure_org_access(db_user.organization_id, current_user)
     return db_user
 
 @app.put("/users/{user_id}", response_model=schemas.User)
@@ -642,11 +745,30 @@ def update_user(
     user_id: int,
     user: schemas.UserUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
+    ensure_org_access(db_user.organization_id, current_user)
+    if user.role == auth.ROLE_SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Superadmin can only be created by backend")
+    if user.organization_id is not None:
+        if not auth.is_superadmin(current_user) and user.organization_id != db_user.organization_id:
+            raise HTTPException(status_code=403, detail="Cannot move users across organizations")
+        org = db.query(models.Organization).filter(models.Organization.id == user.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+    current_org_id = db_user.organization_id
+    was_admin = db_user.role == auth.ROLE_ADMIN and db_user.is_active
+    new_role = user.role if user.role is not None else db_user.role
+    new_active = user.active_account if user.active_account is not None else db_user.is_active
+    new_org_id = user.organization_id if user.organization_id is not None else db_user.organization_id
+    if was_admin and (new_role != auth.ROLE_ADMIN or not new_active or new_org_id != current_org_id):
+        ensure_admin_present(db, current_org_id, exclude_user_id=db_user.id)
+    if new_org_id != current_org_id and new_org_id is not None:
+        if new_role != auth.ROLE_ADMIN or not new_active:
+            ensure_admin_present(db, new_org_id, exclude_user_id=None)
     if user.username and user.username != db_user.username:
         existing = db.query(models.User).filter(models.User.username == user.username).first()
         if existing:
@@ -667,9 +789,6 @@ def update_user(
     if user.profile_photo is not None:
         db_user.profile_photo = user.profile_photo
     if user.organization_id is not None:
-        org = db.query(models.Organization).filter(models.Organization.id == user.organization_id).first()
-        if not org:
-            raise HTTPException(status_code=404, detail="Organization not found")
         db_user.organization_id = user.organization_id
     if user.password:
         db_user.hashed_password = auth.get_password_hash(user.password)
@@ -686,11 +805,12 @@ def set_user_roles(
     user_id: int,
     payload: schemas.RoleAssignment,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
+    ensure_org_access(db_user.organization_id, current_user)
     db_user.roles = get_roles_by_ids(db, payload.role_ids)
     db.commit()
     db.refresh(db_user)
@@ -701,11 +821,12 @@ def set_user_permissions(
     user_id: int,
     payload: schemas.PermissionAssignment,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
+    ensure_org_access(db_user.organization_id, current_user)
     db_user.permissions = get_permissions_by_ids(db, payload.permission_ids)
     db.commit()
     db.refresh(db_user)
@@ -715,11 +836,14 @@ def set_user_permissions(
 def delete_user(
     user_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
+    ensure_org_access(db_user.organization_id, current_user)
+    if db_user.role == auth.ROLE_ADMIN and db_user.is_active:
+        ensure_admin_present(db, db_user.organization_id, exclude_user_id=db_user.id)
     db.delete(db_user)
     db.commit()
     return {"message": "User deleted successfully"}
@@ -729,14 +853,24 @@ def delete_user(
 def create_organization(
     organization: schemas.OrganizationCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
+    if not auth.is_superadmin(current_user) and current_user.organization_id is not None:
+        raise HTTPException(status_code=400, detail="User already belongs to an organization")
     if organization.subscription_id is not None:
-        get_subscription_by_id(db, organization.subscription_id)
+        subscription = get_subscription_by_id(db, organization.subscription_id)
+        if subscription and not subscription.is_active and not auth.is_superadmin(current_user):
+            raise HTTPException(status_code=400, detail="Subscription is not active")
     db_org = models.Organization(**organization.dict())
     db.add(db_org)
     db.commit()
     db.refresh(db_org)
+    if not auth.is_superadmin(current_user):
+        db_user = db.query(models.User).filter(models.User.id == current_user.id).first()
+        if db_user:
+            db_user.organization_id = db_org.id
+            db_user.role = auth.ROLE_ADMIN
+        db.commit()
     return db_org
 
 @app.get("/organizations/", response_model=List[schemas.Organization])
@@ -744,19 +878,25 @@ def read_organizations(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
-    return db.query(models.Organization).offset(skip).limit(limit).all()
+    if auth.is_superadmin(current_user):
+        return db.query(models.Organization).offset(skip).limit(limit).all()
+    org_id = require_org_id(current_user)
+    organization = db.query(models.Organization).filter(models.Organization.id == org_id).first()
+    return [organization] if organization else []
 
 @app.get("/organizations/{organization_id}", response_model=schemas.Organization)
 def read_organization(
     organization_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     organization = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
     if not organization:
         raise HTTPException(status_code=404, detail="Organization not found")
+    if not auth.is_superadmin(current_user) and current_user.organization_id != organization.id:
+        raise HTTPException(status_code=403, detail="Access denied")
     return organization
 
 @app.put("/organizations/{organization_id}", response_model=schemas.Organization)
@@ -764,14 +904,18 @@ def update_organization(
     organization_id: int,
     organization: schemas.OrganizationUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     db_org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
     if not db_org:
         raise HTTPException(status_code=404, detail="Organization not found")
+    if not auth.is_superadmin(current_user) and current_user.organization_id != db_org.id:
+        raise HTTPException(status_code=403, detail="Access denied")
     update_data = organization.dict(exclude_unset=True)
     if "subscription_id" in update_data and update_data["subscription_id"] is not None:
-        get_subscription_by_id(db, update_data["subscription_id"])
+        subscription = get_subscription_by_id(db, update_data["subscription_id"])
+        if subscription and not subscription.is_active and not auth.is_superadmin(current_user):
+            raise HTTPException(status_code=400, detail="Subscription is not active")
     for key, value in update_data.items():
         setattr(db_org, key, value)
     db.commit()
@@ -782,7 +926,7 @@ def update_organization(
 def delete_organization(
     organization_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_superadmin),
 ):
     db_org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
     if not db_org:
@@ -796,7 +940,7 @@ def delete_organization(
 def create_subscription(
     subscription: schemas.SubscriptionCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_superadmin),
 ):
     db_subscription = models.Subscription(**subscription.dict())
     db.add(db_subscription)
@@ -809,18 +953,23 @@ def read_subscriptions(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
-    return db.query(models.Subscription).offset(skip).limit(limit).all()
+    query = db.query(models.Subscription)
+    if not auth.is_superadmin(current_user):
+        query = query.filter(models.Subscription.is_active == True)
+    return query.offset(skip).limit(limit).all()
 
 @app.get("/subscriptions/{subscription_id}", response_model=schemas.Subscription)
 def read_subscription(
     subscription_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_admin),
 ):
     subscription = db.query(models.Subscription).filter(models.Subscription.id == subscription_id).first()
     if not subscription:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+    if not auth.is_superadmin(current_user) and not subscription.is_active:
         raise HTTPException(status_code=404, detail="Subscription not found")
     return subscription
 
@@ -829,7 +978,7 @@ def update_subscription(
     subscription_id: int,
     subscription: schemas.SubscriptionUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_superadmin),
 ):
     db_subscription = db.query(models.Subscription).filter(models.Subscription.id == subscription_id).first()
     if not db_subscription:
@@ -845,7 +994,7 @@ def update_subscription(
 def delete_subscription(
     subscription_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(auth.require_superadmin),
 ):
     db_subscription = db.query(models.Subscription).filter(models.Subscription.id == subscription_id).first()
     if not db_subscription:
@@ -861,11 +1010,19 @@ def create_supplier(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
-    if supplier.organization_id is not None:
-        org = db.query(models.Organization).filter(models.Organization.id == supplier.organization_id).first()
+    organization_id = supplier.organization_id
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        if organization_id is not None and organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Cannot create supplier for another organization")
+        organization_id = org_id
+    elif organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
-    db_supplier = models.Supplier(**supplier.dict())
+    supplier_data = supplier.dict()
+    supplier_data["organization_id"] = organization_id
+    db_supplier = models.Supplier(**supplier_data)
     db.add(db_supplier)
     db.commit()
     db.refresh(db_supplier)
@@ -878,7 +1035,11 @@ def read_suppliers(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
-    return db.query(models.Supplier).offset(skip).limit(limit).all()
+    query = db.query(models.Supplier)
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        query = query.filter(models.Supplier.organization_id == org_id)
+    return query.offset(skip).limit(limit).all()
 
 @app.get("/suppliers/{supplier_id}", response_model=schemas.Supplier)
 def read_supplier(
@@ -889,6 +1050,7 @@ def read_supplier(
     supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
+    ensure_org_access(supplier.organization_id, current_user)
     return supplier
 
 @app.put("/suppliers/{supplier_id}", response_model=schemas.Supplier)
@@ -901,7 +1063,10 @@ def update_supplier(
     db_supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
     if not db_supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
+    ensure_org_access(db_supplier.organization_id, current_user)
     if supplier.organization_id is not None:
+        if not auth.is_superadmin(current_user) and supplier.organization_id != db_supplier.organization_id:
+            raise HTTPException(status_code=403, detail="Cannot move supplier across organizations")
         org = db.query(models.Organization).filter(models.Organization.id == supplier.organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
@@ -921,6 +1086,7 @@ def delete_supplier(
     db_supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
     if not db_supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
+    ensure_org_access(db_supplier.organization_id, current_user)
     db.delete(db_supplier)
     db.commit()
     return {"message": "Supplier deleted successfully"}
@@ -933,14 +1099,20 @@ def create_item(
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
     if item.supplier_id is not None:
-        supplier = db.query(models.Supplier).filter(models.Supplier.id == item.supplier_id).first()
-        if not supplier:
-            raise HTTPException(status_code=404, detail="Supplier not found")
-    if item.organization_id is not None:
-        org = db.query(models.Organization).filter(models.Organization.id == item.organization_id).first()
+        get_supplier_by_id(db, item.supplier_id, current_user)
+    organization_id = item.organization_id
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        if organization_id is not None and organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Cannot create item for another organization")
+        organization_id = org_id
+    elif organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
-    db_item = models.Item(**item.dict())
+    item_data = item.dict()
+    item_data["organization_id"] = organization_id
+    db_item = models.Item(**item_data)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
@@ -953,7 +1125,11 @@ def read_items(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
-    return db.query(models.Item).offset(skip).limit(limit).all()
+    query = db.query(models.Item)
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        query = query.filter(models.Item.organization_id == org_id)
+    return query.offset(skip).limit(limit).all()
 
 @app.get("/items/{item_id}", response_model=schemas.Item)
 def read_item(
@@ -964,6 +1140,7 @@ def read_item(
     item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
+    ensure_org_access(item.organization_id, current_user)
     return item
 
 @app.put("/items/{item_id}", response_model=schemas.Item)
@@ -976,11 +1153,12 @@ def update_item(
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
+    ensure_org_access(db_item.organization_id, current_user)
     if item.supplier_id is not None:
-        supplier = db.query(models.Supplier).filter(models.Supplier.id == item.supplier_id).first()
-        if not supplier:
-            raise HTTPException(status_code=404, detail="Supplier not found")
+        get_supplier_by_id(db, item.supplier_id, current_user)
     if item.organization_id is not None:
+        if not auth.is_superadmin(current_user) and item.organization_id != db_item.organization_id:
+            raise HTTPException(status_code=403, detail="Cannot move items across organizations")
         org = db.query(models.Organization).filter(models.Organization.id == item.organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
@@ -1000,6 +1178,7 @@ def delete_item(
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
+    ensure_org_access(db_item.organization_id, current_user)
     db.delete(db_item)
     db.commit()
     return {"message": "Item deleted successfully"}
@@ -1014,10 +1193,12 @@ def create_stock_movement(
     db_item = db.query(models.Item).filter(models.Item.id == movement.item_id).first()
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
+    ensure_org_access(db_item.organization_id, current_user)
     if movement.user_id is not None:
         user = db.query(models.User).filter(models.User.id == movement.user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        ensure_org_access(user.organization_id, current_user)
     db_movement = models.StockMovement(
         item_id=movement.item_id,
         movement_type=movement.movement_type,
@@ -1041,7 +1222,10 @@ def read_stock_movements(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
-    query = db.query(models.StockMovement)
+    query = db.query(models.StockMovement).join(models.Item)
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        query = query.filter(models.Item.organization_id == org_id)
     if item_id is not None:
         query = query.filter(models.StockMovement.item_id == item_id)
     return query.order_by(models.StockMovement.created_at.desc()).offset(skip).limit(limit).all()
@@ -1055,6 +1239,9 @@ def read_stock_movement(
     movement = db.query(models.StockMovement).filter(models.StockMovement.id == movement_id).first()
     if not movement:
         raise HTTPException(status_code=404, detail="Stock movement not found")
+    db_item = db.query(models.Item).filter(models.Item.id == movement.item_id).first()
+    if db_item:
+        ensure_org_access(db_item.organization_id, current_user)
     return movement
 
 @app.put("/stock_movements/{movement_id}", response_model=schemas.StockMovement)
@@ -1067,10 +1254,14 @@ def update_stock_movement(
     db_movement = db.query(models.StockMovement).filter(models.StockMovement.id == movement_id).first()
     if not db_movement:
         raise HTTPException(status_code=404, detail="Stock movement not found")
+    db_item = db.query(models.Item).filter(models.Item.id == db_movement.item_id).first()
+    if db_item:
+        ensure_org_access(db_item.organization_id, current_user)
     if movement.user_id is not None:
         user = db.query(models.User).filter(models.User.id == movement.user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        ensure_org_access(user.organization_id, current_user)
         db_movement.user_id = movement.user_id
     if movement.movement_type is not None:
         db_movement.movement_type = movement.movement_type
@@ -1101,6 +1292,8 @@ def delete_stock_movement(
         raise HTTPException(status_code=404, detail="Stock movement not found")
     db_item = db.query(models.Item).filter(models.Item.id == db_movement.item_id).first()
     if db_item:
+        ensure_org_access(db_item.organization_id, current_user)
+    if db_item:
         db_item.stock = (db_item.stock or 0) - db_movement.quantity_change
     db.delete(db_movement)
     db.commit()
@@ -1113,17 +1306,25 @@ def create_order(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
-    if order.organization_id is not None:
-        org = db.query(models.Organization).filter(models.Organization.id == order.organization_id).first()
+    organization_id = order.organization_id
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        if organization_id is not None and organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Cannot create order for another organization")
+        organization_id = org_id
+    elif organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
     if order.supplier_id is not None:
-        get_supplier_by_id(db, order.supplier_id)
+        get_supplier_by_id(db, order.supplier_id, current_user)
+    user_id = order.user_id or current_user.id
     if order.user_id is not None:
         user = db.query(models.User).filter(models.User.id == order.user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-    subtotal, order_items = build_order_items(db, order.items)
+        ensure_org_access(user.organization_id, current_user)
+    subtotal, order_items = build_order_items(db, order.items, current_user)
     shipping_fee = order.shipping_fee or 0
     tax = order.tax or 0
     total_amount = subtotal + shipping_fee + tax
@@ -1144,8 +1345,8 @@ def create_order(
         tax=tax,
         total_amount=total_amount,
         currency=order.currency,
-        user_id=order.user_id or current_user.id,
-        organization_id=order.organization_id,
+        user_id=user_id,
+        organization_id=organization_id,
         confirmed_at=order.confirmed_at,
         shipped_at=order.shipped_at,
         delivered_at=order.delivered_at,
@@ -1165,7 +1366,11 @@ def read_orders(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
-    return db.query(models.Order).offset(skip).limit(limit).all()
+    query = db.query(models.Order)
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        query = query.filter(models.Order.organization_id == org_id)
+    return query.offset(skip).limit(limit).all()
 
 @app.get("/orders/{order_id}", response_model=schemas.Order)
 def read_order(
@@ -1176,6 +1381,7 @@ def read_order(
     order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+    ensure_org_access(order.organization_id, current_user)
     return order
 
 @app.put("/orders/{order_id}", response_model=schemas.Order)
@@ -1188,16 +1394,20 @@ def update_order(
     db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not db_order:
         raise HTTPException(status_code=404, detail="Order not found")
+    ensure_org_access(db_order.organization_id, current_user)
     if order.organization_id is not None:
+        if not auth.is_superadmin(current_user) and order.organization_id != db_order.organization_id:
+            raise HTTPException(status_code=403, detail="Cannot move orders across organizations")
         org = db.query(models.Organization).filter(models.Organization.id == order.organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
     if order.supplier_id is not None:
-        get_supplier_by_id(db, order.supplier_id)
+        get_supplier_by_id(db, order.supplier_id, current_user)
     if order.user_id is not None:
         user = db.query(models.User).filter(models.User.id == order.user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        ensure_org_access(user.organization_id, current_user)
         db_order.user_id = order.user_id
     if order.order_number is not None:
         db_order.order_number = order.order_number
@@ -1235,7 +1445,7 @@ def update_order(
         db_order.expected_delivery_at = order.expected_delivery_at
 
     if order.items is not None:
-        subtotal, order_items = build_order_items(db, order.items)
+        subtotal, order_items = build_order_items(db, order.items, current_user)
         db_order.items = order_items
         db_order.subtotal = subtotal
     if order.shipping_fee is not None:
@@ -1256,6 +1466,7 @@ def delete_order(
     db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not db_order:
         raise HTTPException(status_code=404, detail="Order not found")
+    ensure_org_access(db_order.organization_id, current_user)
     db.delete(db_order)
     db.commit()
     return {"message": "Order deleted successfully"}
@@ -1267,15 +1478,22 @@ def create_invoice(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
-    if invoice.organization_id is not None:
-        org = db.query(models.Organization).filter(models.Organization.id == invoice.organization_id).first()
+    organization_id = invoice.organization_id
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        if organization_id is not None and organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Cannot create invoice for another organization")
+        organization_id = org_id
+    elif organization_id is not None:
+        org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
     if invoice.order_id is not None:
         order = db.query(models.Order).filter(models.Order.id == invoice.order_id).first()
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
-    subtotal, invoice_items = build_invoice_items(db, invoice.items)
+        ensure_org_access(order.organization_id, current_user)
+    subtotal, invoice_items = build_invoice_items(db, invoice.items, current_user)
     tax = invoice.tax or 0
     discount = invoice.discount or 0
     total_amount = subtotal + tax - discount
@@ -1300,7 +1518,7 @@ def create_invoice(
         total_amount=total_amount,
         currency=invoice.currency,
         order_id=invoice.order_id,
-        organization_id=invoice.organization_id,
+        organization_id=organization_id,
         items=invoice_items,
     )
     db.add(db_invoice)
@@ -1315,7 +1533,11 @@ def read_invoices(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
-    return db.query(models.Invoice).offset(skip).limit(limit).all()
+    query = db.query(models.Invoice)
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        query = query.filter(models.Invoice.organization_id == org_id)
+    return query.offset(skip).limit(limit).all()
 
 @app.get("/invoices/{invoice_id}", response_model=schemas.Invoice)
 def read_invoice(
@@ -1326,6 +1548,7 @@ def read_invoice(
     invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
+    ensure_org_access(invoice.organization_id, current_user)
     return invoice
 
 @app.put("/invoices/{invoice_id}", response_model=schemas.Invoice)
@@ -1338,7 +1561,10 @@ def update_invoice(
     db_invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
     if not db_invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
+    ensure_org_access(db_invoice.organization_id, current_user)
     if invoice.organization_id is not None:
+        if not auth.is_superadmin(current_user) and invoice.organization_id != db_invoice.organization_id:
+            raise HTTPException(status_code=403, detail="Cannot move invoices across organizations")
         org = db.query(models.Organization).filter(models.Organization.id == invoice.organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
@@ -1346,6 +1572,7 @@ def update_invoice(
         order = db.query(models.Order).filter(models.Order.id == invoice.order_id).first()
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
+        ensure_org_access(order.organization_id, current_user)
         db_invoice.order_id = invoice.order_id
     if invoice.invoice_number is not None:
         db_invoice.invoice_number = invoice.invoice_number
@@ -1377,7 +1604,7 @@ def update_invoice(
         db_invoice.organization_id = invoice.organization_id
 
     if invoice.items is not None:
-        subtotal, invoice_items = build_invoice_items(db, invoice.items)
+        subtotal, invoice_items = build_invoice_items(db, invoice.items, current_user)
         db_invoice.items = invoice_items
         db_invoice.subtotal = subtotal
     if invoice.tax is not None:
@@ -1398,6 +1625,7 @@ def delete_invoice(
     db_invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
     if not db_invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
+    ensure_org_access(db_invoice.organization_id, current_user)
     db.delete(db_invoice)
     db.commit()
     return {"message": "Invoice deleted successfully"}
@@ -1416,6 +1644,11 @@ async def create_product(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user)
 ):
+    organization_id = None
+    if not auth.is_superadmin(current_user):
+        organization_id = require_org_id(current_user)
+    else:
+        organization_id = current_user.organization_id
     final_image_url = None
     if image:
         final_image_url = await storage.upload_file_to_r2(image)
@@ -1430,6 +1663,7 @@ async def create_product(
         stock=stock,
         image_url=final_image_url,
         category=category,
+        organization_id=organization_id,
     )
     db_product = models.Product(**product_data.dict())
     db.add(db_product)
@@ -1438,17 +1672,31 @@ async def create_product(
     return normalize_product_url(db_product)
 
 @app.get("/products/", response_model=List[schemas.Product])
-def read_products(skip: int = 0, limit: int = 100, db: database.SessionLocal = Depends(database.get_db)):
-    products = db.query(models.Product).offset(skip).limit(limit).all()
+def read_products(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    query = db.query(models.Product)
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        query = query.filter(models.Product.organization_id == org_id)
+    products = query.offset(skip).limit(limit).all()
     normalized = [normalize_product_url(p) for p in products]
     logger.info("read_products", extra={"count": len(normalized)})
     return normalized
 
 @app.get("/products/{product_id}", response_model=schemas.Product)
-def read_product(product_id: int, db: database.SessionLocal = Depends(database.get_db)):
+def read_product(
+    product_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
     db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if db_product is None:
         raise HTTPException(status_code=404, detail="Product not found")
+    ensure_org_access(db_product.organization_id, current_user)
     return normalize_product_url(db_product)
 
 @app.put("/products/{product_id}", response_model=schemas.Product)
@@ -1466,6 +1714,7 @@ async def update_product(
     db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if db_product is None:
         raise HTTPException(status_code=404, detail="Product not found")
+    ensure_org_access(db_product.organization_id, current_user)
 
     # Preserve existing image unless a new one is uploaded
     final_image_url = db_product.image_url
@@ -1498,6 +1747,7 @@ def delete_product(product_id: int, db: database.SessionLocal = Depends(database
     db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if db_product is None:
         raise HTTPException(status_code=404, detail="Product not found")
+    ensure_org_access(db_product.organization_id, current_user)
     db.delete(db_product)
     db.commit()
     return {"message": "Product deleted successfully"}
@@ -1505,7 +1755,11 @@ def delete_product(product_id: int, db: database.SessionLocal = Depends(database
 
 @app.delete("/categories/{category_name}")
 def delete_category(category_name: str, db: database.SessionLocal = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
-    updated = db.query(models.Product).filter(models.Product.category == category_name).update({"category": None})
+    query = db.query(models.Product).filter(models.Product.category == category_name)
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        query = query.filter(models.Product.organization_id == org_id)
+    updated = query.update({"category": None})
     db.commit()
     logger.info("category_cleared", extra={"category": category_name, "count": updated})
     return {"cleared": updated}
@@ -1576,6 +1830,11 @@ async def bulk_upload_products(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(auth.get_current_user)
 ):
+    organization_id = None
+    if not auth.is_superadmin(current_user):
+        organization_id = require_org_id(current_user)
+    else:
+        organization_id = current_user.organization_id
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a .csv file.")
 
@@ -1617,6 +1876,7 @@ async def bulk_upload_products(
             stock=stock,
             category=row_category,
             image_url=image_url,
+            organization_id=organization_id,
         )
         db.add(product)
         created += 1
@@ -1631,6 +1891,11 @@ async def bulk_upload_products(
 # Billing Routes
 @app.post("/bills/", response_model=schemas.Bill)
 def create_bill(bill: schemas.BillCreate, db: database.SessionLocal = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
+    organization_id = None
+    if not auth.is_superadmin(current_user):
+        organization_id = require_org_id(current_user)
+    else:
+        organization_id = current_user.organization_id
     total_amount = 0.0
     bill_items = []
     
@@ -1639,6 +1904,7 @@ def create_bill(bill: schemas.BillCreate, db: database.SessionLocal = Depends(da
         product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
         if not product:
             raise HTTPException(status_code=404, detail=f"Product with id {item.product_id} not found")
+        ensure_org_access(product.organization_id, current_user)
 
         item_total = product.price * item.quantity
         total_amount += item_total
@@ -1648,7 +1914,11 @@ def create_bill(bill: schemas.BillCreate, db: database.SessionLocal = Depends(da
         # Update stock
         product.stock -= item.quantity
     
-    db_bill = models.Bill(total_amount=total_amount, payment_method=bill.payment_method)
+    db_bill = models.Bill(
+        total_amount=total_amount,
+        payment_method=bill.payment_method,
+        organization_id=organization_id,
+    )
     db.add(db_bill)
     db.commit()
     db.refresh(db_bill)
@@ -1663,7 +1933,11 @@ def create_bill(bill: schemas.BillCreate, db: database.SessionLocal = Depends(da
 
 @app.get("/bills/", response_model=List[schemas.Bill])
 def read_bills(skip: int = 0, limit: int = 100, db: database.SessionLocal = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
-    bills = db.query(models.Bill).offset(skip).limit(limit).all()
+    query = db.query(models.Bill)
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        query = query.filter(models.Bill.organization_id == org_id)
+    bills = query.offset(skip).limit(limit).all()
     return bills
 
 @app.get("/bills/{bill_id}", response_model=schemas.Bill)
@@ -1671,6 +1945,7 @@ def read_bill(bill_id: int, db: database.SessionLocal = Depends(database.get_db)
     bill = db.query(models.Bill).filter(models.Bill.id == bill_id).first()
     if bill is None:
         raise HTTPException(status_code=404, detail="Bill not found")
+    ensure_org_access(bill.organization_id, current_user)
     return bill
 
 # Image Recognition via OCR -> Search Products by extracted text
@@ -1790,6 +2065,9 @@ async def recognize_product(
     debug_info["tokens"] = list(tokens)
 
     products_q = db.query(models.Product)
+    if not auth.is_superadmin(current_user):
+        org_id = require_org_id(current_user)
+        products_q = products_q.filter(models.Product.organization_id == org_id)
 
     products: List[models.Product] = []
     if tokens:

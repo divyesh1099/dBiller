@@ -19,7 +19,7 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _roleController = TextEditingController(text: 'staff');
+  String _selectedRole = 'staff';
   bool _saving = false;
 
   @override
@@ -29,7 +29,6 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
-    _roleController.dispose();
     super.dispose();
   }
 
@@ -41,7 +40,7 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
       fullName: _fullNameController.text.isEmpty ? null : _fullNameController.text,
       email: _emailController.text.isEmpty ? null : _emailController.text,
       phone: _phoneController.text.isEmpty ? null : _phoneController.text,
-      role: _roleController.text.isEmpty ? 'staff' : _roleController.text,
+      role: _selectedRole,
       password: _passwordController.text,
     );
     try {
@@ -84,9 +83,14 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
                 decoration: const InputDecoration(labelText: 'Phone'),
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _roleController,
+              DropdownButtonFormField<String>(
+                value: _selectedRole,
                 decoration: const InputDecoration(labelText: 'Role'),
+                items: const [
+                  DropdownMenuItem(value: 'admin', child: Text('admin')),
+                  DropdownMenuItem(value: 'staff', child: Text('staff')),
+                ],
+                onChanged: (value) => setState(() => _selectedRole = value ?? 'staff'),
               ),
               const SizedBox(height: 12),
               TextFormField(

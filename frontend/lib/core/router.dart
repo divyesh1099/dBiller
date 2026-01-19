@@ -6,7 +6,6 @@ import '../features/auth/presentation/onboarding_screen.dart';
 import '../features/billing/presentation/ai_image_scanner_screen.dart';
 import '../features/billing/presentation/pos_screen.dart';
 import '../features/dashboard/analytics_screen.dart';
-import '../features/dashboard/heatmap_screen.dart';
 import '../features/dashboard/home_screen.dart';
 import '../features/dashboard/main_shell.dart';
 import '../features/dashboard/settings_screen.dart';
@@ -243,10 +242,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/analytics',
         builder: (context, state) => const AnalyticsScreen(),
-      ),
-      GoRoute(
-        path: '/heatmap',
-        builder: (context, state) => const HeatmapScreen(),
       ),
       GoRoute(
         path: '/superadmin',

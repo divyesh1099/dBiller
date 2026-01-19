@@ -12,6 +12,8 @@ def generate_key():
     db.add(license_obj)
     db.commit()
     print(f"Generated License Key: {key}")
+    with open("license_key.txt", "w") as f:
+        f.write(key)
     db.close()
 
 if __name__ == "__main__":

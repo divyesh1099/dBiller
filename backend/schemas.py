@@ -292,6 +292,7 @@ class ProductBase(BaseModel):
     stock: int = 0
     image_url: Optional[str] = None
     category: Optional[str] = None
+    organization_id: Optional[int] = None
 
 class ProductCreate(ProductBase):
     pass
@@ -487,6 +488,7 @@ class Bill(BaseModel):
     total_amount: float
     payment_method: str
     items: List[BillItem]
+    organization_id: Optional[int] = None
 
     class Config:
         orm_mode = True

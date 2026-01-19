@@ -26,7 +26,7 @@ def migrate():
     
     # Map of table -> list of (column_name, column_type_def)
     required_columns = {
-        "products": [("category", "VARCHAR")],
+        "products": [("category", "VARCHAR"), ("organization_id", "INTEGER")],
         "stores": [("dummy_check", "INTEGER")],
         "users": [
             ("email", "VARCHAR"),
@@ -104,6 +104,9 @@ def migrate():
         "invoice_items": [
             ("sku", "VARCHAR"),
             ("image_url", "VARCHAR"),
+        ],
+        "bills": [
+            ("organization_id", "INTEGER"),
         ],
     }
 

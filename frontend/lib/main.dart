@@ -21,6 +21,7 @@ void main() {
     baseUrl = AppConfig.productionApiUrl; 
     // baseUrl = 'http://localhost:8001';
     env = Environment.dev;
+    /*
     try {
       if (Platform.isAndroid) {
         baseUrl = 'http://10.0.2.2:8001';
@@ -28,12 +29,15 @@ void main() {
     } catch (e) {
       // Platform checking not supported on Web or other error
     }
+    */
   }
 
   AppConfig.init(
     environment: env,
     apiBaseUrl: baseUrl, 
   );
+  debugPrint('🚀 App Configured with Base URL: ${AppConfig.instance.apiBaseUrl}');
+  debugPrint('🌍 Environment: ${env.toString()}');
   runApp(const ProviderScope(child: DBillerApp()));
 }
 

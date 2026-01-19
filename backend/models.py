@@ -138,6 +138,7 @@ class Product(Base):
     image_url = Column(String, nullable=True)
     stock = Column(Integer, default=0)
     category = Column(String, nullable=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
 
 class Bill(Base):
     __tablename__ = "bills"
@@ -146,6 +147,7 @@ class Bill(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     total_amount = Column(Float)
     payment_method = Column(String, default="cash")
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
     
     items = relationship("BillItem", back_populates="bill")
 

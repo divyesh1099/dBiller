@@ -12,7 +12,7 @@ class AppConfig {
   static late AppConfig _instance;
   static AppConfig get instance => _instance;
 
-  static const String productionApiUrl = 'https://dbiller-production.up.railway.app/';
+  static const String productionApiUrl = 'https://dbiller-production.up.railway.app';
 
   static void init({
     required Environment environment,

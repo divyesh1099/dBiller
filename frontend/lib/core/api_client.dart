@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'config.dart';
 
 final apiClientProvider = Provider((ref) => ApiClient());
@@ -12,12 +13,14 @@ class ApiClient {
   ApiClient()
       : _dio = Dio(BaseOptions(
           baseUrl: AppConfig.instance.apiBaseUrl,
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 10),
+          connectTimeout: const Duration(seconds: 120),
+          receiveTimeout: const Duration(seconds: 120),
+          sendTimeout: const Duration(seconds: 120),
         )) {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await _storage.read(key: 'access_token');
+        debugPrint('📡 Request: ${options.method} ${options.baseUrl}${options.path}');
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }

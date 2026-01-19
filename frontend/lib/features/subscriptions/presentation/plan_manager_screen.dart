@@ -6,52 +6,72 @@ import '../../../core/formatters.dart';
 import '../data/subscription.dart';
 import '../data/subscription_repository.dart';
 import 'subscriptions_controller.dart';
+import '../../users/presentation/users_controller.dart';
 
 class PlanManagerScreen extends ConsumerWidget {
   const PlanManagerScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(currentUserProvider);
     final plansAsync = ref.watch(subscriptionPlansProvider);
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
-        ),
-        title: const Text('Plan Manager'),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
-            Expanded(
-              child: plansAsync.when(
-                data: (plans) {
-                  if (plans.isEmpty) {
-                    return const Center(child: Text('No plans available.'));
-                  }
-                  return ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 90),
-                    itemCount: plans.length,
-                    itemBuilder: (context, index) {
-                      final plan = plans[index];
-                      return _PlanCard(plan: plan);
-                    },
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
+    return userAsync.when(
+      data: (user) {
+        if (user.role != 'superadmin') {
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
               ),
+              title: const Text('Plan Manager'),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        onPressed: () => _showCreatePlan(context, ref),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+            body: const Center(child: Text('Access denied')),
+          );
+        }
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+            ),
+            title: const Text('Plan Manager'),
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                Expanded(
+                  child: plansAsync.when(
+                    data: (plans) {
+                      if (plans.isEmpty) {
+                        return const Center(child: Text('No plans available.'));
+                      }
+                      return ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 90),
+                        itemCount: plans.length,
+                        itemBuilder: (context, index) {
+                          final plan = plans[index];
+                          return _PlanCard(plan: plan);
+                        },
+                      );
+                    },
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Center(child: Text('Error: $e')),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: AppColors.primary,
+            onPressed: () => _showCreatePlan(context, ref),
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        );
+      },
+      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
     );
   }
 
