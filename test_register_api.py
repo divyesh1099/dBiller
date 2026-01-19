@@ -76,6 +76,17 @@ def test_full_flow():
             print(f"❌ Fetch Invoices Failed: {inv_response.status_code}")
             print(f"Response Body: {inv_response.text}")
 
+        # 4. Fetch Subscriptions (Test for 500 Error Fix)
+        print(f"--- 4. Fetching Subscriptions ---")
+        sub_response = requests.get(f"{BASE_URL}/subscriptions/", headers=headers)
+        
+        if sub_response.status_code == 200:
+            print("✅ Fetch Subscriptions Successful!")
+            print(sub_response.json())
+        else:
+            print(f"❌ Fetch Subscriptions Failed: {sub_response.status_code}")
+            print(f"Response Body: {sub_response.text}")
+
     except Exception as e:
         print(f"❌ Exception occurred: {e}")
 

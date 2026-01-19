@@ -1,6 +1,53 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, ConfigDict
 from datetime import datetime
+
+
+class SubscriptionBase(BaseModel):
+    name: str
+    price: Optional[float] = None
+    currency: str = "USD"
+    monthly_price: Optional[float] = None
+    annual_price: Optional[float] = None
+    features: Optional[List[str]] = None
+    limits: Optional[Dict[str, Any]] = None
+    description: Optional[str] = None
+    badge_text: Optional[str] = None
+    is_featured: bool = False
+    is_active: bool = True
+
+    @field_validator('features', 'limits', mode='before')
+    @classmethod
+    def parse_json(cls, v):
+        if isinstance(v, str):
+            try:
+                import json
+                return json.loads(v)
+            except ValueError:
+                return v
+        return v
+
+class SubscriptionCreate(SubscriptionBase):
+    pass
+
+class SubscriptionUpdate(BaseModel):
+    name: Optional[str] = None
+    price: Optional[float] = None
+    currency: Optional[str] = None
+    monthly_price: Optional[float] = None
+    annual_price: Optional[float] = None
+    features: Optional[List[str]] = None
+    limits: Optional[Dict[str, Any]] = None
+    description: Optional[str] = None
+    badge_text: Optional[str] = None
+    is_featured: Optional[bool] = None
+    is_active: Optional[bool] = None
+
+class Subscription(SubscriptionBase):
+    id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 # Permission and Role Schemas
 class PermissionBase(BaseModel):
@@ -124,42 +171,7 @@ class Organization(OrganizationBase):
     class Config:
         orm_mode = True
 
-# Subscription Schemas
-class SubscriptionBase(BaseModel):
-    name: str
-    price: Optional[float] = None
-    currency: str = "USD"
-    monthly_price: Optional[float] = None
-    annual_price: Optional[float] = None
-    features: Optional[List[str]] = None
-    limits: Optional[Dict[str, Any]] = None
-    description: Optional[str] = None
-    badge_text: Optional[str] = None
-    is_featured: bool = False
-    is_active: bool = True
 
-class SubscriptionCreate(SubscriptionBase):
-    pass
-
-class SubscriptionUpdate(BaseModel):
-    name: Optional[str] = None
-    price: Optional[float] = None
-    currency: Optional[str] = None
-    monthly_price: Optional[float] = None
-    annual_price: Optional[float] = None
-    features: Optional[List[str]] = None
-    limits: Optional[Dict[str, Any]] = None
-    description: Optional[str] = None
-    badge_text: Optional[str] = None
-    is_featured: Optional[bool] = None
-    is_active: Optional[bool] = None
-
-class Subscription(SubscriptionBase):
-    id: int
-    created_at: datetime
-
-    class Config:
-        orm_mode = True
 
 class OrganizationSubscriptionBase(BaseModel):
     organization_id: int
