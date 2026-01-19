@@ -17,7 +17,9 @@ void main() {
     env = Environment.prod;
   } else {
     // Development Mode
-    baseUrl = 'http://localhost:8001';
+    // TEMP: Use production backend for local testing
+    baseUrl = AppConfig.productionApiUrl; 
+    // baseUrl = 'http://localhost:8001';
     env = Environment.dev;
     try {
       if (Platform.isAndroid) {

@@ -27,9 +27,17 @@ print(f"Connecting to DB Scheme: {SQLALCHEMY_DATABASE_URL.split(':')[0] if ':' i
 print(f"Connecting to DB Host: {SQLALCHEMY_DATABASE_URL.split('@')[-1] if '@' in SQLALCHEMY_DATABASE_URL else 'sqlite'}")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
-if "sqlite" in SQLALCHEMY_DATABASE_URL:
      engine = create_engine(
         SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    )
+else:
+    # Postgres configuration
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        pool_pre_ping=True,  # Check connection liveness before using
+        pool_recycle=300,    # Recycle connections every 5 minutes
+        pool_size=5,         # Default pool size
+        max_overflow=10      # Max extra connections
     )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
