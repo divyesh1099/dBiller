@@ -26,8 +26,8 @@ if SQLALCHEMY_DATABASE_URL:
 print(f"Connecting to DB Scheme: {SQLALCHEMY_DATABASE_URL.split(':')[0] if ':' in SQLALCHEMY_DATABASE_URL else 'Unknown'}")
 print(f"Connecting to DB Host: {SQLALCHEMY_DATABASE_URL.split('@')[-1] if '@' in SQLALCHEMY_DATABASE_URL else 'sqlite'}")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-     engine = create_engine(
+if "sqlite" in SQLALCHEMY_DATABASE_URL:
+    engine = create_engine(
         SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
     )
 else:
