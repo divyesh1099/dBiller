@@ -3,8 +3,15 @@ import uuid
 
 # Production URL
 BASE_URL = "https://dbiller-production.up.railway.app"
-# Use the license key generated
-LICENSE_KEY = "9492cf32-3b7e-4caa-a0c5-194b967da3ec" 
+
+# Read the license key from file
+try:
+    with open("backend/license_key.txt", "r") as f:
+        LICENSE_KEY = f.read().strip()
+    print(f"Using License Key: {LICENSE_KEY}")
+except FileNotFoundError:
+    print("❌ Error: backend/license_key.txt not found. Please run generate_license.py first.")
+    exit(1) 
 
 def test_full_flow():
     print(f"Testing Full Flow on {BASE_URL}")
@@ -20,14 +27,19 @@ def test_full_flow():
         "password": password,
         "device_id": device_id,
         "license_key": LICENSE_KEY,
-        "store_name": "Test Store"
+        "store_name": "Test Store",
+        "email": f"{username}@example.com" # Adding email just in case
     }
     
     try:
-        reg_response = requests.post(f"{BASE_URL}/register", data=register_payload)
+        reg_response = requests.post(f"{BASE_URL}/register", data=register_payload) # Note: requests.post(data=...) sends form-encoded, json=... sends JSON
+        
+        # Check if we messed up sending data vs json
+        # If the API expects JSON, validation error "field required" might happen because we sent form data.
         
         if reg_response.status_code != 200:
-            print(f"❌ Registration Failed: {reg_response.status_code} {reg_response.text}")
+            print(f"❌ Registration Failed: {reg_response.status_code}")
+            print(f"Response Body: {reg_response.text}")
             return
         
         print("✅ Registration Successful!")
@@ -44,7 +56,8 @@ def test_full_flow():
         login_response = requests.post(f"{BASE_URL}/token", data=login_payload)
         
         if login_response.status_code != 200:
-            print(f"❌ Login Failed: {login_response.status_code} {login_response.text}")
+            print(f"❌ Login Failed: {login_response.status_code}")
+            print(f"Response Body: {login_response.text}")
             return
             
         token = login_response.json()["access_token"]
