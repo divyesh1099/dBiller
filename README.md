@@ -32,6 +32,40 @@ Generic Billing Application with Flutter Frontend and FastAPI Backend.
 3.  Run (Dev Mode): `flutter run -t lib/main_dev.dart`
     - Connects to localhost:8001.
 
+## Superadmin and Organization Flow
+
+### Bootstrap a Superadmin
+
+- Set `SUPERADMIN_USERNAME` and `SUPERADMIN_PASSWORD` in the backend environment before starting the API.
+- On first startup, the backend creates a single superadmin account (superadmins can only be created by the backend).
+- Log in with those credentials to access superadmin-only pages (Organizations, Plan Manager, Superadmin Dashboard).
+
+### Register Organizations
+
+- `/register` creates a new organization and assigns the first user as the organization admin.
+- Admin email is required and used for subscription communication.
+- Superadmins can also onboard organizations from the Superadmin Dashboard (payments are recorded manually).
+- Superadmins can manage admins and users across organizations.
+- Organizations list and management are superadmin-only.
+
+### Manage Plans and Subscriptions
+
+- Superadmins manage the subscription catalog in Plan Manager and can activate/deactivate plans.
+- Superadmins can onboard organizations and assign or change their plans.
+- Organization admins (or users with `subscriptions.manage`) can view, change, or opt out in `My Subscriptions`.
+- Cancellations within 7 days receive a full refund (`refund_eligible = true`); later cancellations are marked as `cancelled`.
+
+### Permissions and Roles
+
+- Permissions are fixed and seeded at startup (admins and superadmins always have all permissions).
+- Default permissions include:
+  `users.view`, `users.manage`, `roles.view`, `roles.manage`, `permissions.view`, `permissions.assign`,
+  `subscriptions.view`, `subscriptions.manage`, `plans.manage`, `invoices.view`, `invoices.manage`,
+  `orders.view`, `orders.manage`, `inventory.view`, `inventory.manage`, `suppliers.view`, `suppliers.manage`,
+  `checkout.manage`, `analytics.view`.
+- Default roles seeded: `Manager`, `Billing`, `Inventory` (admins can assign roles and permissions).
+- At least one admin must remain active per organization.
+
 ## Production
 
 for production build:

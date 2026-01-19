@@ -58,6 +58,7 @@ class Organization(Base):
     orders = relationship("Order", back_populates="organization")
     invoices = relationship("Invoice", back_populates="organization")
     subscription = relationship("Subscription", back_populates="organizations")
+    subscription_history = relationship("OrganizationSubscription", back_populates="organization", cascade="all, delete-orphan")
 
 class Role(Base):
     __tablename__ = "roles"
@@ -181,6 +182,26 @@ class Subscription(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     organizations = relationship("Organization", back_populates="subscription")
+
+class OrganizationSubscription(Base):
+    __tablename__ = "organization_subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False, index=True)
+    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
+    status = Column(String, default="active")  # active, cancelled, refunded, expired, replaced
+    started_at = Column(DateTime, default=datetime.datetime.utcnow)
+    ended_at = Column(DateTime, nullable=True)
+    cancelled_at = Column(DateTime, nullable=True)
+    amount = Column(Float, nullable=True)
+    currency = Column(String, default="USD")
+    notes = Column(Text, nullable=True)
+    payment_reference = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    organization = relationship("Organization", back_populates="subscription_history")
+    subscription = relationship("Subscription")
 
 class Supplier(Base):
     __tablename__ = "suppliers"

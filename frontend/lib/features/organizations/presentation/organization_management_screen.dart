@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/app_colors.dart';
+import '../../users/presentation/users_controller.dart';
 import '../data/organization.dart';
 import 'organizations_controller.dart';
 
@@ -23,6 +24,14 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
 
   @override
   Widget build(BuildContext context) {
+    final userAsync = ref.watch(currentUserProvider);
+    final user = userAsync.asData?.value;
+    if (userAsync.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (user == null || user.role != 'superadmin') {
+      return const Scaffold(body: Center(child: Text('Access denied')));
+    }
     final orgsAsync = ref.watch(organizationsProvider);
     return Scaffold(
       body: SafeArea(
@@ -194,9 +203,9 @@ class _OrgCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.login, size: 16, color: Colors.white),
-                      label: const Text('Impersonate'),
+                      onPressed: () => context.push('/organizations/${org.id}/subscriptions'),
+                      icon: const Icon(Icons.subscriptions, size: 16, color: Colors.white),
+                      label: const Text('Subscriptions'),
                       style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                     ),
                   ),

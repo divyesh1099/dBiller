@@ -78,4 +78,45 @@ class SubscriptionRepository {
   Future<void> deletePlan(int id) async {
     await _client.delete('/subscriptions/$id');
   }
+
+  Future<List<OrganizationSubscription>> fetchOrganizationSubscriptions({int? organizationId}) async {
+    final response = await _client.get(
+      '/organization/subscriptions',
+      queryParameters: organizationId != null ? {'org_id': organizationId} : null,
+    );
+    return (response.data as List)
+        .map((e) => OrganizationSubscription.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<OrganizationSubscription> changeOrganizationSubscription(
+    int subscriptionId, {
+    int? organizationId,
+    double? amount,
+    String? currency,
+    String? notes,
+    String? paymentReference,
+  }) async {
+    final payload = <String, dynamic>{
+      'subscription_id': subscriptionId,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (notes != null) 'notes': notes,
+      if (paymentReference != null) 'payment_reference': paymentReference,
+    };
+    final response = organizationId == null
+        ? await _client.post('/organization/subscriptions', data: payload)
+        : await _client.post('/superadmin/organizations/$organizationId/subscriptions', data: payload);
+    return OrganizationSubscription.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<OrganizationSubscription> cancelOrganizationSubscription(
+    int orgSubscriptionId, {
+    int? organizationId,
+  }) async {
+    final response = organizationId == null
+        ? await _client.post('/organization/subscriptions/$orgSubscriptionId/cancel')
+        : await _client.post('/superadmin/organizations/$organizationId/subscriptions/$orgSubscriptionId/cancel');
+    return OrganizationSubscription.fromJson(response.data as Map<String, dynamic>);
+  }
 }

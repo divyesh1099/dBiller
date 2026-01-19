@@ -58,6 +58,18 @@ def is_superadmin(user: models.User) -> bool:
 def is_admin(user: models.User) -> bool:
     return user.role in {ROLE_ADMIN, ROLE_SUPERADMIN}
 
+def has_permission(user: models.User, permission_name: str) -> bool:
+    if is_admin(user):
+        return True
+    for permission in getattr(user, "permissions", []):
+        if permission.name == permission_name:
+            return True
+    for role in getattr(user, "roles", []):
+        for permission in getattr(role, "permissions", []):
+            if permission.name == permission_name:
+                return True
+    return False
+
 def require_admin(current_user: models.User = Depends(get_current_user)) -> models.User:
     if not is_admin(current_user):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")

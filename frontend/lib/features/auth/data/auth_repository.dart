@@ -36,13 +36,23 @@ class AuthRepository {
     }
   }
 
-  Future<void> register(String username, String password, String deviceId, String licenseKey, {String? storeName, List<int>? logoBytes, String? logoName}) async {
+  Future<void> register(
+    String username,
+    String password,
+    String deviceId,
+    String licenseKey,
+    String email, {
+    String? storeName,
+    List<int>? logoBytes,
+    String? logoName,
+  }) async {
     try {
       final form = FormData.fromMap({
         'username': username,
         'password': password,
         'device_id': deviceId,
         'license_key': licenseKey,
+        'email': email,
         if (storeName != null && storeName.isNotEmpty) 'store_name': storeName,
         if (logoBytes != null && logoName != null)
           'store_logo': MultipartFile.fromBytes(logoBytes, filename: logoName),

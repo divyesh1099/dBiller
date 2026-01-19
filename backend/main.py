@@ -157,18 +157,72 @@ def ensure_optional_columns():
 ensure_optional_columns()
 
 DEFAULT_PERMISSIONS = [
+    ("users.view", "View users"),
     ("users.manage", "Create and manage users"),
+    ("roles.view", "View roles"),
     ("roles.manage", "Create and manage roles"),
-    ("permissions.manage", "Assign permissions to roles"),
-    ("subscriptions.manage", "Manage subscription plans"),
-    ("subscriptions.view", "View subscription plans"),
-    ("organizations.manage", "Manage organizations"),
+    ("permissions.view", "View permissions"),
+    ("permissions.assign", "Assign permissions to roles"),
+    ("subscriptions.view", "View subscriptions"),
+    ("subscriptions.manage", "Manage subscriptions"),
+    ("plans.manage", "Manage subscription plans"),
+    ("invoices.view", "View invoices"),
     ("invoices.manage", "Create and manage invoices"),
+    ("orders.view", "View orders"),
     ("orders.manage", "Create and manage orders"),
+    ("inventory.view", "View inventory"),
     ("inventory.manage", "Create and manage inventory items"),
+    ("suppliers.view", "View suppliers"),
     ("suppliers.manage", "Create and manage suppliers"),
     ("checkout.manage", "Create checkout bills"),
+    ("analytics.view", "View analytics"),
 ]
+
+DEFAULT_ROLE_TEMPLATES = [
+    {
+        "name": "Manager",
+        "description": "Full operational access",
+        "permissions": [
+            "users.view",
+            "roles.view",
+            "permissions.view",
+            "subscriptions.view",
+            "subscriptions.manage",
+            "invoices.view",
+            "invoices.manage",
+            "orders.view",
+            "orders.manage",
+            "inventory.view",
+            "inventory.manage",
+            "suppliers.view",
+            "suppliers.manage",
+            "checkout.manage",
+            "analytics.view",
+        ],
+    },
+    {
+        "name": "Billing",
+        "description": "Billing and checkout operations",
+        "permissions": [
+            "invoices.view",
+            "invoices.manage",
+            "orders.view",
+            "checkout.manage",
+            "subscriptions.view",
+        ],
+    },
+    {
+        "name": "Inventory",
+        "description": "Inventory and supplier operations",
+        "permissions": [
+            "inventory.view",
+            "inventory.manage",
+            "suppliers.view",
+            "suppliers.manage",
+        ],
+    },
+]
+REFUND_WINDOW_DAYS = 7
 
 def seed_permissions():
     db = database.SessionLocal()
@@ -178,6 +232,30 @@ def seed_permissions():
             if name in existing:
                 continue
             db.add(models.Permission(name=name, description=description))
+        db.commit()
+    finally:
+        db.close()
+
+def seed_roles():
+    db = database.SessionLocal()
+    try:
+        permissions_by_name = {
+            p.name: p for p in db.query(models.Permission).all()
+        }
+        existing = {r.name for r in db.query(models.Role).all()}
+        for template in DEFAULT_ROLE_TEMPLATES:
+            if template["name"] in existing:
+                continue
+            role = models.Role(
+                name=template["name"],
+                description=template["description"],
+            )
+            role.permissions = [
+                permissions_by_name[name]
+                for name in template["permissions"]
+                if name in permissions_by_name
+            ]
+            db.add(role)
         db.commit()
     finally:
         db.close()
@@ -209,6 +287,7 @@ def bootstrap_superadmin():
         db.close()
 
 seed_permissions()
+seed_roles()
 bootstrap_superadmin()
 
 
@@ -273,6 +352,38 @@ def ensure_admin_present(db: database.SessionLocal, org_id: Optional[int], exclu
         query = query.filter(models.User.id != exclude_user_id)
     if query.count() == 0:
         raise HTTPException(status_code=400, detail="At least one admin is required")
+
+def ensure_admin_email_present(db: database.SessionLocal, org_id: Optional[int]):
+    if org_id is None:
+        return
+    admin = (
+        db.query(models.User)
+        .filter(
+            models.User.organization_id == org_id,
+            models.User.role == auth.ROLE_ADMIN,
+            models.User.is_active == True,
+            models.User.email.isnot(None),
+        )
+        .first()
+    )
+    if not admin or not admin.email or not admin.email.strip():
+        raise HTTPException(status_code=400, detail="Admin email is required for subscription management")
+
+def require_permission(permission_name: str):
+    def dependency(current_user: schemas.User = Depends(auth.get_current_user)):
+        if not auth.has_permission(current_user, permission_name):
+            raise HTTPException(status_code=403, detail=f"Missing permission: {permission_name}")
+        return current_user
+    return dependency
+
+def is_refund_eligible(started_at: Optional[datetime.datetime]) -> bool:
+    if started_at is None:
+        return False
+    return datetime.datetime.utcnow() - started_at <= timedelta(days=REFUND_WINDOW_DAYS)
+
+def annotate_refund_status(subscription: models.OrganizationSubscription):
+    subscription.refund_eligible = is_refund_eligible(subscription.started_at)
+    return subscription
 
 def get_roles_by_ids(db: database.SessionLocal, role_ids: Optional[List[int]]):
     if not role_ids:
@@ -476,6 +587,7 @@ async def register_user(
     password: str = Form(...),
     device_id: str = Form(...),
     license_key: str = Form(...),
+    email: str = Form(...),
     store_name: str = Form(None),
     store_logo: UploadFile = File(None),
     db: database.SessionLocal = Depends(database.get_db),
@@ -491,7 +603,14 @@ async def register_user(
         raise HTTPException(status_code=400, detail="Username already registered")
     
     hashed_password = auth.get_password_hash(password)
-    db_user = models.User(username=username, hashed_password=hashed_password, role="admin")
+    if not email.strip():
+        raise HTTPException(status_code=400, detail="Admin email is required")
+    db_user = models.User(
+        username=username,
+        hashed_password=hashed_password,
+        role="admin",
+        email=email.strip(),
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -540,13 +659,15 @@ async def register_user(
 def create_user(
     user: schemas.UserCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("users.manage")),
 ):
     db_user = db.query(models.User).filter(models.User.username == user.username).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     if user.role == auth.ROLE_SUPERADMIN:
         raise HTTPException(status_code=403, detail="Superadmin can only be created by backend")
+    if user.role == auth.ROLE_ADMIN and (user.email is None or not user.email.strip()):
+        raise HTTPException(status_code=400, detail="Admin email is required")
     organization_id = user.organization_id
     if not auth.is_superadmin(current_user):
         org_id = require_org_id(current_user)
@@ -584,7 +705,7 @@ def create_user(
 def create_permission(
     permission: schemas.PermissionCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("permissions.assign")),
 ):
     raise HTTPException(status_code=403, detail="Permissions are fixed and cannot be modified")
 
@@ -593,7 +714,7 @@ def read_permissions(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("permissions.view")),
 ):
     return db.query(models.Permission).offset(skip).limit(limit).all()
 
@@ -601,7 +722,7 @@ def read_permissions(
 def read_permission(
     permission_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("permissions.view")),
 ):
     permission = db.query(models.Permission).filter(models.Permission.id == permission_id).first()
     if not permission:
@@ -613,7 +734,7 @@ def update_permission(
     permission_id: int,
     permission: schemas.PermissionUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("permissions.assign")),
 ):
     raise HTTPException(status_code=403, detail="Permissions are fixed and cannot be modified")
 
@@ -621,7 +742,7 @@ def update_permission(
 def delete_permission(
     permission_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("permissions.assign")),
 ):
     raise HTTPException(status_code=403, detail="Permissions are fixed and cannot be modified")
 
@@ -629,7 +750,7 @@ def delete_permission(
 def create_role(
     role: schemas.RoleCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("roles.manage")),
 ):
     existing = db.query(models.Role).filter(models.Role.name == role.name).first()
     if existing:
@@ -645,7 +766,7 @@ def read_roles(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("roles.view")),
 ):
     return db.query(models.Role).offset(skip).limit(limit).all()
 
@@ -653,7 +774,7 @@ def read_roles(
 def read_role(
     role_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("roles.view")),
 ):
     role = db.query(models.Role).filter(models.Role.id == role_id).first()
     if not role:
@@ -665,7 +786,7 @@ def update_role(
     role_id: int,
     role: schemas.RoleUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("roles.manage")),
 ):
     db_role = db.query(models.Role).filter(models.Role.id == role_id).first()
     if not db_role:
@@ -686,7 +807,7 @@ def update_role_permissions(
     role_id: int,
     payload: schemas.PermissionAssignment,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("permissions.assign")),
 ):
     db_role = db.query(models.Role).filter(models.Role.id == role_id).first()
     if not db_role:
@@ -700,7 +821,7 @@ def update_role_permissions(
 def delete_role(
     role_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("roles.manage")),
 ):
     db_role = db.query(models.Role).filter(models.Role.id == role_id).first()
     if not db_role:
@@ -715,7 +836,7 @@ def read_users(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("users.view")),
 ):
     if auth.is_superadmin(current_user):
         return db.query(models.User).offset(skip).limit(limit).all()
@@ -732,7 +853,7 @@ def read_users(
 def read_user(
     user_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("users.view")),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
@@ -745,7 +866,7 @@ def update_user(
     user_id: int,
     user: schemas.UserUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("users.manage")),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
@@ -762,8 +883,11 @@ def update_user(
     current_org_id = db_user.organization_id
     was_admin = db_user.role == auth.ROLE_ADMIN and db_user.is_active
     new_role = user.role if user.role is not None else db_user.role
+    new_email = user.email if user.email is not None else db_user.email
     new_active = user.active_account if user.active_account is not None else db_user.is_active
     new_org_id = user.organization_id if user.organization_id is not None else db_user.organization_id
+    if new_role == auth.ROLE_ADMIN and (new_email is None or not new_email.strip()):
+        raise HTTPException(status_code=400, detail="Admin email is required")
     if was_admin and (new_role != auth.ROLE_ADMIN or not new_active or new_org_id != current_org_id):
         ensure_admin_present(db, current_org_id, exclude_user_id=db_user.id)
     if new_org_id != current_org_id and new_org_id is not None:
@@ -805,7 +929,7 @@ def set_user_roles(
     user_id: int,
     payload: schemas.RoleAssignment,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("users.manage")),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
@@ -821,7 +945,7 @@ def set_user_permissions(
     user_id: int,
     payload: schemas.PermissionAssignment,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("users.manage")),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
@@ -836,7 +960,7 @@ def set_user_permissions(
 def delete_user(
     user_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("users.manage")),
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
@@ -853,24 +977,16 @@ def delete_user(
 def create_organization(
     organization: schemas.OrganizationCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(auth.require_superadmin),
 ):
-    if not auth.is_superadmin(current_user) and current_user.organization_id is not None:
-        raise HTTPException(status_code=400, detail="User already belongs to an organization")
     if organization.subscription_id is not None:
         subscription = get_subscription_by_id(db, organization.subscription_id)
-        if subscription and not subscription.is_active and not auth.is_superadmin(current_user):
+        if subscription and not subscription.is_active:
             raise HTTPException(status_code=400, detail="Subscription is not active")
     db_org = models.Organization(**organization.dict())
     db.add(db_org)
     db.commit()
     db.refresh(db_org)
-    if not auth.is_superadmin(current_user):
-        db_user = db.query(models.User).filter(models.User.id == current_user.id).first()
-        if db_user:
-            db_user.organization_id = db_org.id
-            db_user.role = auth.ROLE_ADMIN
-        db.commit()
     return db_org
 
 @app.get("/organizations/", response_model=List[schemas.Organization])
@@ -878,25 +994,19 @@ def read_organizations(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(auth.require_superadmin),
 ):
-    if auth.is_superadmin(current_user):
-        return db.query(models.Organization).offset(skip).limit(limit).all()
-    org_id = require_org_id(current_user)
-    organization = db.query(models.Organization).filter(models.Organization.id == org_id).first()
-    return [organization] if organization else []
+    return db.query(models.Organization).offset(skip).limit(limit).all()
 
 @app.get("/organizations/{organization_id}", response_model=schemas.Organization)
 def read_organization(
     organization_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(auth.require_superadmin),
 ):
     organization = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
     if not organization:
         raise HTTPException(status_code=404, detail="Organization not found")
-    if not auth.is_superadmin(current_user) and current_user.organization_id != organization.id:
-        raise HTTPException(status_code=403, detail="Access denied")
     return organization
 
 @app.put("/organizations/{organization_id}", response_model=schemas.Organization)
@@ -904,17 +1014,15 @@ def update_organization(
     organization_id: int,
     organization: schemas.OrganizationUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(auth.require_superadmin),
 ):
     db_org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
     if not db_org:
         raise HTTPException(status_code=404, detail="Organization not found")
-    if not auth.is_superadmin(current_user) and current_user.organization_id != db_org.id:
-        raise HTTPException(status_code=403, detail="Access denied")
     update_data = organization.dict(exclude_unset=True)
     if "subscription_id" in update_data and update_data["subscription_id"] is not None:
         subscription = get_subscription_by_id(db, update_data["subscription_id"])
-        if subscription and not subscription.is_active and not auth.is_superadmin(current_user):
+        if subscription and not subscription.is_active:
             raise HTTPException(status_code=400, detail="Subscription is not active")
     for key, value in update_data.items():
         setattr(db_org, key, value)
@@ -953,7 +1061,7 @@ def read_subscriptions(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("subscriptions.view")),
 ):
     query = db.query(models.Subscription)
     if not auth.is_superadmin(current_user):
@@ -964,7 +1072,7 @@ def read_subscriptions(
 def read_subscription(
     subscription_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.require_admin),
+    current_user: schemas.User = Depends(require_permission("subscriptions.view")),
 ):
     subscription = db.query(models.Subscription).filter(models.Subscription.id == subscription_id).first()
     if not subscription:
@@ -1003,12 +1111,222 @@ def delete_subscription(
     db.commit()
     return {"message": "Subscription deleted successfully"}
 
+# Organization Subscription Management
+def apply_subscription_change(
+    db: database.SessionLocal,
+    org_id: int,
+    payload: schemas.OrganizationSubscriptionCreate,
+    current_user: schemas.User,
+    allow_price_override: bool = False,
+) -> models.OrganizationSubscription:
+    ensure_admin_email_present(db, org_id)
+    subscription = get_subscription_by_id(db, payload.subscription_id)
+    if subscription and not subscription.is_active and not auth.is_superadmin(current_user):
+        raise HTTPException(status_code=400, detail="Subscription is not active")
+    now = datetime.datetime.utcnow()
+    active_subs = (
+        db.query(models.OrganizationSubscription)
+        .filter(
+            models.OrganizationSubscription.organization_id == org_id,
+            models.OrganizationSubscription.status == "active",
+        )
+        .all()
+    )
+    for existing in active_subs:
+        existing.status = "replaced"
+        existing.ended_at = now
+    amount = None
+    currency = None
+    if allow_price_override and payload.amount is not None:
+        amount = payload.amount
+    else:
+        amount = subscription.monthly_price or subscription.price or 0
+    if allow_price_override and payload.currency:
+        currency = payload.currency
+    else:
+        currency = subscription.currency
+    started_at = payload.started_at or now
+    org_sub = models.OrganizationSubscription(
+        organization_id=org_id,
+        subscription_id=payload.subscription_id,
+        status="active",
+        started_at=started_at,
+        amount=amount,
+        currency=currency,
+        notes=payload.notes,
+        payment_reference=payload.payment_reference,
+    )
+    db.add(org_sub)
+    org = db.query(models.Organization).filter(models.Organization.id == org_id).first()
+    if org:
+        org.subscription_id = payload.subscription_id
+        org.current_period_end = started_at + timedelta(days=30)
+        org.status = "active"
+    db.commit()
+    db.refresh(org_sub)
+    return annotate_refund_status(org_sub)
+
+@app.get("/organization/subscriptions", response_model=List[schemas.OrganizationSubscription])
+def read_organization_subscriptions(
+    org_id: Optional[int] = None,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("subscriptions.view")),
+):
+    if auth.is_superadmin(current_user):
+        if org_id is None:
+            raise HTTPException(status_code=400, detail="org_id is required for superadmin")
+        target_org_id = org_id
+    else:
+        target_org_id = require_org_id(current_user)
+    subs = (
+        db.query(models.OrganizationSubscription)
+        .filter(models.OrganizationSubscription.organization_id == target_org_id)
+        .order_by(models.OrganizationSubscription.started_at.desc())
+        .all()
+    )
+    return [annotate_refund_status(sub) for sub in subs]
+
+@app.post("/organization/subscriptions", response_model=schemas.OrganizationSubscription)
+def create_organization_subscription(
+    payload: schemas.OrganizationSubscriptionCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("subscriptions.manage")),
+):
+    org_id = require_org_id(current_user)
+    return apply_subscription_change(db, org_id, payload, current_user, allow_price_override=False)
+
+@app.post("/organization/subscriptions/{org_subscription_id}/cancel", response_model=schemas.OrganizationSubscription)
+def cancel_organization_subscription(
+    org_subscription_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("subscriptions.manage")),
+):
+    org_sub = (
+        db.query(models.OrganizationSubscription)
+        .filter(models.OrganizationSubscription.id == org_subscription_id)
+        .first()
+    )
+    if not org_sub:
+        raise HTTPException(status_code=404, detail="Organization subscription not found")
+    ensure_org_access(org_sub.organization_id, current_user)
+    now = datetime.datetime.utcnow()
+    refund_eligible = is_refund_eligible(org_sub.started_at)
+    org_sub.cancelled_at = now
+    org_sub.ended_at = now
+    org_sub.status = "refunded" if refund_eligible else "cancelled"
+    org = db.query(models.Organization).filter(models.Organization.id == org_sub.organization_id).first()
+    if org and org.subscription_id == org_sub.subscription_id:
+        org.subscription_id = None
+        org.current_period_end = now
+    db.commit()
+    db.refresh(org_sub)
+    org_sub.refund_eligible = refund_eligible
+    return org_sub
+
+@app.get("/superadmin/organizations/{org_id}/subscriptions", response_model=List[schemas.OrganizationSubscription])
+def read_org_subscriptions_superadmin(
+    org_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.require_superadmin),
+):
+    subs = (
+        db.query(models.OrganizationSubscription)
+        .filter(models.OrganizationSubscription.organization_id == org_id)
+        .order_by(models.OrganizationSubscription.started_at.desc())
+        .all()
+    )
+    return [annotate_refund_status(sub) for sub in subs]
+
+@app.post("/superadmin/organizations/{org_id}/subscriptions", response_model=schemas.OrganizationSubscription)
+def set_org_subscription_superadmin(
+    org_id: int,
+    payload: schemas.OrganizationSubscriptionCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.require_superadmin),
+):
+    return apply_subscription_change(db, org_id, payload, current_user, allow_price_override=True)
+
+@app.post("/superadmin/organizations/{org_id}/subscriptions/{org_subscription_id}/cancel", response_model=schemas.OrganizationSubscription)
+def cancel_org_subscription_superadmin(
+    org_id: int,
+    org_subscription_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.require_superadmin),
+):
+    org_sub = (
+        db.query(models.OrganizationSubscription)
+        .filter(
+            models.OrganizationSubscription.id == org_subscription_id,
+            models.OrganizationSubscription.organization_id == org_id,
+        )
+        .first()
+    )
+    if not org_sub:
+        raise HTTPException(status_code=404, detail="Organization subscription not found")
+    now = datetime.datetime.utcnow()
+    refund_eligible = is_refund_eligible(org_sub.started_at)
+    org_sub.cancelled_at = now
+    org_sub.ended_at = now
+    org_sub.status = "refunded" if refund_eligible else "cancelled"
+    org = db.query(models.Organization).filter(models.Organization.id == org_id).first()
+    if org and org.subscription_id == org_sub.subscription_id:
+        org.subscription_id = None
+        org.current_period_end = now
+    db.commit()
+    db.refresh(org_sub)
+    org_sub.refund_eligible = refund_eligible
+    return org_sub
+
+@app.post("/superadmin/organizations/onboard", response_model=schemas.Organization)
+def onboard_organization(
+    payload: schemas.SuperadminOnboardOrganization,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.require_superadmin),
+):
+    existing_user = db.query(models.User).filter(models.User.username == payload.admin_username).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Admin username already registered")
+    if not payload.admin_email.strip():
+        raise HTTPException(status_code=400, detail="Admin email is required")
+    org = models.Organization(name=payload.organization_name)
+    db.add(org)
+    db.commit()
+    db.refresh(org)
+
+    admin_user = models.User(
+        username=payload.admin_username,
+        hashed_password=auth.get_password_hash(payload.admin_password),
+        role=auth.ROLE_ADMIN,
+        email=payload.admin_email.strip(),
+        organization_id=org.id,
+        is_active=True,
+    )
+    db.add(admin_user)
+    db.commit()
+    db.refresh(admin_user)
+
+    if payload.subscription_id is not None:
+        apply_subscription_change(
+            db,
+            org.id,
+            schemas.OrganizationSubscriptionCreate(
+                subscription_id=payload.subscription_id,
+                amount=payload.amount,
+                currency=payload.currency,
+                notes=payload.notes,
+                payment_reference=payload.payment_reference,
+            ),
+            current_user,
+            allow_price_override=True,
+        )
+    return org
+
 # Supplier CRUD
 @app.post("/suppliers/", response_model=schemas.Supplier)
 def create_supplier(
     supplier: schemas.SupplierCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("suppliers.manage")),
 ):
     organization_id = supplier.organization_id
     if not auth.is_superadmin(current_user):
@@ -1033,7 +1351,7 @@ def read_suppliers(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("suppliers.view")),
 ):
     query = db.query(models.Supplier)
     if not auth.is_superadmin(current_user):
@@ -1045,7 +1363,7 @@ def read_suppliers(
 def read_supplier(
     supplier_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("suppliers.view")),
 ):
     supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
     if not supplier:
@@ -1058,7 +1376,7 @@ def update_supplier(
     supplier_id: int,
     supplier: schemas.SupplierUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("suppliers.manage")),
 ):
     db_supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
     if not db_supplier:
@@ -1081,7 +1399,7 @@ def update_supplier(
 def delete_supplier(
     supplier_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("suppliers.manage")),
 ):
     db_supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
     if not db_supplier:
@@ -1096,7 +1414,7 @@ def delete_supplier(
 def create_item(
     item: schemas.ItemCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.manage")),
 ):
     if item.supplier_id is not None:
         get_supplier_by_id(db, item.supplier_id, current_user)
@@ -1123,7 +1441,7 @@ def read_items(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.view")),
 ):
     query = db.query(models.Item)
     if not auth.is_superadmin(current_user):
@@ -1135,7 +1453,7 @@ def read_items(
 def read_item(
     item_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.view")),
 ):
     item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if not item:
@@ -1148,7 +1466,7 @@ def update_item(
     item_id: int,
     item: schemas.ItemUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.manage")),
 ):
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if not db_item:
@@ -1173,7 +1491,7 @@ def update_item(
 def delete_item(
     item_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.manage")),
 ):
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if not db_item:
@@ -1188,7 +1506,7 @@ def delete_item(
 def create_stock_movement(
     movement: schemas.StockMovementCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.manage")),
 ):
     db_item = db.query(models.Item).filter(models.Item.id == movement.item_id).first()
     if not db_item:
@@ -1220,7 +1538,7 @@ def read_stock_movements(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.view")),
 ):
     query = db.query(models.StockMovement).join(models.Item)
     if not auth.is_superadmin(current_user):
@@ -1234,7 +1552,7 @@ def read_stock_movements(
 def read_stock_movement(
     movement_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.view")),
 ):
     movement = db.query(models.StockMovement).filter(models.StockMovement.id == movement_id).first()
     if not movement:
@@ -1249,7 +1567,7 @@ def update_stock_movement(
     movement_id: int,
     movement: schemas.StockMovementUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.manage")),
 ):
     db_movement = db.query(models.StockMovement).filter(models.StockMovement.id == movement_id).first()
     if not db_movement:
@@ -1285,7 +1603,7 @@ def update_stock_movement(
 def delete_stock_movement(
     movement_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.manage")),
 ):
     db_movement = db.query(models.StockMovement).filter(models.StockMovement.id == movement_id).first()
     if not db_movement:
@@ -1304,7 +1622,7 @@ def delete_stock_movement(
 def create_order(
     order: schemas.OrderCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("orders.manage")),
 ):
     organization_id = order.organization_id
     if not auth.is_superadmin(current_user):
@@ -1364,7 +1682,7 @@ def read_orders(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("orders.view")),
 ):
     query = db.query(models.Order)
     if not auth.is_superadmin(current_user):
@@ -1376,7 +1694,7 @@ def read_orders(
 def read_order(
     order_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("orders.view")),
 ):
     order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not order:
@@ -1389,7 +1707,7 @@ def update_order(
     order_id: int,
     order: schemas.OrderUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("orders.manage")),
 ):
     db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not db_order:
@@ -1461,7 +1779,7 @@ def update_order(
 def delete_order(
     order_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("orders.manage")),
 ):
     db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not db_order:
@@ -1476,7 +1794,7 @@ def delete_order(
 def create_invoice(
     invoice: schemas.InvoiceCreate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("invoices.manage")),
 ):
     organization_id = invoice.organization_id
     if not auth.is_superadmin(current_user):
@@ -1531,7 +1849,7 @@ def read_invoices(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("invoices.view")),
 ):
     query = db.query(models.Invoice)
     if not auth.is_superadmin(current_user):
@@ -1543,7 +1861,7 @@ def read_invoices(
 def read_invoice(
     invoice_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("invoices.view")),
 ):
     invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
     if not invoice:
@@ -1556,7 +1874,7 @@ def update_invoice(
     invoice_id: int,
     invoice: schemas.InvoiceUpdate,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("invoices.manage")),
 ):
     db_invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
     if not db_invoice:
@@ -1620,7 +1938,7 @@ def update_invoice(
 def delete_invoice(
     invoice_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("invoices.manage")),
 ):
     db_invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
     if not db_invoice:
@@ -1642,7 +1960,7 @@ async def create_product(
     image: UploadFile = File(None),
     image_url: str = Form(None),
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user)
+    current_user: schemas.User = Depends(require_permission("inventory.manage"))
 ):
     organization_id = None
     if not auth.is_superadmin(current_user):
@@ -1676,7 +1994,7 @@ def read_products(
     skip: int = 0,
     limit: int = 100,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.view")),
 ):
     query = db.query(models.Product)
     if not auth.is_superadmin(current_user):
@@ -1691,7 +2009,7 @@ def read_products(
 def read_product(
     product_id: int,
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
+    current_user: schemas.User = Depends(require_permission("inventory.view")),
 ):
     db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if db_product is None:
@@ -1709,7 +2027,7 @@ async def update_product(
     image: UploadFile = File(None),
     image_url: str = Form(None),
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user)
+    current_user: schemas.User = Depends(require_permission("inventory.manage"))
 ):
     db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if db_product is None:
@@ -1743,7 +2061,11 @@ async def update_product(
     return normalize_product_url(db_product)
 
 @app.delete("/products/{product_id}")
-def delete_product(product_id: int, db: database.SessionLocal = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
+def delete_product(
+    product_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("inventory.manage")),
+):
     db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if db_product is None:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -1754,7 +2076,11 @@ def delete_product(product_id: int, db: database.SessionLocal = Depends(database
 
 
 @app.delete("/categories/{category_name}")
-def delete_category(category_name: str, db: database.SessionLocal = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
+def delete_category(
+    category_name: str,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("inventory.manage")),
+):
     query = db.query(models.Product).filter(models.Product.category == category_name)
     if not auth.is_superadmin(current_user):
         org_id = require_org_id(current_user)
@@ -1828,7 +2154,7 @@ async def bulk_upload_products(
     file: UploadFile = File(...),
     category: str = Form(None),
     db: database.SessionLocal = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user)
+    current_user: schemas.User = Depends(require_permission("inventory.manage"))
 ):
     organization_id = None
     if not auth.is_superadmin(current_user):
@@ -1890,7 +2216,11 @@ async def bulk_upload_products(
 
 # Billing Routes
 @app.post("/bills/", response_model=schemas.Bill)
-def create_bill(bill: schemas.BillCreate, db: database.SessionLocal = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
+def create_bill(
+    bill: schemas.BillCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("checkout.manage")),
+):
     organization_id = None
     if not auth.is_superadmin(current_user):
         organization_id = require_org_id(current_user)
@@ -1932,7 +2262,12 @@ def create_bill(bill: schemas.BillCreate, db: database.SessionLocal = Depends(da
     return db_bill
 
 @app.get("/bills/", response_model=List[schemas.Bill])
-def read_bills(skip: int = 0, limit: int = 100, db: database.SessionLocal = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
+def read_bills(
+    skip: int = 0,
+    limit: int = 100,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("checkout.manage")),
+):
     query = db.query(models.Bill)
     if not auth.is_superadmin(current_user):
         org_id = require_org_id(current_user)
@@ -1941,7 +2276,11 @@ def read_bills(skip: int = 0, limit: int = 100, db: database.SessionLocal = Depe
     return bills
 
 @app.get("/bills/{bill_id}", response_model=schemas.Bill)
-def read_bill(bill_id: int, db: database.SessionLocal = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
+def read_bill(
+    bill_id: int,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("checkout.manage")),
+):
     bill = db.query(models.Bill).filter(models.Bill.id == bill_id).first()
     if bill is None:
         raise HTTPException(status_code=404, detail="Bill not found")

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/app_colors.dart';
 import '../auth/presentation/auth_controller.dart';
+import '../users/data/user.dart';
 import '../users/presentation/users_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -12,34 +13,44 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
     final user = userAsync.asData?.value;
-    final isAdmin = user?.role == 'admin' || user?.role == 'superadmin';
     final isSuperadmin = user?.role == 'superadmin';
+    final canManageUsers = _hasAnyPermission(user, const ['users.view', 'users.manage']);
+    final canManageRoles = _hasAnyPermission(user, const ['roles.view', 'roles.manage']);
+    final canManagePermissions = _hasAnyPermission(user, const ['permissions.view', 'permissions.assign']);
+    final canManageSubscriptions = _hasAnyPermission(user, const ['subscriptions.view', 'subscriptions.manage']);
+    final showAdminSection =
+        canManageUsers || canManageRoles || canManagePermissions || canManageSubscriptions || isSuperadmin;
     final adminTiles = <Widget>[
-      _NavTile(
-        icon: Icons.groups,
-        label: 'User Management',
-        onTap: () => context.push('/users'),
-      ),
-      _NavTile(
-        icon: Icons.security,
-        label: 'Roles',
-        onTap: () => context.push('/roles'),
-      ),
-      _NavTile(
-        icon: Icons.grid_view,
-        label: 'Permissions Matrix',
-        onTap: () => context.push('/permissions'),
-      ),
-      _NavTile(
-        icon: Icons.corporate_fare,
-        label: 'Organizations',
-        onTap: () => context.push('/organizations'),
-      ),
-      _NavTile(
-        icon: Icons.subscriptions,
-        label: 'Subscription Plans',
-        onTap: () => context.push('/subscriptions'),
-      ),
+      if (canManageUsers)
+        _NavTile(
+          icon: Icons.groups,
+          label: 'User Management',
+          onTap: () => context.push('/users'),
+        ),
+      if (canManageRoles)
+        _NavTile(
+          icon: Icons.security,
+          label: 'Roles',
+          onTap: () => context.push('/roles'),
+        ),
+      if (canManagePermissions)
+        _NavTile(
+          icon: Icons.grid_view,
+          label: 'Permissions Matrix',
+          onTap: () => context.push('/permissions'),
+        ),
+      if (canManageSubscriptions && !isSuperadmin)
+        _NavTile(
+          icon: Icons.subscriptions,
+          label: 'My Subscriptions',
+          onTap: () => context.push('/subscriptions'),
+        ),
+      if (isSuperadmin)
+        _NavTile(
+          icon: Icons.corporate_fare,
+          label: 'Organizations',
+          onTap: () => context.push('/organizations'),
+        ),
       if (isSuperadmin)
         _NavTile(
           icon: Icons.workspace_premium,
@@ -94,7 +105,7 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.push('/checkout'),
             ),
           ]),
-          if (isAdmin) _Section(title: 'Administration', children: adminTiles),
+          if (showAdminSection) _Section(title: 'Administration', children: adminTiles),
           _Section(title: 'Insights', children: [
             _NavTile(
               icon: Icons.analytics,
@@ -113,6 +124,20 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  bool _hasAnyPermission(UserProfile? user, List<String> permissions) {
+    if (user == null) return false;
+    if (user.role == 'admin' || user.role == 'superadmin') return true;
+    for (final perm in user.permissions) {
+      if (permissions.contains(perm.name)) return true;
+    }
+    for (final role in user.roles) {
+      for (final perm in role.permissions) {
+        if (permissions.contains(perm.name)) return true;
+      }
+    }
+    return false;
   }
 }
 

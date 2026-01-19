@@ -161,6 +161,36 @@ class Subscription(SubscriptionBase):
     class Config:
         orm_mode = True
 
+class OrganizationSubscriptionBase(BaseModel):
+    organization_id: int
+    subscription_id: int
+    status: str = "active"
+    started_at: Optional[datetime] = None
+    ended_at: Optional[datetime] = None
+    cancelled_at: Optional[datetime] = None
+    amount: Optional[float] = None
+    currency: str = "USD"
+    notes: Optional[str] = None
+    payment_reference: Optional[str] = None
+
+class OrganizationSubscriptionCreate(BaseModel):
+    subscription_id: int
+    started_at: Optional[datetime] = None
+    amount: Optional[float] = None
+    currency: Optional[str] = None
+    notes: Optional[str] = None
+    payment_reference: Optional[str] = None
+
+class OrganizationSubscription(OrganizationSubscriptionBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    subscription: Optional[Subscription] = None
+    refund_eligible: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
+
 # Supplier Schemas
 class SupplierBase(BaseModel):
     name: str
@@ -508,3 +538,14 @@ class UserRegister(BaseModel):
     device_id: str
     license_key: str
     store_name: Optional[str] = None
+
+class SuperadminOnboardOrganization(BaseModel):
+    organization_name: str
+    admin_username: str
+    admin_password: str
+    admin_email: str
+    subscription_id: Optional[int] = None
+    amount: Optional[float] = None
+    currency: Optional[str] = None
+    payment_reference: Optional[str] = None
+    notes: Optional[str] = None

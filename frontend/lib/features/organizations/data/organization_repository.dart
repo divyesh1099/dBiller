@@ -54,6 +54,44 @@ class OrganizationDraft {
   }
 }
 
+class OnboardOrganizationDraft {
+  final String organizationName;
+  final String adminUsername;
+  final String adminPassword;
+  final String adminEmail;
+  final int? subscriptionId;
+  final double? amount;
+  final String? currency;
+  final String? paymentReference;
+  final String? notes;
+
+  OnboardOrganizationDraft({
+    required this.organizationName,
+    required this.adminUsername,
+    required this.adminPassword,
+    required this.adminEmail,
+    this.subscriptionId,
+    this.amount,
+    this.currency,
+    this.paymentReference,
+    this.notes,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'organization_name': organizationName,
+      'admin_username': adminUsername,
+      'admin_password': adminPassword,
+      'admin_email': adminEmail,
+      if (subscriptionId != null) 'subscription_id': subscriptionId,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (paymentReference != null) 'payment_reference': paymentReference,
+      if (notes != null) 'notes': notes,
+    };
+  }
+}
+
 class OrganizationRepository {
   final ApiClient _client;
 
@@ -83,5 +121,10 @@ class OrganizationRepository {
 
   Future<void> deleteOrganization(int id) async {
     await _client.delete('/organizations/$id');
+  }
+
+  Future<Organization> onboardOrganization(OnboardOrganizationDraft draft) async {
+    final response = await _client.post('/superadmin/organizations/onboard', data: draft.toJson());
+    return Organization.fromJson(response.data as Map<String, dynamic>);
   }
 }

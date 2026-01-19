@@ -10,6 +10,7 @@ import '../features/dashboard/home_screen.dart';
 import '../features/dashboard/main_shell.dart';
 import '../features/dashboard/settings_screen.dart';
 import '../features/dashboard/superadmin_dashboard_screen.dart';
+import '../features/dashboard/superadmin_onboard_screen.dart';
 import '../features/items/presentation/inventory_management_screen.dart';
 import '../features/items/presentation/item_details_screen.dart';
 import '../features/items/presentation/item_edit_screen.dart';
@@ -229,6 +230,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               organizationId: int.parse(state.pathParameters['id']!),
             ),
           ),
+          GoRoute(
+            path: ':id/subscriptions',
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => SubscriptionPlansScreen(
+              organizationId: int.parse(state.pathParameters['id']!),
+              title: 'Organization Subscriptions',
+            ),
+          ),
         ],
       ),
       GoRoute(
@@ -246,6 +255,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/superadmin',
         builder: (context, state) => const SuperadminDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/superadmin/onboard',
+        builder: (context, state) => const SuperadminOnboardScreen(),
       ),
       GoRoute(
         path: '/ai-scanner',

@@ -69,6 +69,23 @@ class SuperadminDashboardScreen extends ConsumerWidget {
                 _MetricTile(title: 'Organizations', value: orgs.length.toString()),
                 _MetricTile(title: 'Active Subscriptions', value: activeSubscriptions.toString()),
                 _MetricTile(title: 'MRR', value: formatCurrency(mrr, currency: currency)),
+                const SizedBox(height: 8),
+                const _SectionHeader(title: 'Actions'),
+                _ActionTile(
+                  icon: Icons.person_add_alt_1,
+                  label: 'Onboard Organization',
+                  onTap: () => context.push('/superadmin/onboard'),
+                ),
+                _ActionTile(
+                  icon: Icons.corporate_fare,
+                  label: 'Organizations',
+                  onTap: () => context.push('/organizations'),
+                ),
+                _ActionTile(
+                  icon: Icons.workspace_premium,
+                  label: 'Plan Manager',
+                  onTap: () => context.push('/plans'),
+                ),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -116,6 +133,44 @@ class _MetricTile extends StatelessWidget {
       child: ListTile(
         title: Text(title, style: const TextStyle(color: AppColors.textMuted)),
         trailing: Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        title.toUpperCase(),
+        style: const TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}
+
+class _ActionTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionTile({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        leading: Icon(icon, color: AppColors.primary),
+        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }

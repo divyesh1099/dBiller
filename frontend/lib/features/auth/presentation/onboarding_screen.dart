@@ -20,10 +20,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _confirmController = TextEditingController();
   final _licenseController = TextEditingController(); // New
   final _storeNameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   Uint8List? _logoBytes;
   String? _logoName;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    _licenseController.dispose();
+    _storeNameController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickLogo() async {
     final res = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
@@ -45,6 +57,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           _passwordController.text,
           deviceId,
           _licenseController.text, // Pass license
+          _emailController.text,
           storeName: _storeNameController.text,
           logoBytes: _logoBytes,
           logoName: _logoName,
@@ -140,6 +153,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ],
               ),
               const SizedBox(height: 18),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Admin Email'),
+                validator: (v) => v == null || v.isEmpty ? 'Admin email is required' : null,
+              ),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _usernameController,
                 decoration: const InputDecoration(labelText: 'Username'),

@@ -49,3 +49,55 @@ class SubscriptionPlan {
     );
   }
 }
+
+class OrganizationSubscription {
+  final int id;
+  final int organizationId;
+  final int subscriptionId;
+  final String status;
+  final DateTime? startedAt;
+  final DateTime? endedAt;
+  final DateTime? cancelledAt;
+  final double? amount;
+  final String currency;
+  final String? notes;
+  final String? paymentReference;
+  final bool refundEligible;
+  final SubscriptionPlan? subscription;
+
+  OrganizationSubscription({
+    required this.id,
+    required this.organizationId,
+    required this.subscriptionId,
+    required this.status,
+    required this.currency,
+    required this.refundEligible,
+    this.startedAt,
+    this.endedAt,
+    this.cancelledAt,
+    this.amount,
+    this.notes,
+    this.paymentReference,
+    this.subscription,
+  });
+
+  factory OrganizationSubscription.fromJson(Map<String, dynamic> json) {
+    return OrganizationSubscription(
+      id: readInt(json['id']),
+      organizationId: readInt(json['organization_id']),
+      subscriptionId: readInt(json['subscription_id']),
+      status: (json['status'] ?? 'active').toString(),
+      startedAt: json['started_at'] == null ? null : DateTime.tryParse(json['started_at'].toString()),
+      endedAt: json['ended_at'] == null ? null : DateTime.tryParse(json['ended_at'].toString()),
+      cancelledAt: json['cancelled_at'] == null ? null : DateTime.tryParse(json['cancelled_at'].toString()),
+      amount: json['amount'] == null ? null : readDouble(json['amount']),
+      currency: (json['currency'] ?? 'USD').toString(),
+      notes: json['notes'] as String?,
+      paymentReference: json['payment_reference'] as String?,
+      refundEligible: readBool(json['refund_eligible']),
+      subscription: json['subscription'] is Map<String, dynamic>
+          ? SubscriptionPlan.fromJson(json['subscription'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+}

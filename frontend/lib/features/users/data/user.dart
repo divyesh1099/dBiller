@@ -5,14 +5,24 @@ class UserRole {
   final int id;
   final String name;
   final String? description;
+  final List<UserPermission> permissions;
 
-  UserRole({required this.id, required this.name, this.description});
+  UserRole({
+    required this.id,
+    required this.name,
+    this.description,
+    this.permissions = const [],
+  });
 
   factory UserRole.fromJson(Map<String, dynamic> json) {
     return UserRole(
       id: readInt(json['id']),
       name: (json['name'] ?? '').toString(),
       description: json['description'] as String?,
+      permissions: (json['permissions'] as List<dynamic>?)
+              ?.map((e) => UserPermission.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 }

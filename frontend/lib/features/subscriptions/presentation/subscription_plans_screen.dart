@@ -3,223 +3,286 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/app_colors.dart';
 import '../../../core/formatters.dart';
+import '../../users/presentation/users_controller.dart';
 import '../data/subscription.dart';
+import '../data/subscription_repository.dart';
 import 'subscriptions_controller.dart';
 
 class SubscriptionPlansScreen extends ConsumerStatefulWidget {
-  const SubscriptionPlansScreen({super.key});
+  final int? organizationId;
+  final String? title;
+
+  const SubscriptionPlansScreen({super.key, this.organizationId, this.title});
 
   @override
   ConsumerState<SubscriptionPlansScreen> createState() => _SubscriptionPlansScreenState();
 }
 
 class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScreen> {
-  String _billingCycle = 'monthly';
-
   @override
   Widget build(BuildContext context) {
+    final userAsync = ref.watch(currentUserProvider);
     final plansAsync = ref.watch(subscriptionPlansProvider);
+    final orgId = widget.organizationId;
+    final orgSubsAsync = ref.watch(organizationSubscriptionsProvider(orgId));
+    final plans = plansAsync.asData?.value ?? const <SubscriptionPlan>[];
+    final orgSubs = orgSubsAsync.asData?.value ?? const <OrganizationSubscription>[];
+    final current = orgSubs.firstWhere(
+      (sub) => sub.status.toLowerCase() == 'active',
+      orElse: () => OrganizationSubscription(
+        id: 0,
+        organizationId: 0,
+        subscriptionId: 0,
+        status: 'none',
+        currency: plans.isNotEmpty ? plans.first.currency : 'USD',
+        refundEligible: false,
+      ),
+    );
+    final hasActive = current.id != 0;
+    final history = orgSubs.where((sub) => sub.id != current.id).toList();
+    final isLoading = plansAsync.isLoading || orgSubsAsync.isLoading || userAsync.isLoading;
+    final hasError = plansAsync.hasError || orgSubsAsync.hasError || userAsync.hasError;
+    final user = userAsync.asData?.value;
+    final screenTitle = widget.title ?? 'My Subscriptions';
+
+    if (orgId != null && user != null && user.role != 'superadmin') {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+          ),
+          title: Text(screenTitle),
+        ),
+        body: const Center(child: Text('Access denied')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
         ),
-        title: const Text('Subscription Plans'),
+        title: Text(screenTitle),
       ),
       body: SafeArea(
-        child: Column(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
+            if (isLoading) const LinearProgressIndicator(),
+            if (hasError)
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Text('Unable to load subscription data.', style: TextStyle(color: AppColors.textMuted)),
+              ),
             const SizedBox(height: 12),
-            _BillingToggle(
-              selected: _billingCycle,
-              onChanged: (value) => setState(() => _billingCycle = value),
-            ),
+            if (user != null && user.role == 'admin' && (user.email == null || user.email!.isEmpty))
+              const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'Add an admin email before changing subscriptions.',
+                  style: TextStyle(color: Colors.orangeAccent),
+                ),
+              ),
+            const _SectionHeader(title: 'Current Subscription'),
             const SizedBox(height: 8),
-            const Text(
-              'Choose the plan that fits your business needs',
-              style: TextStyle(color: AppColors.textMuted),
+            _CurrentSubscriptionCard(subscription: hasActive ? current : null),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: plans.isEmpty ? null : () => _showPlanPicker(context, plans),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                    child: Text(hasActive ? 'Change Plan' : 'Choose Plan'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: hasActive ? () => _cancelSubscription(current) : null,
+                    child: const Text('Opt Out'),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: plansAsync.when(
-                data: (plans) {
-                  if (plans.isEmpty) {
-                    return const Center(child: Text('No subscription plans available.'));
-                  }
-                  return ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemBuilder: (context, index) {
-                      final plan = plans[index];
-                      final price = _billingCycle == 'monthly' ? plan.monthlyPrice : plan.annualPrice;
-                      return _PlanCard(
-                        plan: plan,
-                        price: price,
-                        billingCycle: _billingCycle,
-                      );
-                    },
-                    separatorBuilder: (_, __) => const SizedBox(width: 16),
-                    itemCount: plans.length,
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
+            const _SectionHeader(title: 'Subscription History'),
+            const SizedBox(height: 8),
+            if (history.isEmpty)
+              const Text('No past subscriptions.', style: TextStyle(color: AppColors.textMuted))
+            else
+              Column(
+                children: history.map((sub) => _HistoryCard(subscription: sub)).toList(),
               ),
+            const SizedBox(height: 16),
+            const Text(
+              'Payments are handled outside the app. Use the superadmin portal to record payments and onboard organizations.',
+              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
             ),
           ],
         ),
       ),
     );
   }
+
+  Future<void> _showPlanPicker(BuildContext context, List<SubscriptionPlan> plans) async {
+    final selected = await showModalBottomSheet<SubscriptionPlan>(
+      context: context,
+      builder: (context) => _PlanPicker(plans: plans),
+    );
+    if (selected == null) return;
+    await ref
+        .read(subscriptionRepositoryProvider)
+        .changeOrganizationSubscription(selected.id, organizationId: widget.organizationId);
+    ref.invalidate(organizationSubscriptionsProvider(widget.organizationId));
+  }
+
+  Future<void> _cancelSubscription(OrganizationSubscription current) async {
+    await ref
+        .read(subscriptionRepositoryProvider)
+        .cancelOrganizationSubscription(current.id, organizationId: widget.organizationId);
+    ref.invalidate(organizationSubscriptionsProvider(widget.organizationId));
+  }
 }
 
-class _BillingToggle extends StatelessWidget {
-  final String selected;
-  final ValueChanged<String> onChanged;
+class _SectionHeader extends StatelessWidget {
+  final String title;
 
-  const _BillingToggle({required this.selected, required this.onChanged});
+  const _SectionHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: _ToggleButton(
-                label: 'Monthly',
-                selected: selected == 'monthly',
-                onTap: () => onChanged('monthly'),
-              ),
-            ),
-            Expanded(
-              child: _ToggleButton(
-                label: 'Yearly',
-                selected: selected == 'yearly',
-                onTap: () => onChanged('yearly'),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return Text(
+      title.toUpperCase(),
+      style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.bold),
     );
   }
 }
 
-class _ToggleButton extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
+class _CurrentSubscriptionCard extends StatelessWidget {
+  final OrganizationSubscription? subscription;
 
-  const _ToggleButton({required this.label, required this.selected, required this.onTap});
+  const _CurrentSubscriptionCard({required this.subscription});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+    if (subscription == null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: selected ? AppColors.textDark : AppColors.textMuted,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PlanCard extends StatelessWidget {
-  final SubscriptionPlan plan;
-  final double? price;
-  final String billingCycle;
-
-  const _PlanCard({
-    required this.plan,
-    required this.price,
-    required this.billingCycle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+        child: const Text('No active subscription.', style: TextStyle(color: AppColors.textMuted)),
+      );
+    }
+    final plan = subscription!.subscription;
     return Container(
-      width: 280,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: plan.isFeatured ? AppColors.primary : Colors.white.withOpacity(0.08)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (plan.badgeText != null && plan.badgeText!.isNotEmpty)
-            Align(
-              alignment: Alignment.topRight,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  plan.badgeText!,
-                  style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-              ),
-            ),
-          Text(plan.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
+          Text(plan?.name ?? 'Plan #${subscription!.subscriptionId}', style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
           Text(
-            price == null ? 'Custom' : '${formatCurrency(price!, currency: plan.currency)} / $billingCycle',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            subscription!.amount == null
+                ? 'Custom pricing'
+                : formatCurrency(subscription!.amount!, currency: subscription!.currency),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
-          Text(plan.description ?? '', style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
-          const SizedBox(height: 16),
+          const SizedBox(height: 6),
+          Text('Status: ${subscription!.status}', style: const TextStyle(color: AppColors.textMuted)),
+          if (subscription!.startedAt != null)
+            Text('Started: ${formatShortDate(subscription!.startedAt)}', style: const TextStyle(color: AppColors.textMuted)),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryCard extends StatelessWidget {
+  final OrganizationSubscription subscription;
+
+  const _HistoryCard({required this.subscription});
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = subscription.subscription;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Row(
+        children: [
           Expanded(
-            child: ListView(
-              children: plan.features
-                  .map(
-                    (feature) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.check_circle, size: 16, color: AppColors.primary),
-                          const SizedBox(width: 8),
-                          Expanded(child: Text(feature, style: const TextStyle(fontSize: 12))),
-                        ],
-                      ),
-                    ),
-                  )
-                  .toList(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(plan?.name ?? 'Plan #${subscription.subscriptionId}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text('Status: ${subscription.status}', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                if (subscription.startedAt != null)
+                  Text('Started: ${formatShortDate(subscription.startedAt)}', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                if (subscription.endedAt != null)
+                  Text('Ended: ${formatShortDate(subscription.endedAt)}', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: plan.isFeatured ? AppColors.primary : Colors.white.withOpacity(0.1),
-              ),
-              onPressed: () {},
-              child: Text(plan.isFeatured ? 'Choose Plan' : 'Get Started'),
+          if (subscription.amount != null)
+            Text(
+              formatCurrency(subscription.amount!, currency: subscription.currency),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlanPicker extends StatelessWidget {
+  final List<SubscriptionPlan> plans;
+
+  const _PlanPicker({required this.plans});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Select a Plan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          ),
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: plans.length,
+              itemBuilder: (context, index) {
+                final plan = plans[index];
+                return ListTile(
+                  title: Text(plan.name),
+                  subtitle: Text(plan.description ?? ''),
+                  trailing: Text(
+                    plan.monthlyPrice == null
+                        ? 'Custom'
+                        : formatCurrency(plan.monthlyPrice!, currency: plan.currency),
+                  ),
+                  onTap: () => Navigator.pop(context, plan),
+                );
+              },
             ),
           ),
         ],

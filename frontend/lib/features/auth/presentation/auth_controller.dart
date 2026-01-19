@@ -23,8 +23,26 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
   
-  Future<void> register(String username, String password, String deviceId, String licenseKey, {String? storeName, List<int>? logoBytes, String? logoName}) async {
-    await _repository.register(username, password, deviceId, licenseKey, storeName: storeName, logoBytes: logoBytes, logoName: logoName);
+  Future<void> register(
+    String username,
+    String password,
+    String deviceId,
+    String licenseKey,
+    String email, {
+    String? storeName,
+    List<int>? logoBytes,
+    String? logoName,
+  }) async {
+    await _repository.register(
+      username,
+      password,
+      deviceId,
+      licenseKey,
+      email,
+      storeName: storeName,
+      logoBytes: logoBytes,
+      logoName: logoName,
+    );
   }
 
   Future<void> logout() async {
