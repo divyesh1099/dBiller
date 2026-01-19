@@ -239,3 +239,7 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,flutter
+
+# Local config
+license_key.txt
+**/license_key.txt

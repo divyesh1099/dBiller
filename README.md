@@ -55,6 +55,21 @@ Generic Billing Application with Flutter Frontend and FastAPI Backend.
 - Organization admins (or users with `subscriptions.manage`) can view, change, or opt out in `My Subscriptions`.
 - Cancellations within 7 days receive a full refund (`refund_eligible = true`); later cancellations are marked as `cancelled`.
 
+### Seeded Plans
+
+- **Basic**: core features, 1 admin user only, analytics disabled.
+- **Premium**: unlimited users, analytics disabled.
+- **Enterprise**: unlimited users with analytics.
+- Plan limits are stored in `subscription.limits` (`max_users`, `analytics_enabled`). Update pricing in Plan Manager.
+- New organizations are auto-assigned to the Basic plan.
+
+### Razorpay Payments
+
+- Set `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` in the backend environment.
+- Create order: `POST /payments/razorpay/order` (requires `subscriptions.manage`).
+- Verify payment: `POST /payments/razorpay/verify` (creates the organization subscription).
+- Android checkout uses `razorpay_flutter` and is wired from `My Subscriptions`.
+
 ### Permissions and Roles
 
 - Permissions are fixed and seeded at startup (admins and superadmins always have all permissions).

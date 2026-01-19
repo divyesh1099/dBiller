@@ -14,3 +14,4 @@ pydantic
 pillow
 pytesseract
 alembic
+razorpay

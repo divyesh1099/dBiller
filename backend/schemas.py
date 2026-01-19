@@ -191,6 +191,29 @@ class OrganizationSubscription(OrganizationSubscriptionBase):
     class Config:
         orm_mode = True
 
+class RazorpayOrderCreate(BaseModel):
+    subscription_id: int
+    organization_id: Optional[int] = None
+    amount: Optional[float] = None
+    currency: Optional[str] = None
+    notes: Optional[str] = None
+
+class RazorpayOrderResponse(BaseModel):
+    order_id: str
+    amount: int
+    currency: str
+    key_id: str
+    subscription_id: int
+    organization_id: Optional[int] = None
+
+class RazorpayPaymentVerify(BaseModel):
+    subscription_id: int
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+    organization_id: Optional[int] = None
+    notes: Optional[str] = None
+
 # Supplier Schemas
 class SupplierBase(BaseModel):
     name: str

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../core/app_colors.dart';
 import '../../../core/formatters.dart';
 import '../../users/presentation/users_controller.dart';
@@ -19,6 +21,29 @@ class SubscriptionPlansScreen extends ConsumerStatefulWidget {
 }
 
 class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScreen> {
+  Razorpay? _razorpay;
+  SubscriptionPlan? _pendingPlan;
+  bool _processingPayment = false;
+
+  bool get _razorpayEnabled => !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_razorpayEnabled) {
+      _razorpay = Razorpay();
+      _razorpay!.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+      _razorpay!.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+      _razorpay!.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    }
+  }
+
+  @override
+  void dispose() {
+    _razorpay?.clear();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(currentUserProvider);
@@ -71,6 +96,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           padding: const EdgeInsets.all(16),
           children: [
             if (isLoading) const LinearProgressIndicator(),
+            if (_processingPayment) const LinearProgressIndicator(),
             if (hasError)
               const Padding(
                 padding: EdgeInsets.only(top: 8),
@@ -93,7 +119,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: plans.isEmpty ? null : () => _showPlanPicker(context, plans),
+                    onPressed: plans.isEmpty || _processingPayment ? null : () => _showPlanPicker(context, plans),
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                     child: Text(hasActive ? 'Change Plan' : 'Choose Plan'),
                   ),
@@ -101,7 +127,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: hasActive ? () => _cancelSubscription(current) : null,
+                    onPressed: hasActive && !_processingPayment ? () => _cancelSubscription(current) : null,
                     child: const Text('Opt Out'),
                   ),
                 ),
@@ -118,7 +144,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
               ),
             const SizedBox(height: 16),
             const Text(
-              'Payments are handled outside the app. Use the superadmin portal to record payments and onboard organizations.',
+              'Payments are handled via Razorpay on Android. Superadmins can still record payments and onboard organizations manually.',
               style: TextStyle(fontSize: 12, color: AppColors.textMuted),
             ),
           ],
@@ -133,10 +159,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
       builder: (context) => _PlanPicker(plans: plans),
     );
     if (selected == null) return;
-    await ref
-        .read(subscriptionRepositoryProvider)
-        .changeOrganizationSubscription(selected.id, organizationId: widget.organizationId);
-    ref.invalidate(organizationSubscriptionsProvider(widget.organizationId));
+    if (widget.organizationId != null || !_razorpayEnabled) {
+      await _changeSubscriptionDirect(selected.id);
+      return;
+    }
+    await _startRazorpayCheckout(selected);
   }
 
   Future<void> _cancelSubscription(OrganizationSubscription current) async {
@@ -144,6 +171,94 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         .read(subscriptionRepositoryProvider)
         .cancelOrganizationSubscription(current.id, organizationId: widget.organizationId);
     ref.invalidate(organizationSubscriptionsProvider(widget.organizationId));
+  }
+
+  Future<void> _changeSubscriptionDirect(int subscriptionId) async {
+    await ref
+        .read(subscriptionRepositoryProvider)
+        .changeOrganizationSubscription(subscriptionId, organizationId: widget.organizationId);
+    ref.invalidate(organizationSubscriptionsProvider(widget.organizationId));
+  }
+
+  Future<void> _startRazorpayCheckout(SubscriptionPlan plan) async {
+    final user = ref.read(currentUserProvider).asData?.value;
+    setState(() => _processingPayment = true);
+    try {
+      final order = await ref.read(subscriptionRepositoryProvider).createRazorpayOrder(plan.id);
+      _pendingPlan = plan;
+      final options = {
+        'key': order.keyId,
+        'amount': order.amount,
+        'currency': order.currency,
+        'order_id': order.orderId,
+        'name': 'dBiller',
+        'description': plan.name,
+        'prefill': {
+          if (user?.email != null && user!.email!.isNotEmpty) 'email': user.email,
+        },
+      };
+      _razorpay?.open(options);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment init failed: $e')));
+      }
+      if (mounted) setState(() => _processingPayment = false);
+    }
+  }
+
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    final plan = _pendingPlan;
+    if (plan == null) {
+      if (mounted) setState(() => _processingPayment = false);
+      return;
+    }
+    if (response.orderId == null || response.paymentId == null || response.signature == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment response incomplete')));
+        setState(() => _processingPayment = false);
+      }
+      _pendingPlan = null;
+      return;
+    }
+    try {
+      await ref.read(subscriptionRepositoryProvider).verifyRazorpayPayment(
+            subscriptionId: plan.id,
+            razorpayOrderId: response.orderId!,
+            razorpayPaymentId: response.paymentId!,
+            razorpaySignature: response.signature!,
+          );
+      ref.invalidate(organizationSubscriptionsProvider(widget.organizationId));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment successful')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment verification failed: $e')));
+      }
+    } finally {
+      _pendingPlan = null;
+      if (mounted) setState(() => _processingPayment = false);
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment failed: ${response.message ?? response.code}')),
+      );
+      setState(() => _processingPayment = false);
+    }
+    _pendingPlan = null;
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('External wallet selected: ${response.walletName ?? ''}')),
+      );
+      setState(() => _processingPayment = false);
+    }
+    _pendingPlan = null;
   }
 }
 

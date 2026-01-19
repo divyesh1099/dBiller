@@ -101,3 +101,32 @@ class OrganizationSubscription {
     );
   }
 }
+
+class RazorpayOrder {
+  final String orderId;
+  final int amount;
+  final String currency;
+  final String keyId;
+  final int subscriptionId;
+  final int? organizationId;
+
+  RazorpayOrder({
+    required this.orderId,
+    required this.amount,
+    required this.currency,
+    required this.keyId,
+    required this.subscriptionId,
+    this.organizationId,
+  });
+
+  factory RazorpayOrder.fromJson(Map<String, dynamic> json) {
+    return RazorpayOrder(
+      orderId: (json['order_id'] ?? '').toString(),
+      amount: readInt(json['amount']),
+      currency: (json['currency'] ?? 'INR').toString(),
+      keyId: (json['key_id'] ?? '').toString(),
+      subscriptionId: readInt(json['subscription_id']),
+      organizationId: json['organization_id'] == null ? null : readInt(json['organization_id']),
+    );
+  }
+}

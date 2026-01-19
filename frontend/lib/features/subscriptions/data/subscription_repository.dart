@@ -119,4 +119,42 @@ class SubscriptionRepository {
         : await _client.post('/superadmin/organizations/$organizationId/subscriptions/$orgSubscriptionId/cancel');
     return OrganizationSubscription.fromJson(response.data as Map<String, dynamic>);
   }
+
+  Future<RazorpayOrder> createRazorpayOrder(
+    int subscriptionId, {
+    int? organizationId,
+    double? amount,
+    String? currency,
+    String? notes,
+  }) async {
+    final payload = <String, dynamic>{
+      'subscription_id': subscriptionId,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (notes != null) 'notes': notes,
+    };
+    final response = await _client.post('/payments/razorpay/order', data: payload);
+    return RazorpayOrder.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<OrganizationSubscription> verifyRazorpayPayment({
+    required int subscriptionId,
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    int? organizationId,
+    String? notes,
+  }) async {
+    final payload = <String, dynamic>{
+      'subscription_id': subscriptionId,
+      'razorpay_order_id': razorpayOrderId,
+      'razorpay_payment_id': razorpayPaymentId,
+      'razorpay_signature': razorpaySignature,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (notes != null) 'notes': notes,
+    };
+    final response = await _client.post('/payments/razorpay/verify', data: payload);
+    return OrganizationSubscription.fromJson(response.data as Map<String, dynamic>);
+  }
 }

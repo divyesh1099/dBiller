@@ -154,19 +154,20 @@ class _ScanButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ElevatedButton.icon(
+      child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),
         onPressed: onTap,
-        icon: const Icon(Icons.photo_camera, color: Colors.white),
-        label: const Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Scan to Search', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            Icon(Icons.photo_camera, color: Colors.white),
             SizedBox(width: 8),
+            Text('Scan to Search', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            SizedBox(width: 4),
             Text('AI', style: TextStyle(color: Colors.white70, fontSize: 10)),
           ],
         ),

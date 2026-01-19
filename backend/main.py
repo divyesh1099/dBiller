@@ -3,8 +3,10 @@ import io
 import csv
 import re
 import datetime
+import json
 import logging
 import difflib
+from decimal import Decimal
 from datetime import timedelta
 from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, status, Form, File, UploadFile
@@ -15,6 +17,11 @@ from sqlalchemy import or_, text
 from database import engine, Base
 import models, schemas, database
 import auth
+
+try:
+    import razorpay
+except Exception:
+    razorpay = None
 
 try:
     import pytesseract
@@ -222,6 +229,69 @@ DEFAULT_ROLE_TEMPLATES = [
         ],
     },
 ]
+DEFAULT_SUBSCRIPTIONS = [
+    {
+        "name": "Basic",
+        "description": "Single admin access to core billing and inventory features.",
+        "price": 0.0,
+        "currency": "USD",
+        "monthly_price": 0.0,
+        "annual_price": 0.0,
+        "features": [
+            "Inventory",
+            "Billing",
+            "Orders",
+            "Suppliers",
+            "Checkout",
+            "Single admin user",
+        ],
+        "limits": {"max_users": 1, "analytics_enabled": False},
+        "badge_text": "Starter",
+        "is_featured": False,
+        "is_active": True,
+    },
+    {
+        "name": "Premium",
+        "description": "Unlimited users with core features, analytics excluded.",
+        "price": 0.0,
+        "currency": "USD",
+        "monthly_price": 0.0,
+        "annual_price": 0.0,
+        "features": [
+            "Inventory",
+            "Billing",
+            "Orders",
+            "Suppliers",
+            "Checkout",
+            "Unlimited users",
+        ],
+        "limits": {"max_users": -1, "analytics_enabled": False},
+        "badge_text": "Team",
+        "is_featured": False,
+        "is_active": True,
+    },
+    {
+        "name": "Enterprise",
+        "description": "Unlimited users with analytics access.",
+        "price": 0.0,
+        "currency": "USD",
+        "monthly_price": 0.0,
+        "annual_price": 0.0,
+        "features": [
+            "Inventory",
+            "Billing",
+            "Orders",
+            "Suppliers",
+            "Checkout",
+            "Unlimited users",
+            "Analytics",
+        ],
+        "limits": {"max_users": -1, "analytics_enabled": True},
+        "badge_text": "Analytics",
+        "is_featured": True,
+        "is_active": True,
+    },
+]
 REFUND_WINDOW_DAYS = 7
 
 def seed_permissions():
@@ -260,6 +330,18 @@ def seed_roles():
     finally:
         db.close()
 
+def seed_subscriptions():
+    db = database.SessionLocal()
+    try:
+        existing = {s.name for s in db.query(models.Subscription).all()}
+        for template in DEFAULT_SUBSCRIPTIONS:
+            if template["name"] in existing:
+                continue
+            db.add(models.Subscription(**template))
+        db.commit()
+    finally:
+        db.close()
+
 def bootstrap_superadmin():
     username = os.getenv("SUPERADMIN_USERNAME")
     password = os.getenv("SUPERADMIN_PASSWORD")
@@ -288,6 +370,7 @@ def bootstrap_superadmin():
 
 seed_permissions()
 seed_roles()
+seed_subscriptions()
 bootstrap_superadmin()
 
 
@@ -414,6 +497,87 @@ def get_subscription_by_id(db: database.SessionLocal, subscription_id: Optional[
     if not subscription:
         raise HTTPException(status_code=404, detail="Subscription not found")
     return subscription
+
+def get_subscription_limits(subscription: Optional[models.Subscription]) -> dict:
+    if subscription is None:
+        return {}
+    limits = subscription.limits or {}
+    if isinstance(limits, str):
+        try:
+            limits = json.loads(limits)
+        except json.JSONDecodeError:
+            limits = {}
+    if not isinstance(limits, dict):
+        return {}
+    return limits
+
+def get_org_subscription(db: database.SessionLocal, org_id: Optional[int]) -> Optional[models.Subscription]:
+    if org_id is None:
+        return None
+    org = db.query(models.Organization).filter(models.Organization.id == org_id).first()
+    if not org or org.subscription_id is None:
+        return None
+    if org.subscription:
+        return org.subscription
+    return db.query(models.Subscription).filter(models.Subscription.id == org.subscription_id).first()
+
+def get_plan_max_users(subscription: Optional[models.Subscription]) -> Optional[int]:
+    limits = get_subscription_limits(subscription)
+    max_users = limits.get("max_users")
+    if max_users is None:
+        return None
+    try:
+        max_users = int(max_users)
+    except (TypeError, ValueError):
+        return None
+    if max_users <= 0:
+        return None
+    return max_users
+
+def ensure_user_limit(db: database.SessionLocal, org_id: Optional[int], exclude_user_id: Optional[int] = None):
+    if org_id is None:
+        return
+    subscription = get_org_subscription(db, org_id)
+    max_users = get_plan_max_users(subscription)
+    if max_users is None:
+        return
+    query = db.query(models.User).filter(models.User.organization_id == org_id)
+    if exclude_user_id is not None:
+        query = query.filter(models.User.id != exclude_user_id)
+    if query.count() >= max_users:
+        raise HTTPException(status_code=400, detail="User limit reached for the current subscription plan")
+
+def get_razorpay_client():
+    if razorpay is None:
+        raise HTTPException(status_code=500, detail="Razorpay SDK not available")
+    key_id = os.getenv("RAZORPAY_KEY_ID")
+    key_secret = os.getenv("RAZORPAY_KEY_SECRET")
+    if not key_id or not key_secret:
+        raise HTTPException(status_code=500, detail="Razorpay is not configured")
+    return razorpay.Client(auth=(key_id, key_secret)), key_id
+
+def get_basic_subscription(db: database.SessionLocal) -> Optional[models.Subscription]:
+    return (
+        db.query(models.Subscription)
+        .filter(models.Subscription.name.ilike("basic"))
+        .first()
+    )
+
+def assign_default_subscription(
+    db: database.SessionLocal,
+    org_id: int,
+    current_user: models.User,
+):
+    basic = get_basic_subscription(db)
+    if not basic:
+        return
+    apply_subscription_change(
+        db,
+        org_id,
+        schemas.OrganizationSubscriptionCreate(subscription_id=basic.id),
+        current_user,
+        allow_price_override=True,
+    )
 
 def get_supplier_by_id(db: database.SessionLocal, supplier_id: Optional[int], current_user: schemas.User):
     if supplier_id is None:
@@ -547,6 +711,11 @@ def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is deactivated. Contact your administrator.",
+        )
     
     # Device Logic
     device = db.query(models.UserDevice).filter(models.UserDevice.user_id == user.id, models.UserDevice.device_id == device_id).first()
@@ -653,6 +822,7 @@ async def register_user(
         db.add(store)
         db.commit()
 
+    assign_default_subscription(db, db_org.id, db_user)
     return db_user
 
 @app.post("/users/", response_model=schemas.User)
@@ -678,6 +848,8 @@ def create_user(
         org = db.query(models.Organization).filter(models.Organization.id == organization_id).first()
         if not org:
             raise HTTPException(status_code=404, detail="Organization not found")
+    if organization_id is not None:
+        ensure_user_limit(db, organization_id)
     hashed_password = auth.get_password_hash(user.password)
     db_user = models.User(
         username=user.username,
@@ -886,6 +1058,8 @@ def update_user(
     new_email = user.email if user.email is not None else db_user.email
     new_active = user.active_account if user.active_account is not None else db_user.is_active
     new_org_id = user.organization_id if user.organization_id is not None else db_user.organization_id
+    if db_user.id == current_user.id and auth.is_admin(current_user) and not new_active:
+        raise HTTPException(status_code=403, detail="Admins cannot deactivate their own account")
     if new_role == auth.ROLE_ADMIN and (new_email is None or not new_email.strip()):
         raise HTTPException(status_code=400, detail="Admin email is required")
     if was_admin and (new_role != auth.ROLE_ADMIN or not new_active or new_org_id != current_org_id):
@@ -893,6 +1067,7 @@ def update_user(
     if new_org_id != current_org_id and new_org_id is not None:
         if new_role != auth.ROLE_ADMIN or not new_active:
             ensure_admin_present(db, new_org_id, exclude_user_id=None)
+        ensure_user_limit(db, new_org_id, exclude_user_id=db_user.id)
     if user.username and user.username != db_user.username:
         existing = db.query(models.User).filter(models.User.username == user.username).first()
         if existing:
@@ -962,6 +1137,8 @@ def delete_user(
     db: database.SessionLocal = Depends(database.get_db),
     current_user: schemas.User = Depends(require_permission("users.manage")),
 ):
+    if current_user.id == user_id:
+        raise HTTPException(status_code=403, detail="Users cannot delete their own account")
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -1277,6 +1454,108 @@ def cancel_org_subscription_superadmin(
     org_sub.refund_eligible = refund_eligible
     return org_sub
 
+@app.post("/payments/razorpay/order", response_model=schemas.RazorpayOrderResponse)
+def create_razorpay_order(
+    payload: schemas.RazorpayOrderCreate,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("subscriptions.manage")),
+):
+    if auth.is_superadmin(current_user) and payload.organization_id is not None:
+        org_id = payload.organization_id
+    else:
+        org_id = require_org_id(current_user)
+    if org_id is None:
+        raise HTTPException(status_code=400, detail="Organization is required for payments")
+    ensure_admin_email_present(db, org_id)
+    subscription = get_subscription_by_id(db, payload.subscription_id)
+    if subscription and not subscription.is_active and not auth.is_superadmin(current_user):
+        raise HTTPException(status_code=400, detail="Subscription is not active")
+    if auth.is_superadmin(current_user) and payload.amount is not None:
+        amount = payload.amount
+    else:
+        amount = subscription.monthly_price or subscription.price or 0
+    if amount is None or amount <= 0:
+        raise HTTPException(status_code=400, detail="Plan price is not configured")
+    if auth.is_superadmin(current_user) and payload.currency:
+        currency = payload.currency
+    else:
+        currency = subscription.currency or "INR"
+    amount_paise = int((Decimal(str(amount)) * Decimal("100")).to_integral_value())
+    notes = {
+        "organization_id": str(org_id),
+        "subscription_id": str(subscription.id),
+        "created_by": str(current_user.id),
+    }
+    if payload.notes:
+        notes["notes"] = payload.notes
+    client, key_id = get_razorpay_client()
+    receipt = f"org-{org_id}-plan-{subscription.id}-{int(datetime.datetime.utcnow().timestamp())}"
+    order = client.order.create(
+        {
+            "amount": amount_paise,
+            "currency": currency,
+            "receipt": receipt,
+            "notes": notes,
+        }
+    )
+    return schemas.RazorpayOrderResponse(
+        order_id=order["id"],
+        amount=amount_paise,
+        currency=currency,
+        key_id=key_id,
+        subscription_id=subscription.id,
+        organization_id=org_id,
+    )
+
+@app.post("/payments/razorpay/verify", response_model=schemas.OrganizationSubscription)
+def verify_razorpay_payment(
+    payload: schemas.RazorpayPaymentVerify,
+    db: database.SessionLocal = Depends(database.get_db),
+    current_user: schemas.User = Depends(require_permission("subscriptions.manage")),
+):
+    if auth.is_superadmin(current_user) and payload.organization_id is not None:
+        org_id = payload.organization_id
+    else:
+        org_id = require_org_id(current_user)
+    if org_id is None:
+        raise HTTPException(status_code=400, detail="Organization is required for payments")
+    client, _ = get_razorpay_client()
+    try:
+        client.utility.verify_payment_signature(
+            {
+                "razorpay_order_id": payload.razorpay_order_id,
+                "razorpay_payment_id": payload.razorpay_payment_id,
+                "razorpay_signature": payload.razorpay_signature,
+            }
+        )
+    except Exception:
+        raise HTTPException(status_code=400, detail="Payment verification failed")
+    order = client.order.fetch(payload.razorpay_order_id)
+    order_notes = order.get("notes") or {}
+    if str(order_notes.get("organization_id")) != str(org_id) or str(order_notes.get("subscription_id")) != str(payload.subscription_id):
+        raise HTTPException(status_code=400, detail="Payment does not match the subscription request")
+    amount = Decimal(order.get("amount", 0)) / Decimal("100")
+    currency = order.get("currency") or "INR"
+    notes = payload.notes
+    order_note = f"razorpay_order_id={payload.razorpay_order_id}"
+    if notes:
+        notes = f"{notes} | {order_note}"
+    else:
+        notes = order_note
+    return apply_subscription_change(
+        db,
+        org_id,
+        schemas.OrganizationSubscriptionCreate(
+            subscription_id=payload.subscription_id,
+            amount=float(amount),
+            currency=currency,
+            notes=notes,
+            payment_reference=payload.razorpay_payment_id,
+        ),
+        current_user,
+        allow_price_override=True,
+    )
+
 @app.post("/superadmin/organizations/onboard", response_model=schemas.Organization)
 def onboard_organization(
     payload: schemas.SuperadminOnboardOrganization,
@@ -1319,6 +1598,8 @@ def onboard_organization(
             current_user,
             allow_price_override=True,
         )
+    else:
+        assign_default_subscription(db, org.id, admin_user)
     return org
 
 # Supplier CRUD
